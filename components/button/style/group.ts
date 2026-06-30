@@ -1,5 +1,7 @@
-import type { ButtonToken } from '.';
+import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { GenerateStyle } from '../../theme/internal';
+import type { ButtonToken } from './token';
 
 const genButtonBorderStyle = (buttonTypeCls: string, borderColor: string) => ({
   // Border
@@ -22,8 +24,8 @@ const genButtonBorderStyle = (buttonTypeCls: string, borderColor: string) => ({
   },
 });
 
-const genGroupStyle: GenerateStyle<ButtonToken> = (token) => {
-  const { componentCls, fontSize, lineWidth, colorPrimaryHover, colorErrorHover } = token;
+const genGroupStyle: GenerateStyle<ButtonToken, CSSObject> = (token) => {
+  const { componentCls, fontSize, lineWidth, groupBorderColor, colorErrorHover } = token;
 
   return {
     [`${componentCls}-group`]: [
@@ -41,7 +43,7 @@ const genGroupStyle: GenerateStyle<ButtonToken> = (token) => {
           },
 
           '&:not(:first-child)': {
-            marginInlineStart: -lineWidth,
+            marginInlineStart: token.calc(lineWidth).mul(-1).equal(),
 
             [`&, & > ${componentCls}`]: {
               borderStartStartRadius: 0,
@@ -54,9 +56,7 @@ const genGroupStyle: GenerateStyle<ButtonToken> = (token) => {
           position: 'relative',
           zIndex: 1,
 
-          [`&:hover,
-          &:focus,
-          &:active`]: {
+          '&:hover, &:focus, &:active': {
             zIndex: 2,
           },
 
@@ -71,7 +71,7 @@ const genGroupStyle: GenerateStyle<ButtonToken> = (token) => {
       },
 
       // Border Color
-      genButtonBorderStyle(`${componentCls}-primary`, colorPrimaryHover),
+      genButtonBorderStyle(`${componentCls}-primary`, groupBorderColor),
       genButtonBorderStyle(`${componentCls}-danger`, colorErrorHover),
     ],
   };

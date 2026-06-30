@@ -1,5 +1,8 @@
 ---
-order: 2
+group:
+  title: 如何使用
+  order: 0
+order: 0
 title: 快速上手
 ---
 
@@ -13,17 +16,12 @@ Ant Design React 致力于提供给程序员**愉悦**的开发体验。
 
 这是一个最简单的 Ant Design 组件的在线 codesandbox 演示。
 
-<iframe
-  src="https://codesandbox.io/embed/antd-reproduction-template-forked-jyh2k9?autoresize=1&fontsize=14&hidenavigation=1&theme=light"
-  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
-  title="antd reproduction template"
-  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
-  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
-/>
+<!-- prettier-ignore -->
+<code src="./demo/first-example.tsx">第一个例子</code>
 
 ### 1. 创建一个 codesandbox
 
-访问 https://u.ant.design/codesandbox-repro 创建一个 codesandbox 的在线示例，别忘了保存以创建一个新的实例。
+访问 https://u.ant.design/reproduce 创建一个 codesandbox 的在线示例，别忘了保存以创建一个新的实例。
 
 ### 2. 使用组件
 
@@ -31,12 +29,15 @@ Ant Design React 致力于提供给程序员**愉悦**的开发体验。
 
 ```jsx
 import React, { useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import { ConfigProvider, DatePicker, message } from 'antd';
 // 由于 antd 组件的默认文案是英文，所以需要修改为中文
 import dayjs from 'dayjs';
+import { createRoot } from 'react-dom/client';
+
 import 'dayjs/locale/zh-cn';
+
 import zhCN from 'antd/locale/zh_CN';
+
 import './index.css';
 
 dayjs.locale('zh-cn');
@@ -81,7 +82,7 @@ createRoot(document.getElementById('root')).render(<App />);
   <DatePicker onChange={value => this.handleChange(value)} />
   <div style={{ marginTop: 16 }}>
 -   当前日期：{date ? date.format('YYYY-MM-DD') : '未选择'}
-+   <Alert message="当前日期" description={date ? date.format('YYYY年MM月DD日') : '未选择'} />
++   <Alert title="当前日期" description={date ? date.format('YYYY年MM月DD日') : '未选择'} />
   </div>
 ```
 
@@ -93,7 +94,7 @@ createRoot(document.getElementById('root')).render(<App />);
 
 ### 4. 下一步
 
-实际项目开发中，你会需要构建、调试、代理、打包部署等一系列工程化的需求。您可以阅读后面的文档或者使用以下脚手架和范例：
+在实际项目开发中，你会遇到构建、调试、代理、打包部署等一系列工程化的需求。你可以阅读后面的文档或者使用以下脚手架和范例：
 
 - [Ant Design Pro](https://pro.ant.design/)
 - [create-next-app](https://github.com/ant-design/ant-design-examples/tree/main/examples/with-nextjs-inline-style)

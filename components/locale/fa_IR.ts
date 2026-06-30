@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/fa_IR';
+import Pagination from '@rc-component/pagination/locale/fa_IR';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/fa_IR';
 import DatePicker from '../date-picker/locale/fa_IR';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/fa_IR';
 
 const typeTemplate = '${label} از نوع ${type} معتبر نیست';
@@ -15,17 +15,20 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'لطفاً انتخاب کنید',
+    close: 'بستن',
+    show: 'نمایش',
+    hide: 'مخفی کردن',
   },
   Table: {
     filterTitle: 'منوی فیلتر',
     filterConfirm: 'تایید',
     filterReset: 'پاک کردن',
     filterEmptyText: 'بدون فیلتر',
-    filterCheckall: 'انتخاب همه‌ی موارد',
+    filterCheckAll: 'انتخاب همه‌ی موارد',
     filterSearchPlaceholder: 'جستجو در فیلترها',
     emptyText: 'بدون داده',
     selectAll: 'انتخاب صفحه‌ی کنونی',
-    selectInvert: 'معکوس کردن انتخاب‌ها در صفحه ی کنونی',
+    selectInvert: 'معکوس کردن انتخاب‌ها در صفحه‌ی کنونی',
     selectNone: 'انتخاب هیچکدام',
     selectionAll: 'انتخاب همه‌ی داده‌ها',
     sortTitle: 'مرتب سازی',
@@ -58,8 +61,9 @@ const localeValues: Locale = {
     selectCurrent: 'انتخاب صفحه فعلی',
     removeCurrent: 'پاک کردن انتخاب‌های صفحه فعلی',
     selectAll: 'انتخاب همه',
+    deselectAll: 'لغو انتخاب همه',
     removeAll: 'پاک کردن همه انتخاب‌ها',
-    selectInvert: 'معکوس کردن انتخاب‌ها در صفحه ی کنونی',
+    selectInvert: 'معکوس کردن انتخاب‌ها در صفحه‌ی کنونی',
   },
   Upload: {
     uploading: 'در حال آپلود...',
@@ -79,9 +83,7 @@ const localeValues: Locale = {
     copy: 'کپی',
     copied: 'کپی شد',
     expand: 'توسعه',
-  },
-  PageHeader: {
-    back: 'برگشت',
+    collapse: 'بستن',
   },
   Form: {
     optional: '(اختیاری)',
@@ -133,12 +135,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: 'پیش‌نمایش',
-  },
   QRCode: {
-    expired: 'QR Code منقضی شذد',
+    expired: 'کد QR منقضی شد',
     refresh: 'به‌روزرسانی',
+    scanned: 'اسکن شد',
+  },
+  ColorPicker: {
+    presetEmpty: 'خالی',
+    transparent: 'شفاف',
+    singleColor: 'تک‌رنگ',
+    gradientColor: 'گرادینت',
   },
 };
 

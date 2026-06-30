@@ -1,5 +1,5 @@
-import { Avatar, List, Radio, Space } from 'antd';
 import React, { useState } from 'react';
+import { Avatar, List, Radio, Space } from 'antd';
 
 type PaginationPosition = 'top' | 'bottom' | 'both';
 
@@ -30,7 +30,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Space direction="vertical" style={{ marginBottom: '20px' }} size="middle">
+      <Space vertical style={{ marginBottom: '20px' }} size="medium">
         <Space>
           <span>Pagination Position:</span>
           <Radio.Group
@@ -70,9 +70,7 @@ const App: React.FC = () => {
         renderItem={(item, index) => (
           <List.Item>
             <List.Item.Meta
-              avatar={
-                <Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />
-              }
+              avatar={<Avatar src={`https://api.dicebear.com/10.x/lorelei/svg?seed=${index}`} />}
               title={<a href="https://ant.design">{item.title}</a>}
               description="Ant Design, a design language for background applications, is refined by Ant UED Team"
             />

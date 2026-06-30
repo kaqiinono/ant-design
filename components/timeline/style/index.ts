@@ -1,241 +1,246 @@
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import { resetComponent } from '../../style';
-import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook, mergeToken } from '../../theme/internal';
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks, mergeToken } from '../../theme/internal';
+import { genCssVar } from '../../theme/util/genStyleUtils';
+import genHorizontalStyle from './horizontal';
 
 export interface ComponentToken {
   /**
    * @desc 轨迹颜色
    * @descEN Line color
    */
-  tailColor: string;
+  tailColor?: string;
   /**
    * @desc 轨迹宽度
    * @descEN Line width
    */
-  tailWidth: number;
+  tailWidth?: number | string;
   /**
    * @desc 节点边框宽度
    * @descEN Border width of node
    */
-  dotBorderWidth: number;
+  dotBorderWidth?: number | string;
+  /**
+   * @desc 节点大小
+   * @descEN Node size
+   */
+  dotSize?: number | string;
   /**
    * @desc 节点背景色
    * @descEN Background color of node
    */
-  dotBg: string;
+  dotBg?: string;
   /**
    * @desc 时间项下间距
    * @descEN Bottom padding of item
    */
-  itemPaddingBottom: number;
+  itemPaddingBottom?: number;
 }
 
-interface TimelineToken extends FullToken<'Timeline'> {
+export interface TimelineToken extends FullToken<'Timeline'> {
   itemHeadSize: number;
   customHeadPaddingVertical: number;
   paddingInlineEnd: number;
 }
 
 const genTimelineStyle: GenerateStyle<TimelineToken, CSSObject> = (token) => {
-  const { componentCls } = token;
+  const {
+    componentCls,
+    tailColor,
+    fontHeight,
+    dotSize,
+    dotBg,
+    dotBorderWidth,
+    fontSize,
+    lineHeight,
+    colorText,
+    tailWidth,
+    colorPrimary,
+    colorError,
+    colorSuccess,
+    colorTextDisabled,
+    antCls,
+  } = token;
+
+  const itemCls = `${componentCls}-item`;
+
+  const [varName, varRef] = genCssVar(antCls, 'cmp-steps');
 
   return {
-    [componentCls]: {
-      ...resetComponent(token),
-      margin: 0,
-      padding: 0,
-      listStyle: 'none',
+    [componentCls]: [
+      // ==============================================================
+      // ==                           Item                           ==
+      // ==============================================================
+      {
+        ...resetComponent(token),
 
-      [`${componentCls}-item`]: {
-        position: 'relative',
-        margin: 0,
-        paddingBottom: token.itemPaddingBottom,
-        fontSize: token.fontSize,
-        listStyle: 'none',
+        [itemCls]: {
+          [varName('title-horizontal-title-height')]: fontHeight,
+          [varName('vertical-rail-margin')]: '0px',
+          [varName('title-horizontal-rail-gap')]: '0px',
 
-        '&-tail': {
-          position: 'absolute',
-          insetBlockStart: token.itemHeadSize,
-          insetInlineStart: (token.itemHeadSize - token.tailWidth) / 2,
-          height: `calc(100% - ${token.itemHeadSize}px)`,
-          borderInlineStart: `${token.tailWidth}px ${token.lineType} ${token.tailColor}`,
-        },
+          // Root Level: Record Steps icon size and support fallback
+          [varName('icon-dot-size-origin')]: varRef('icon-size-active'),
+          [varName('icon-dot-size-custom')]: dotSize,
 
-        '&-pending': {
-          [`${componentCls}-item-head`]: {
-            fontSize: token.fontSizeSM,
-            backgroundColor: 'transparent',
+          // Item Level: Record Steps icon color and support fallback
+          [varName('item-icon-dot-bg-color-origin')]: varRef('item-icon-dot-bg-color'),
+          [varName('item-icon-dot-bg-color-custom')]: dotBg,
+
+          [varName('icon-size')]: varRef('icon-dot-size-custom', varRef('icon-dot-size-origin')),
+
+          // Icon
+          [`${itemCls}-icon`]: {
+            [varName('dot-icon-border-width')]: dotBorderWidth,
+            [varName('dot-icon-size')]: varRef('icon-size'),
+            [varName('item-icon-dot-bg-color')]: varRef(
+              'item-icon-dot-bg-color-custom',
+              varRef('item-icon-dot-bg-color-origin'),
+            ),
           },
 
-          [`${componentCls}-item-tail`]: {
-            display: 'none',
+          // Title
+          [`${itemCls}-title`]: {
+            fontSize,
+            lineHeight,
+          },
+
+          // Content
+          [`${itemCls}-content`]: {
+            color: colorText,
+          },
+
+          // Rail
+          [`${itemCls}-rail`]: {
+            [varName('item-solid-line-color')]: tailColor,
+            [varName('rail-size')]: tailWidth,
           },
         },
+      },
 
-        '&-head': {
-          position: 'absolute',
-          width: token.itemHeadSize,
-          height: token.itemHeadSize,
-          backgroundColor: token.dotBg,
-          border: `${token.dotBorderWidth}px ${token.lineType} transparent`,
-          borderRadius: '50%',
+      // ==============================================================
+      // ==                          Status                          ==
+      // ==============================================================
+      {
+        [itemCls]: {
+          [varName('item-process-rail-line-style')]: 'dotted',
+        },
 
+        [`${itemCls}${itemCls}${itemCls}-color`]: {
           '&-blue': {
-            color: token.colorPrimary,
-            borderColor: token.colorPrimary,
+            [varName('item-icon-dot-color')]: colorPrimary,
           },
 
           '&-red': {
-            color: token.colorError,
-            borderColor: token.colorError,
+            [varName('item-icon-dot-color')]: colorError,
           },
 
           '&-green': {
-            color: token.colorSuccess,
-            borderColor: token.colorSuccess,
+            [varName('item-icon-dot-color')]: colorSuccess,
           },
 
           '&-gray': {
-            color: token.colorTextDisabled,
-            borderColor: token.colorTextDisabled,
-          },
-        },
-
-        '&-head-custom': {
-          position: 'absolute',
-          insetBlockStart: token.itemHeadSize / 2,
-          insetInlineStart: token.itemHeadSize / 2,
-          width: 'auto',
-          height: 'auto',
-          marginBlockStart: 0,
-          paddingBlock: token.customHeadPaddingVertical,
-          lineHeight: 1,
-          textAlign: 'center',
-          border: 0,
-          borderRadius: 0,
-          transform: `translate(-50%, -50%)`,
-        },
-
-        '&-content': {
-          position: 'relative',
-          insetBlockStart: -(token.fontSize * token.lineHeight - token.fontSize) + token.lineWidth,
-          marginInlineStart: token.margin + token.itemHeadSize,
-          marginInlineEnd: 0,
-          marginBlockStart: 0,
-          marginBlockEnd: 0,
-          wordBreak: 'break-word',
-        },
-
-        '&-last': {
-          [`> ${componentCls}-item-tail`]: {
-            display: 'none',
-          },
-
-          [`> ${componentCls}-item-content`]: {
-            minHeight: token.controlHeightLG * 1.2,
+            [varName('item-icon-dot-color')]: colorTextDisabled,
           },
         },
       },
+    ],
+  };
+};
 
-      [`&${componentCls}-alternate,
-        &${componentCls}-right,
-        &${componentCls}-label`]: {
-        [`${componentCls}-item`]: {
-          '&-tail, &-head, &-head-custom': {
-            insetInlineStart: '50%',
+const genVerticalStyle: GenerateStyle<TimelineToken, CSSObject> = (token) => {
+  const { calc, componentCls, itemPaddingBottom, margin, antCls } = token;
+  const itemCls = `${componentCls}-item`;
+
+  const [, stepsVarRef] = genCssVar(antCls, 'cmp-steps');
+  const [timelineVarName, timelineVarRef] = genCssVar(antCls, 'timeline');
+
+  return {
+    [`${componentCls}:not(${componentCls}-horizontal)`]: {
+      [timelineVarName('head-span')]: '12',
+      [timelineVarName('head-span-ptg')]: `calc(${timelineVarRef('head-span')} / 24 * 100%)`,
+
+      // =============================================================
+      // ==                        Alternate                        ==
+      // =============================================================
+      [`&${componentCls}-layout-alternate`]: {
+        [itemCls]: {
+          [timelineVarName('alternate-gap')]: calc(margin)
+            .mul(2)
+            .add(stepsVarRef('dot-icon-size'))
+            .equal(),
+
+          minHeight: 'auto',
+          paddingBottom: itemPaddingBottom,
+
+          // Icon & Rail
+          [`${itemCls}-icon, ${itemCls}-rail`]: {
+            position: 'absolute',
+            insetInlineStart: timelineVarRef('head-span-ptg'),
           },
 
-          '&-head': {
-            marginInlineStart: `-${token.marginXXS}px`,
-
-            '&-custom': {
-              marginInlineStart: token.tailWidth / 2,
-            },
+          // Icon
+          [`${itemCls}-icon`]: {
+            marginInlineStart: `calc(${stepsVarRef('icon-size')} / -2)`,
           },
 
-          '&-left': {
-            [`${componentCls}-item-content`]: {
-              insetInlineStart: `calc(50% - ${token.marginXXS}px)`,
-              width: `calc(50% - ${token.marginSM}px)`,
+          // Section
+          [`${itemCls}-section`]: {
+            display: 'flex',
+            flexWrap: 'nowrap',
+            gap: timelineVarRef('alternate-gap'),
+          },
+
+          // >>> Header
+          [`${itemCls}-header`]: {
+            textAlign: 'end',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            flex: `1 1 calc(${timelineVarRef('head-span-ptg')} - ${timelineVarRef('alternate-gap')} / 2)`,
+          },
+
+          // >>> Content
+          [`${itemCls}-content`]: {
+            textAlign: 'start',
+            flex: `1 1 calc(100% - ${timelineVarRef('head-span-ptg')} - ${timelineVarRef('alternate-gap')} / 2)`,
+          },
+
+          // Placement
+          '&-placement-end': {
+            [`${itemCls}-header`]: {
               textAlign: 'start',
+              order: 1,
             },
-          },
 
-          '&-right': {
-            [`${componentCls}-item-content`]: {
-              width: `calc(50% - ${token.marginSM}px)`,
-              margin: 0,
+            [`${itemCls}-content`]: {
               textAlign: 'end',
             },
+
+            [`${itemCls}-icon, ${itemCls}-rail`]: {
+              insetInlineStart: `calc(100% - ${timelineVarRef('head-span-ptg')})`,
+            },
           },
         },
       },
 
-      [`&${componentCls}-right`]: {
-        [`${componentCls}-item-right`]: {
-          [`${componentCls}-item-tail,
-            ${componentCls}-item-head,
-            ${componentCls}-item-head-custom`]: {
-            insetInlineStart: `calc(100% - ${(token.itemHeadSize + token.tailWidth) / 2}px)`,
-          },
-
-          [`${componentCls}-item-content`]: {
-            width: `calc(100% - ${token.itemHeadSize + token.marginXS}px)`,
-          },
-        },
-      },
-
-      [`&${componentCls}-pending
-        ${componentCls}-item-last
-        ${componentCls}-item-tail`]: {
-        display: 'block',
-        height: `calc(100% - ${token.margin}px)`,
-        borderInlineStart: `${token.tailWidth}px dotted ${token.tailColor}`,
-      },
-
-      [`&${componentCls}-reverse
-        ${componentCls}-item-last
-        ${componentCls}-item-tail`]: {
-        display: 'none',
-      },
-
-      [`&${componentCls}-reverse ${componentCls}-item-pending`]: {
-        [`${componentCls}-item-tail`]: {
-          insetBlockStart: token.margin,
-          display: 'block',
-          height: `calc(100% - ${token.margin}px)`,
-          borderInlineStart: `${token.tailWidth}px dotted ${token.tailColor}`,
-        },
-
-        [`${componentCls}-item-content`]: {
-          minHeight: token.controlHeightLG * 1.2,
-        },
-      },
-
-      [`&${componentCls}-label`]: {
-        [`${componentCls}-item-label`]: {
-          position: 'absolute',
-          insetBlockStart: -(token.fontSize * token.lineHeight - token.fontSize) + token.tailWidth,
-          width: `calc(50% - ${token.marginSM}px)`,
+      // =============================================================
+      // ==                        Same Side                        ==
+      // =============================================================
+      [`&:not(${componentCls}-layout-alternate)`]: {
+        [`${itemCls}-placement-end`]: {
           textAlign: 'end',
-        },
 
-        [`${componentCls}-item-right`]: {
-          [`${componentCls}-item-label`]: {
-            insetInlineStart: `calc(50% + ${token.marginSM}px)`,
-            width: `calc(50% - ${token.marginSM}px)`,
-            textAlign: 'start',
+          [`${itemCls}-icon`]: {
+            order: 1,
           },
-        },
-      },
 
-      // ====================== RTL =======================
-      '&-rtl': {
-        direction: 'rtl',
-
-        [`${componentCls}-item-head-custom`]: {
-          transform: `translate(50%, -50%)`,
+          [`${itemCls}-rail`]: {
+            insetInlineStart: 'auto',
+            insetInlineEnd: `calc(${stepsVarRef('icon-size')} / 2)`,
+            marginInlineEnd: `calc(${stepsVarRef('rail-size')} / -2)`,
+          },
         },
       },
     },
@@ -243,7 +248,16 @@ const genTimelineStyle: GenerateStyle<TimelineToken, CSSObject> = (token) => {
 };
 
 // ============================== Export ==============================
-export default genComponentStyleHook(
+export const prepareComponentToken: GetDefaultToken<'Timeline'> = (token) => ({
+  tailColor: token.colorSplit,
+  tailWidth: token.lineWidthBold,
+  dotBorderWidth: token.lineWidthBold,
+  dotBg: undefined,
+  dotSize: undefined,
+  itemPaddingBottom: token.padding * 1.25,
+});
+
+export default genStyleHooks(
   'Timeline',
   (token) => {
     const timeLineToken = mergeToken<TimelineToken>(token, {
@@ -251,14 +265,11 @@ export default genComponentStyleHook(
       customHeadPaddingVertical: token.paddingXXS,
       paddingInlineEnd: 2,
     });
-
-    return [genTimelineStyle(timeLineToken)];
+    return [
+      genTimelineStyle(timeLineToken),
+      genVerticalStyle(timeLineToken),
+      genHorizontalStyle(timeLineToken),
+    ];
   },
-  (token) => ({
-    tailColor: token.colorSplit,
-    tailWidth: token.lineWidthBold,
-    dotBorderWidth: token.wireframe ? token.lineWidthBold : token.lineWidth * 3,
-    dotBg: token.colorBgContainer,
-    itemPaddingBottom: token.padding * 1.25,
-  }),
+  prepareComponentToken,
 );

@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { mergeProps } from '@rc-component/util';
+
+import { isFunction, isPlainObject } from '../../_util/is';
 import type { PaginationProps } from '../../pagination';
-import extendsObject from '../../_util/extendsObject';
 import type { TablePaginationConfig } from '../interface';
 
 export const DEFAULT_PAGE_SIZE = 10;
@@ -14,12 +16,11 @@ export function getPaginationParam(
     pageSize: mergedPagination.pageSize,
   };
 
-  const paginationObj = pagination && typeof pagination === 'object' ? pagination : {};
+  const paginationObj = isPlainObject(pagination) ? pagination : {};
 
-  Object.keys(paginationObj).forEach((pageProp: keyof typeof paginationObj) => {
-    const value = mergedPagination[pageProp];
-
-    if (typeof value !== 'function') {
+  Object.keys(paginationObj).forEach((pageProp) => {
+    const value = mergedPagination[pageProp as keyof typeof paginationObj];
+    if (!isFunction(value)) {
       param[pageProp] = value;
     }
   });
@@ -32,8 +33,9 @@ function usePagination(
   onChange: (current: number, pageSize: number) => void,
   pagination?: TablePaginationConfig | false,
 ): readonly [TablePaginationConfig, (current?: number, pageSize?: number) => void] {
-  const { total: paginationTotal = 0, ...paginationObj } =
-    pagination && typeof pagination === 'object' ? pagination : {};
+  const { total: paginationTotal = 0, ...paginationObj } = isPlainObject(pagination)
+    ? pagination
+    : {};
 
   const [innerPagination, setInnerPagination] = useState<{ current?: number; pageSize?: number }>(
     () => ({
@@ -44,13 +46,9 @@ function usePagination(
   );
 
   // ============ Basic Pagination Config ============
-  const mergedPagination = extendsObject<Partial<TablePaginationConfig>>(
-    innerPagination,
-    paginationObj,
-    {
-      total: paginationTotal > 0 ? paginationTotal : total,
-    },
-  );
+  const mergedPagination = mergeProps(innerPagination, paginationObj, {
+    total: paginationTotal > 0 ? paginationTotal : total,
+  });
 
   // Reset `current` if data length or pageSize changed
   const maxPage = Math.ceil((paginationTotal || total) / mergedPagination.pageSize!);

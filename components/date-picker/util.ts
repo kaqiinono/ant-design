@@ -1,16 +1,16 @@
-import type { AlignType } from '@rc-component/trigger';
-import type { PickerMode } from 'rc-picker/lib/interface';
-import type { SharedTimeProps } from 'rc-picker/lib/panels/TimePanel';
-import type { SelectCommonPlacement } from '../_util/motion';
-import type { DirectionType } from '../config-provider';
-import type { PickerLocale } from './generatePicker';
+import * as React from 'react';
+import type { PickerMode } from '@rc-component/picker/interface';
 
-export function getPlaceholder(
+import { isNonNullable } from '../_util/is';
+import useSelectIcons from '../select/useIcons';
+import type { PickerLocale, PickerProps } from './generatePicker';
+
+export const getPlaceholder = (
   locale: PickerLocale,
   picker?: PickerMode,
   customizePlaceholder?: string,
-): string {
-  if (customizePlaceholder !== undefined) {
+) => {
+  if (isNonNullable(customizePlaceholder)) {
     return customizePlaceholder;
   }
 
@@ -27,136 +27,62 @@ export function getPlaceholder(
     return locale.lang.weekPlaceholder;
   }
   if (picker === 'time' && locale.timePickerLocale.placeholder) {
-    return locale!.timePickerLocale.placeholder;
+    return locale.timePickerLocale.placeholder;
   }
   return locale.lang.placeholder;
-}
+};
 
-export function getRangePlaceholder(
+export const getRangePlaceholder = (
   locale: PickerLocale,
   picker?: PickerMode,
   customizePlaceholder?: [string, string],
-) {
-  if (customizePlaceholder !== undefined) {
+) => {
+  if (isNonNullable(customizePlaceholder)) {
     return customizePlaceholder;
   }
 
-  if (picker === 'year' && locale.lang.yearPlaceholder) {
+  if (picker === 'year' && locale.lang.rangeYearPlaceholder) {
     return locale.lang.rangeYearPlaceholder;
   }
-  if (picker === 'quarter' && locale.lang.quarterPlaceholder) {
+  if (picker === 'quarter' && locale.lang.rangeQuarterPlaceholder) {
     return locale.lang.rangeQuarterPlaceholder;
   }
-  if (picker === 'month' && locale.lang.monthPlaceholder) {
+  if (picker === 'month' && locale.lang.rangeMonthPlaceholder) {
     return locale.lang.rangeMonthPlaceholder;
   }
-  if (picker === 'week' && locale.lang.weekPlaceholder) {
+  if (picker === 'week' && locale.lang.rangeWeekPlaceholder) {
     return locale.lang.rangeWeekPlaceholder;
   }
-  if (picker === 'time' && locale.timePickerLocale.placeholder) {
-    return locale!.timePickerLocale.rangePlaceholder;
+  if (picker === 'time' && locale.timePickerLocale.rangePlaceholder) {
+    return locale.timePickerLocale.rangePlaceholder;
   }
   return locale.lang.rangePlaceholder;
-}
+};
 
-export function transPlacement2DropdownAlign(
-  direction: DirectionType,
-  placement?: SelectCommonPlacement,
-): AlignType {
-  const overflow = {
-    adjustX: 1,
-    adjustY: 1,
-  };
-  switch (placement) {
-    case 'bottomLeft': {
-      return {
-        points: ['tl', 'bl'],
-        offset: [0, 4],
-        overflow,
-      };
-    }
-    case 'bottomRight': {
-      return {
-        points: ['tr', 'br'],
-        offset: [0, 4],
-        overflow,
-      };
-    }
-    case 'topLeft': {
-      return {
-        points: ['bl', 'tl'],
-        offset: [0, -4],
-        overflow,
-      };
-    }
-    case 'topRight': {
-      return {
-        points: ['br', 'tr'],
-        offset: [0, -4],
-        overflow,
-      };
-    }
-    default: {
-      return {
-        points: direction === 'rtl' ? ['tr', 'br'] : ['tl', 'bl'],
-        offset: [0, 4],
-        overflow,
-      };
-    }
-  }
-}
+export const useIcons = (
+  props: Pick<PickerProps, 'allowClear' | 'removeIcon'>,
+  prefixCls: string,
+) => {
+  const { allowClear = true } = props;
 
-function toArray<T>(list: T | T[]): T[] {
-  if (!list) {
-    return [];
-  }
-  return Array.isArray(list) ? list : [list];
-}
+  const { clearIcon, removeIcon } = useSelectIcons({
+    ...props,
+    prefixCls,
+    componentName: 'DatePicker',
+  });
 
-export function getTimeProps<DateType, DisabledTime>(
-  props: { format?: string; picker?: PickerMode } & Omit<
-    SharedTimeProps<DateType>,
-    'disabledTime'
-  > & {
-      disabledTime?: DisabledTime;
-    },
-) {
-  const { format, picker, showHour, showMinute, showSecond, use12Hours } = props;
-
-  const firstFormat = toArray(format)[0];
-  const showTimeObj = { ...props };
-
-  if (firstFormat && typeof firstFormat === 'string') {
-    if (!firstFormat.includes('s') && showSecond === undefined) {
-      showTimeObj.showSecond = false;
+  const mergedAllowClear = React.useMemo(() => {
+    if (allowClear === false) {
+      return false;
     }
-    if (!firstFormat.includes('m') && showMinute === undefined) {
-      showTimeObj.showMinute = false;
-    }
-    if (
-      !firstFormat.includes('H') &&
-      !firstFormat.includes('h') &&
-      !firstFormat.includes('K') &&
-      !firstFormat.includes('k') &&
-      showHour === undefined
-    ) {
-      showTimeObj.showHour = false;
-    }
-    if ((firstFormat.includes('a') || firstFormat.includes('A')) && use12Hours === undefined) {
-      showTimeObj.use12Hours = true;
-    }
-  }
 
-  if (picker === 'time') {
-    return showTimeObj;
-  }
+    const allowClearConfig = allowClear === true ? {} : allowClear;
 
-  if (typeof firstFormat === 'function') {
-    // format of showTime should use default when format is custom format function
-    delete showTimeObj.format;
-  }
+    return {
+      clearIcon: clearIcon as React.ReactNode,
+      ...allowClearConfig,
+    };
+  }, [allowClear, clearIcon]);
 
-  return {
-    showTime: showTimeObj,
-  };
-}
+  return [mergedAllowClear, removeIcon] as const;
+};

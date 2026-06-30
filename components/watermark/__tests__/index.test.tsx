@@ -1,8 +1,12 @@
 import React from 'react';
+import { spyElementPrototypes } from '@rc-component/util';
+
 import Watermark from '..';
 import mountTest from '../../../tests/shared/mountTest';
 import rtlTest from '../../../tests/shared/rtlTest';
-import { render, waitFakeTimer, waitFor } from '../../../tests/utils';
+import { render, waitFakeTimer } from '../../../tests/utils';
+import Drawer from '../../drawer';
+import Modal from '../../modal';
 
 describe('Watermark', () => {
   mountTest(Watermark);
@@ -12,8 +16,17 @@ describe('Watermark', () => {
 
   beforeAll(() => {
     mockSrcSet.mockImplementation(function fn() {
+      // @ts-ignore
       this.onload?.();
     });
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   afterAll(() => {
@@ -35,11 +48,65 @@ describe('Watermark', () => {
       />,
     );
     const target = container.querySelector<HTMLDivElement>('.watermark div');
-    expect(target?.style.left).toBe('150px');
-    expect(target?.style.top).toBe('150px');
-    expect(target?.style.width).toBe('calc(100% - 150px)');
-    expect(target?.style.height).toBe('calc(100% - 150px)');
+    expect(target).toHaveStyle({
+      left: '150px',
+      top: '150px',
+      width: 'calc(100% - 150px)',
+      height: 'calc(100% - 150px)',
+    });
     expect(container).toMatchSnapshot();
+  });
+
+  it('supports custom font for each content line', async () => {
+    const fillText = jest.spyOn(CanvasRenderingContext2D.prototype, 'fillText');
+    const fonts: string[] = [];
+    const spyCanvas = spyElementPrototypes(CanvasRenderingContext2D, {
+      font: {
+        set(this: CanvasRenderingContext2D, ...args: any[]) {
+          const [originDescriptor, value] = args as [PropertyDescriptor, string];
+          fonts.push(value);
+          return originDescriptor.set?.call(this, value);
+        },
+      },
+    });
+
+    try {
+      render(
+        <Watermark
+          content={[
+            { text: 'Ant Design', font: { fontSize: 20, fontWeight: 'bold' } },
+            {
+              text: 'Happy Working',
+              font: { fontFamily: 'serif', fontSize: 12, fontStyle: 'italic' },
+            },
+            {
+              text: 'Fallback',
+              font: { fontFamily: 'monospace', fontSize: undefined },
+            },
+          ]}
+        />,
+      );
+      await waitFakeTimer();
+
+      expect(fonts).toEqual(
+        expect.arrayContaining([
+          'normal normal bold 20px sans-serif',
+          'italic normal normal 12px serif',
+          'normal normal normal 16px monospace',
+        ]),
+      );
+      const textCalls = fillText.mock.calls.filter(([text]) =>
+        ['Ant Design', 'Happy Working', 'Fallback'].includes(text as string),
+      );
+      expect(textCalls.map(([text]) => text)).toEqual(['Ant Design', 'Happy Working', 'Fallback']);
+      textCalls.forEach(([, x, y]) => {
+        expect(Number.isFinite(x)).toBeTruthy();
+        expect(Number.isFinite(y)).toBeTruthy();
+      });
+    } finally {
+      fillText.mockRestore();
+      spyCanvas.mockRestore();
+    }
   });
 
   it('Interleaved watermark backgroundSize is correct', () => {
@@ -53,7 +120,7 @@ describe('Watermark', () => {
       />,
     );
     const target = container.querySelector<HTMLDivElement>('.watermark div');
-    expect(target?.style.backgroundSize).toBe('600px');
+    expect(target).toHaveStyle({ backgroundSize: '720px' });
     expect(container).toMatchSnapshot();
   });
 
@@ -66,6 +133,7 @@ describe('Watermark', () => {
 
   it('Invalid image watermark', () => {
     mockSrcSet.mockImplementation(function fn() {
+      // @ts-ignore
       this.onerror?.();
     });
     const { container } = render(
@@ -76,22 +144,125 @@ describe('Watermark', () => {
   });
 
   it('MutationObserver should work properly', async () => {
+    let counter = 0;
+    const spyCanvas = spyElementPrototypes(HTMLCanvasElement, {
+      toDataURL(originDescriptor: any) {
+        counter += 1;
+        return originDescriptor.value.call(this);
+      },
+    });
     const { container } = render(<Watermark className="watermark" content="MutationObserver" />);
     const target = container.querySelector<HTMLDivElement>('.watermark div');
     await waitFakeTimer();
+    expect(counter).toBe(1);
+
     target?.remove();
-    await waitFor(() => expect(target).toBeTruthy());
+    await waitFakeTimer();
+    expect(counter).toBe(1);
+
     expect(container).toMatchSnapshot();
+
+    spyCanvas.mockRestore();
   });
 
-  it('Observe the modification of style', async () => {
-    const { container } = render(
-      <Watermark offset={[-200, -200]} className="watermark" content="MutationObserver" />,
+  describe('Observe the modification of style', () => {
+    it('watermark', async () => {
+      const { container } = render(
+        <Watermark offset={[-200, -200]} className="watermark" content="MutationObserver" />,
+      );
+      const target = container.querySelector<HTMLDivElement>('.watermark div');
+      await waitFakeTimer();
+      target?.setAttribute('style', '');
+      await waitFakeTimer();
+      expect(container).toMatchSnapshot();
+    });
+
+    it('container', async () => {
+      const { container } = render(
+        <Watermark offset={[-200, -200]} className="watermark" content="MutationObserver" />,
+      );
+
+      const target = container.querySelector<HTMLDivElement>('.watermark');
+      await waitFakeTimer();
+      target?.setAttribute('style', '');
+      await waitFakeTimer();
+
+      expect(target).toHaveStyle({
+        overflow: 'hidden',
+      });
+    });
+  });
+
+  describe('nest component', () => {
+    function test(name: string, children: React.ReactNode, getWatermarkElement: () => Node) {
+      it(name, async () => {
+        const { rerender } = render(<Watermark className="test">{children}</Watermark>);
+        await waitFakeTimer();
+
+        const watermark = getWatermarkElement();
+
+        expect(watermark).toHaveStyle({ zIndex: '999' });
+
+        // Not crash when children removed
+        rerender(<Watermark className="test" />);
+      });
+    }
+
+    test(
+      'Modal',
+      <Modal open />,
+      () => document.body.querySelector('.ant-modal-container')!.lastChild!,
     );
-    const target = container.querySelector<HTMLDivElement>('.watermark div');
+
+    test(
+      'Drawer',
+      <Drawer open />,
+      () => document.body.querySelector('.ant-drawer-section')!.lastChild!,
+    );
+
+    it('inherit = false', async () => {
+      render(
+        <Watermark inherit={false}>
+          <Drawer open />
+        </Watermark>,
+      );
+      await waitFakeTimer();
+
+      expect(document.body.querySelector('.ant-drawer-section')!.lastChild).toHaveClass(
+        'ant-drawer-body',
+      );
+    });
+  });
+
+  it('should not crash if content is empty string', async () => {
+    const spy = jest.spyOn(CanvasRenderingContext2D.prototype, 'drawImage');
+    render(<Watermark content="" className="watermark" />);
     await waitFakeTimer();
-    target?.setAttribute('style', '');
-    await waitFor(() => expect(target).toBeTruthy());
-    expect(container).toMatchSnapshot();
+    expect(spy).not.toHaveBeenCalledWith(expect.anything(), 0, 0);
+    expect(spy).not.toHaveBeenCalledWith(expect.anything(), -0, 0);
+    expect(spy).not.toHaveBeenCalledWith(expect.anything(), -0, -0);
+    expect(spy).not.toHaveBeenCalledWith(expect.anything(), 0, -0);
+    spy.mockRestore();
+  });
+
+  it('should call onRemove when watermark is hard removed', async () => {
+    const onRemove = jest.fn();
+    const { container } = render(<Watermark content="Ant" onRemove={onRemove} />);
+    await waitFakeTimer();
+
+    const watermarkEle = container.querySelector<HTMLDivElement>('[style*="background-image"]');
+    watermarkEle?.remove();
+    await waitFakeTimer();
+
+    expect(onRemove).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onRemove when unmount', async () => {
+    const onRemove = jest.fn();
+    const { unmount } = render(<Watermark content="Ant" onRemove={onRemove} />);
+    await waitFakeTimer();
+    unmount();
+    await waitFakeTimer();
+    expect(onRemove).not.toHaveBeenCalled();
   });
 });

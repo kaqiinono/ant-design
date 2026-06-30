@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/zh_TW';
+import Pagination from '@rc-component/pagination/locale/zh_TW';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/zh_TW';
 import DatePicker from '../date-picker/locale/zh_TW';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/zh_TW';
 
 const typeTemplate = '${label}不是一個有效的${type}';
@@ -15,12 +15,18 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: '請選擇',
+    close: '關閉',
+    show: '顯示',
+    hide: '隱藏',
   },
   Table: {
     filterTitle: '篩選器',
     filterConfirm: '確定',
     filterReset: '重置',
     filterEmptyText: '無篩選項',
+    filterCheckAll: '全選',
+    filterSearchPlaceholder: '在篩選項中搜尋',
+    emptyText: '暫無數據',
     selectAll: '全部選取',
     selectInvert: '反向選取',
     selectNone: '清空所有',
@@ -76,9 +82,7 @@ const localeValues: Locale = {
     copy: '複製',
     copied: '複製成功',
     expand: '展開',
-  },
-  PageHeader: {
-    back: '返回',
+    collapse: '收起',
   },
   Form: {
     defaultValidateMessages: {
@@ -129,8 +133,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: '預覽',
+  QRCode: {
+    expired: '二維碼過期',
+    refresh: '點擊刷新',
+    scanned: '已掃描',
+  },
+  ColorPicker: {
+    presetEmpty: '暫無',
+    transparent: '透明',
+    singleColor: '單色',
+    gradientColor: '漸變色',
   },
 };
 

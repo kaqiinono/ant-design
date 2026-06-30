@@ -1,4 +1,5 @@
 import type * as React from 'react';
+
 import type { MapToken } from './maps';
 
 // ======================================================================
@@ -61,7 +62,7 @@ export interface AliasToken extends MapToken {
   colorBorderBg: string;
   /**
    * @nameZH 分割线颜色
-   * @nameEN Separator color
+   * @nameEN Separator Color
    * @desc 用于作为分割线的颜色，此颜色和 colorBorderSecondary 的颜色一致，但是用的是透明色。
    * @descEN Used as the color of separator, this color is the same as colorBorderSecondary but with transparency.
    */
@@ -70,21 +71,21 @@ export interface AliasToken extends MapToken {
   // Text
   /**
    * @nameZH 占位文本颜色
-   * @nameEN Placeholder text color
+   * @nameEN Placeholder Text Color
    * @desc 控制占位文本的颜色。
    * @descEN Control the color of placeholder text.
    */
   colorTextPlaceholder: string;
   /**
    * @nameZH 禁用字体颜色
-   * @nameEN Disabled text color
+   * @nameEN Disabled Text Color
    * @desc 控制禁用状态下的字体颜色。
    * @descEN Control the color of text in disabled state.
    */
   colorTextDisabled: string;
   /**
    * @nameZH 标题字体颜色
-   * @nameEN Heading font color
+   * @nameEN Heading Text Color
    * @desc 控制标题字体颜色。
    * @descEN Control the font color of heading.
    */
@@ -160,6 +161,20 @@ export interface AliasToken extends MapToken {
    * @descEN Control the outline color of input component in error state.
    */
   colorErrorOutline: string;
+  /**
+   * @nameZH 错误状态下前后缀颜色
+   * @nameEN Error affix color
+   * @desc 控制表单控件前后缀在错误状态下的颜色。
+   * @descEN Control the color of form control prefix/suffix in error state.
+   */
+  colorErrorAffix: string;
+  /**
+   * @nameZH 警告状态下前后缀颜色
+   * @nameEN Warning affix color
+   * @desc 控制表单控件前后缀在警告状态下的颜色。
+   * @descEN Control the color of form control prefix/suffix in warning state.
+   */
+  colorWarningAffix: string;
 
   // Font
   /**
@@ -578,8 +593,30 @@ export interface AliasToken extends MapToken {
    * @descEN Control the minimum width of extra extra large screens.
    */
   screenXXLMin: number;
+  /**
+   * @nameZH 屏幕宽度（像素） - 超超大屏幕最大值
+   * @nameEN Screen width (pixels) - Extra extra large screens maximum value
+   * @desc 控制超超大屏幕的最大宽度。
+   * @descEN Control the maximum width of extra extra large screens.
+   */
+  screenXXLMax: number;
+  /**
+   * @nameZH 屏幕宽度（像素） - 超超超大屏幕
+   * @nameEN Screen width (pixels) - XXXL screens
+   * @desc 控制超超超大屏幕的屏幕宽度。
+   * @descEN Control the screen width of XXXL screens.
+   */
+  screenXXXL: number;
+  /**
+   * @nameZH 屏幕宽度（像素） - 超超超大屏幕最小值
+   * @nameEN Screen width (pixels) - XXXL screens minimum value
+   * @desc 控制超超超大屏幕的最小宽度。
+   * @descEN Control the minimum width of XXXL screens.
+   */
+  screenXXXLMin: number;
 
   /**
+   * @deprecated
    * Used for DefaultButton, Switch which has default outline
    * @desc 默认样式的 Outline 颜色
    * @descEN Default style outline color.
@@ -589,6 +626,8 @@ export interface AliasToken extends MapToken {
   // FIXME: component box-shadow, should be removed
   /** @internal */
   boxShadowPopoverArrow: string;
+  /** @internal */
+  dropShadowPopover: string;
   /** @internal */
   boxShadowCard: string;
   /** @internal */

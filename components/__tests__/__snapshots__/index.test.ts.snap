@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`antd exports modules correctly 1`] = `
 [
@@ -10,6 +10,7 @@ exports[`antd exports modules correctly 1`] = `
   "Avatar",
   "BackTop",
   "Badge",
+  "BorderBeam",
   "Breadcrumb",
   "Button",
   "Calendar",
@@ -27,6 +28,7 @@ exports[`antd exports modules correctly 1`] = `
   "Drawer",
   "Dropdown",
   "Empty",
+  "Flex",
   "FloatButton",
   "Form",
   "Grid",
@@ -35,6 +37,7 @@ exports[`antd exports modules correctly 1`] = `
   "InputNumber",
   "Layout",
   "List",
+  "Masonry",
   "Mentions",
   "Menu",
   "Modal",
@@ -53,6 +56,7 @@ exports[`antd exports modules correctly 1`] = `
   "Slider",
   "Space",
   "Spin",
+  "Splitter",
   "Statistic",
   "Steps",
   "Switch",
@@ -72,6 +76,7 @@ exports[`antd exports modules correctly 1`] = `
   "message",
   "notification",
   "theme",
+  "unstableSetRender",
   "version",
 ]
 `;

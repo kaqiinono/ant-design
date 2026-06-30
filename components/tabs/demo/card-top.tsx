@@ -1,14 +1,13 @@
 import React from 'react';
-import { Tabs, theme } from 'antd';
-import { css } from '@emotion/css';
+import { Tabs } from 'antd';
+import { createStyles } from 'antd-style';
 
-const useStyle = () => {
-  const { token } = theme.useToken();
+const useStyle = createStyles(({ token, css }) => {
   const antdTabsCls = '.ant-tabs';
 
   return css`
     ${antdTabsCls}${antdTabsCls}-card {
-      ${antdTabsCls}-content {
+      ${antdTabsCls}-body {
         padding: ${token.padding}px;
         background: ${token.colorBgContainer};
       }
@@ -32,9 +31,9 @@ const useStyle = () => {
       }
     }
   `;
-};
+});
 
-const items = new Array(3).fill(null).map((_, i) => {
+const items = Array.from({ length: 3 }).map((_, i) => {
   const id = String(i + 1);
   return {
     label: `Tab Title ${id}`,
@@ -50,10 +49,10 @@ const items = new Array(3).fill(null).map((_, i) => {
 });
 
 const App = () => {
-  const style = useStyle();
+  const { styles } = useStyle();
 
   return (
-    <div className={style}>
+    <div className={styles}>
       <Tabs type="card" items={items} />
     </div>
   );

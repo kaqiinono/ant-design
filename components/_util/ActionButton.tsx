@@ -1,23 +1,26 @@
-import useState from 'rc-util/lib/hooks/useState';
 import * as React from 'react';
-import Button from '../button';
-import type { ButtonProps, LegacyButtonType } from '../button/button';
-import { convertLegacyProps } from '../button/button';
+import { useState } from '@rc-component/util';
+
+import Button from '../button/Button';
+import type { ButtonProps, LegacyButtonType } from '../button/Button';
+import { convertLegacyProps } from '../button/buttonHelpers';
+import { isThenable } from './is';
 
 export interface ActionButtonProps {
   type?: LegacyButtonType;
   actionFn?: (...args: any[]) => any | PromiseLike<any>;
-  close?: Function;
+  close?: (...args: any[]) => void;
   autoFocus?: boolean;
   prefixCls: string;
   buttonProps?: ButtonProps;
   emitEvent?: boolean;
   quitOnNullishReturnValue?: boolean;
   children?: React.ReactNode;
-}
 
-function isThenable<T extends any>(thing?: PromiseLike<T>): boolean {
-  return !!(thing && thing.then);
+  /**
+   * Do not throw if is await mode
+   */
+  isSilent?: () => boolean;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = (props) => {
@@ -29,6 +32,7 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
     close,
     autoFocus,
     emitEvent,
+    isSilent,
     quitOnNullishReturnValue,
     actionFn,
   } = props;
@@ -42,10 +46,10 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
   };
 
   React.useEffect(() => {
-    let timeoutId: NodeJS.Timer | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     if (autoFocus) {
       timeoutId = setTimeout(() => {
-        buttonRef.current?.focus();
+        buttonRef.current?.focus({ preventScroll: true });
       });
     }
     return () => {
@@ -53,14 +57,14 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
         clearTimeout(timeoutId);
       }
     };
-  }, []);
+  }, [autoFocus]);
 
   const handlePromiseOnOk = (returnValueOfOnOk?: PromiseLike<any>) => {
     if (!isThenable(returnValueOfOnOk)) {
       return;
     }
     setLoading(true);
-    returnValueOfOnOk!.then(
+    returnValueOfOnOk.then(
       (...args: any[]) => {
         setLoading(false, true);
         onInternalClose(...args);
@@ -70,6 +74,12 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
         // See: https://github.com/ant-design/ant-design/issues/6183
         setLoading(false, true);
         clickedRef.current = false;
+
+        // Do not throw if is `await` mode
+        if (isSilent?.()) {
+          return;
+        }
+
         return Promise.reject(e);
       },
     );
@@ -98,7 +108,7 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
       clickedRef.current = false;
     } else {
       returnValueOfOnOk = actionFn();
-      if (!returnValueOfOnOk) {
+      if (!isThenable(returnValueOfOnOk)) {
         onInternalClose();
         return;
       }

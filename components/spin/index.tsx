@@ -1,97 +1,131 @@
-import classNames from 'classnames';
-import omit from 'rc-util/lib/omit';
 import * as React from 'react';
+import { clsx } from 'clsx';
 import { debounce } from 'throttle-debounce';
-import { cloneElement, isValidElement } from '../_util/reactNode';
-import warning from '../_util/warning';
-import type { ConfigConsumerProps } from '../config-provider';
-import { ConfigContext } from '../config-provider';
-import useStyle from './style/index';
 
-const SpinSizes = ['small', 'default', 'large'] as const;
-export type SpinSize = (typeof SpinSizes)[number];
+import { useMergeSemantic } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
+import { devUseWarning } from '../_util/warning';
+import { useComponentConfig } from '../config-provider/context';
+import useSize from '../config-provider/hooks/useSize';
+import type { SizeType } from '../config-provider/SizeContext';
+import Indicator from './Indicator';
+import useStyle from './style/index';
+import usePercent from './usePercent';
+
 export type SpinIndicator = React.ReactElement<HTMLElement>;
+
+export type SpinSemanticType = {
+  classNames?: {
+    root?: string;
+    section?: string;
+    indicator?: string;
+    description?: string;
+
+    container?: string;
+
+    /** @deprecated Please use `description` instead */
+    tip?: string;
+    /** @deprecated Please use `root` instead */
+    mask?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    section?: React.CSSProperties;
+    indicator?: React.CSSProperties;
+    description?: React.CSSProperties;
+
+    container?: React.CSSProperties;
+
+    /** @deprecated Please use `description` instead */
+    tip?: React.CSSProperties;
+    /** @deprecated Please use `root` instead */
+    mask?: React.CSSProperties;
+  };
+};
+
+export type SpinSemanticAllType = GenerateSemantic<SpinSemanticType, SpinProps>;
 
 export interface SpinProps {
   prefixCls?: string;
   className?: string;
   rootClassName?: string;
+  /** Whether Spin is spinning */
   spinning?: boolean;
   style?: React.CSSProperties;
-  size?: SpinSize;
+  /**
+   * Note: `default` is deprecated and will be removed in v7, please use `medium` instead.
+   */
+  size?: SizeType | 'default';
+  /** Customize description content when Spin has children */
+  /** @deprecated Please use `description` instead */
   tip?: React.ReactNode;
+  description?: React.ReactNode;
+  /** Specifies a delay in milliseconds for loading state (prevent flush) */
   delay?: number;
+  /** The className of wrapper when Spin has children */
+  /** @deprecated Please use `classNames.root` instead */
   wrapperClassName?: string;
+  /** React node of the spinning indicator */
   indicator?: SpinIndicator;
   children?: React.ReactNode;
+  /** Display a backdrop with the `Spin` component */
+  fullscreen?: boolean;
+  percent?: number | 'auto';
+  classNames?: SpinSemanticAllType['classNamesAndFn'];
+  styles?: SpinSemanticAllType['stylesAndFn'];
 }
 
-export interface SpinClassProps extends SpinProps {
-  hashId: string;
-  spinPrefixCls: string;
-}
-
-export type SpinFCType = React.FC<SpinProps> & {
+export type SpinType = React.FC<SpinProps> & {
   setDefaultIndicator: (indicator: React.ReactNode) => void;
 };
 
 // Render indicator
-let defaultIndicator: React.ReactNode = null;
-
-function renderIndicator(prefixCls: string, props: SpinClassProps): React.ReactNode {
-  const { indicator } = props;
-  const dotClassName = `${prefixCls}-dot`;
-
-  // should not be render default indicator when indicator value is null
-  if (indicator === null) {
-    return null;
-  }
-
-  if (isValidElement(indicator)) {
-    return cloneElement(indicator, {
-      className: classNames(indicator.props.className, dotClassName),
-    });
-  }
-
-  if (isValidElement(defaultIndicator)) {
-    return cloneElement(defaultIndicator, {
-      className: classNames(defaultIndicator.props.className, dotClassName),
-    });
-  }
-
-  return (
-    <span className={classNames(dotClassName, `${prefixCls}-dot-spin`)}>
-      <i className={`${prefixCls}-dot-item`} key={1} />
-      <i className={`${prefixCls}-dot-item`} key={2} />
-      <i className={`${prefixCls}-dot-item`} key={3} />
-      <i className={`${prefixCls}-dot-item`} key={4} />
-    </span>
-  );
-}
+let defaultIndicator: React.ReactNode | undefined;
 
 function shouldDelay(spinning?: boolean, delay?: number): boolean {
-  return !!spinning && !!delay && !isNaN(Number(delay));
+  return !!spinning && !!delay && !Number.isNaN(Number(delay));
 }
 
-const Spin: React.FC<SpinClassProps> = (props) => {
+const Spin: SpinType = (props) => {
   const {
-    spinPrefixCls: prefixCls,
+    prefixCls: customizePrefixCls,
     spinning: customSpinning = true,
     delay = 0,
     className,
     rootClassName,
-    size = 'default',
+    size,
     tip,
+    description,
     wrapperClassName,
     style,
     children,
-    hashId,
+    fullscreen = false,
+    indicator,
+    percent,
+    classNames,
+    styles,
     ...restProps
   } = props;
+
+  const {
+    getPrefixCls,
+    direction,
+    indicator: contextIndicator,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('spin');
+
+  const prefixCls = getPrefixCls('spin', customizePrefixCls);
+
+  const [hashId, cssVarCls] = useStyle(prefixCls);
 
   const [spinning, setSpinning] = React.useState<boolean>(
     () => customSpinning && !shouldDelay(customSpinning, delay),
   );
+
+  const mergedPercent = usePercent(spinning, percent);
 
   React.useEffect(() => {
     if (customSpinning) {
@@ -107,89 +141,150 @@ const Spin: React.FC<SpinClassProps> = (props) => {
     setSpinning(false);
   }, [delay, customSpinning]);
 
-  const isNestedPattern = React.useMemo<boolean>(() => typeof children !== 'undefined', [children]);
+  // ======================= Size ======================
+  const mergedSize = useSize((ctx) => size ?? ctx);
 
-  if (process.env.NODE_ENV !== 'production') {
-    warning(!tip || isNestedPattern, 'Spin', '`tip` only work in nest pattern.');
-  }
+  // ======================= Description ======================
+  const mergedDescription = description ?? tip;
 
-  const { direction, spin } = React.useContext<ConfigConsumerProps>(ConfigContext);
+  // =============== Merged Props for Semantic ================
+  const mergedProps: SpinProps = {
+    ...props,
+    size: mergedSize,
+    spinning,
+    tip: mergedDescription,
+    description: mergedDescription,
+    fullscreen,
+    children,
+    percent: mergedPercent,
+  };
 
-  const spinClassName = classNames(
-    prefixCls,
-    spin?.className,
+  // ========================= Style ==========================
+  const [mergedClassNames, mergedStyles] = useMergeSemantic(
+    [contextClassNames, classNames],
+    [contextStyles, styles],
     {
-      [`${prefixCls}-sm`]: size === 'small',
-      [`${prefixCls}-lg`]: size === 'large',
-      [`${prefixCls}-spinning`]: spinning,
-      [`${prefixCls}-show-text`]: !!tip,
-      [`${prefixCls}-rtl`]: direction === 'rtl',
+      props: mergedProps,
     },
-    className,
-    rootClassName,
-    hashId,
   );
 
-  const containerClassName = classNames(`${prefixCls}-container`, {
-    [`${prefixCls}-blur`]: spinning,
-  });
+  // ======================== Warning =========================
+  if (process.env.NODE_ENV !== 'production') {
+    const warning = devUseWarning('Spin');
 
-  // fix https://fb.me/react-unknown-prop
-  const divProps = omit(restProps, ['indicator', 'prefixCls']);
+    warning.deprecated(size !== 'default', 'size="default"', 'size="medium"');
+    warning.deprecated(!tip, 'tip', 'description');
+    warning.deprecated(!wrapperClassName, 'wrapperClassName', 'classNames.root');
 
-  const mergedStyle: React.CSSProperties = { ...spin?.style, ...style };
-
-  const spinElement: React.ReactNode = (
-    <div
-      {...divProps}
-      style={mergedStyle}
-      className={spinClassName}
-      aria-live="polite"
-      aria-busy={spinning}
-    >
-      {renderIndicator(prefixCls, props)}
-      {tip && isNestedPattern ? <div className={`${prefixCls}-text`}>{tip}</div> : null}
-    </div>
-  );
-
-  if (isNestedPattern) {
-    return (
-      <div
-        {...divProps}
-        className={classNames(`${prefixCls}-nested-loading`, wrapperClassName, hashId)}
-      >
-        {spinning && <div key="loading">{spinElement}</div>}
-        <div className={containerClassName} key="container">
-          {children}
-        </div>
-      </div>
+    warning.deprecated(
+      !(mergedClassNames?.tip || mergedStyles?.tip),
+      'classNames.tip and styles.tip',
+      'classNames.description and styles.description',
+    );
+    warning.deprecated(
+      !(mergedClassNames?.mask || mergedStyles?.mask),
+      'classNames.mask and styles.mask',
+      'classNames.root and styles.root',
     );
   }
-  return spinElement;
+
+  // ======================= Indicator ========================
+  const mergedIndicator = indicator ?? contextIndicator ?? defaultIndicator;
+
+  // ========================= Render =========================
+  const hasChildren = typeof children !== 'undefined';
+  const isNested = hasChildren || fullscreen;
+
+  const indicatorNode = (
+    <>
+      <Indicator
+        className={clsx(mergedClassNames.indicator)}
+        style={mergedStyles.indicator}
+        prefixCls={prefixCls}
+        indicator={mergedIndicator}
+        percent={mergedPercent}
+      />
+      {mergedDescription && (
+        <div
+          className={clsx(
+            `${prefixCls}-description`,
+            mergedClassNames.tip,
+            mergedClassNames.description,
+          )}
+          style={{
+            ...mergedStyles.tip,
+            ...mergedStyles.description,
+          }}
+        >
+          {mergedDescription}
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div
+      className={clsx(
+        prefixCls,
+        {
+          [`${prefixCls}-sm`]: mergedSize === 'small',
+          [`${prefixCls}-lg`]: mergedSize === 'large',
+          [`${prefixCls}-spinning`]: spinning,
+          [`${prefixCls}-rtl`]: direction === 'rtl',
+          [`${prefixCls}-fullscreen`]: fullscreen,
+        },
+        rootClassName,
+        mergedClassNames.root,
+        fullscreen && mergedClassNames.mask,
+        isNested ? wrapperClassName : [`${prefixCls}-section`, mergedClassNames.section],
+        contextClassName,
+        className,
+        hashId,
+        cssVarCls,
+      )}
+      style={{
+        ...mergedStyles.root,
+        ...(!isNested ? mergedStyles.section : {}),
+        ...(fullscreen ? mergedStyles.mask : {}),
+        ...contextStyle,
+        ...style,
+      }}
+      aria-live="polite"
+      aria-busy={spinning}
+      {...restProps}
+    >
+      {/* Indicator */}
+      {spinning &&
+        (isNested ? (
+          <div
+            className={clsx(`${prefixCls}-section`, mergedClassNames.section)}
+            style={mergedStyles.section}
+          >
+            {indicatorNode}
+          </div>
+        ) : (
+          indicatorNode
+        ))}
+
+      {/* Children */}
+      {hasChildren && (
+        <div
+          className={clsx(`${prefixCls}-container`, mergedClassNames.container)}
+          style={mergedStyles.container}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
 };
 
-const SpinFC: SpinFCType = (props) => {
-  const { prefixCls: customizePrefixCls } = props;
-  const { getPrefixCls } = React.useContext(ConfigContext);
-
-  const spinPrefixCls = getPrefixCls('spin', customizePrefixCls);
-
-  const [wrapSSR, hashId] = useStyle(spinPrefixCls);
-
-  const spinClassProps: SpinClassProps = {
-    ...props,
-    spinPrefixCls,
-    hashId,
-  };
-  return wrapSSR(<Spin {...spinClassProps} />);
-};
-
-SpinFC.setDefaultIndicator = (indicator: React.ReactNode) => {
+Spin.setDefaultIndicator = (indicator: React.ReactNode) => {
   defaultIndicator = indicator;
 };
 
 if (process.env.NODE_ENV !== 'production') {
-  SpinFC.displayName = 'Spin';
+  Spin.displayName = 'Spin';
 }
 
-export default SpinFC;
+export default Spin;

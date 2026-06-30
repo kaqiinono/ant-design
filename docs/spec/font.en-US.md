@@ -26,9 +26,9 @@ In order to implement a good font system, the first thing is to choose an approp
   'Noto Color Emoji';
 ```
 
-> References：https://www.smashingmagazine.com/2015/11/using-system-ui-fonts-practical-guide/ and http://markdotto.com/2018/02/07/github-system-fonts/
+> References: https://www.smashingmagazine.com/2015/11/using-system-ui-fonts-practical-guide/ and https://markdotto.com/blog/github-system-fonts/
 
-In addition, in many applications, numbers often need to be displayed vertically. We set the CSS property `font-variant-numeric` to `tabular-nums;` to use [tabular figures](https://www.fonts.com/content/learning/fontology/level-3/numbers/proportional-vs-tabular-figures).
+In addition, in many applications, numbers often need to be displayed vertically. We recommend setting the CSS property `font-variant-numeric` to `tabular-nums` to use [tabular figures](https://www.fonts.com/content/learning/fontology/level-3/numbers/proportional-vs-tabular-figures).
 
 > References：https://stackoverflow.com/questions/32660748/how-to-use-apples-new-san-francisco-font-on-a-webpage#comment78509178_32660790
 
@@ -80,11 +80,11 @@ The choice of font weight is also based on the principles of order, stability, a
 
 ## Font Color
 
-Text will be difficult to read if it is too close to the background color. To achieve barrier-free design, we follow the WCAG standard, which maintains an AAA level of contrast ratio, i.e. 7:1 or more between body text, title, and background color.
+<ImagePreview>
+  <TokenCompare tokenNames="colorTextHeading|colorText|colorTextSecondary|colorTextDisabled|colorBorder|colorSplit|colorBgLayout"></TokenCompare>
+</ImagePreview>
 
-<div>
-  <img src="https://gw.alipayobjects.com/mdn/rms_08e378/afts/img/A*PdFFQr2NXyUAAAAAAAAAAAAAARQnAQ" />
-</div>
+Text will be difficult to read if it is too close to the background color. To achieve barrier-free design, we follow the WCAG standard, which maintains an AAA level of contrast ratio, i.e. 7:1 or more between body text, title, and background color.
 
 ## Advanced Tips
 

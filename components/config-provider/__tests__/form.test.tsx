@@ -1,9 +1,9 @@
-import type { ValidateMessages } from 'rc-field-form/es/interface';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import type { ValidateMessages } from '@rc-component/form';
 import scrollIntoView from 'scroll-into-view-if-needed';
+
 import ConfigProvider from '..';
-import { fireEvent, render, waitFakeTimer } from '../../../tests/utils';
+import { act, fireEvent, render, waitFakeTimer } from '../../../tests/utils';
 import Button from '../../button';
 import type { FormInstance } from '../../form';
 import Form from '../../form';
@@ -16,12 +16,12 @@ jest.mock('scroll-into-view-if-needed');
 describe('ConfigProvider.Form', () => {
   (scrollIntoView as any).mockImplementation(() => {});
 
-  beforeEach(() => {
-    (scrollIntoView as any).mockReset();
-  });
-
   beforeAll(() => {
     jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
+    (scrollIntoView as any).mockReset();
   });
 
   afterAll(() => {
@@ -53,7 +53,7 @@ describe('ConfigProvider.Form', () => {
       await act(async () => {
         try {
           await formRef.current?.validateFields();
-        } catch (e) {
+        } catch {
           // Do nothing
         }
       });
@@ -76,7 +76,7 @@ describe('ConfigProvider.Form', () => {
       await act(async () => {
         try {
           await formRef.current?.validateFields();
-        } catch (e) {
+        } catch {
           // Do nothing
         }
       });
@@ -126,7 +126,7 @@ describe('ConfigProvider.Form', () => {
       await act(async () => {
         try {
           await formRef.current?.validateFields();
-        } catch (e) {
+        } catch {
           // Do nothing
         }
       });
@@ -226,6 +226,62 @@ describe('ConfigProvider.Form', () => {
         </ConfigProvider>,
       );
       expect(container.querySelector('.ant-form-item-no-colon')).toBeFalsy();
+    });
+  });
+
+  describe('form labelAlign', () => {
+    it('set labelAlign left', () => {
+      const { container } = render(
+        <ConfigProvider form={{ labelAlign: 'left' }}>
+          <Form>
+            <Form.Item label="姓名">
+              <input />
+            </Form.Item>
+          </Form>
+        </ConfigProvider>,
+      );
+      expect(container.querySelector('.ant-form-item-label-left')).toBeTruthy();
+    });
+
+    it('form labelAlign should override ConfigProvider labelAlign', () => {
+      const { container } = render(
+        <ConfigProvider form={{ labelAlign: 'left' }}>
+          <Form labelAlign="right">
+            <Form.Item label="姓名">
+              <input />
+            </Form.Item>
+          </Form>
+        </ConfigProvider>,
+      );
+      expect(container.querySelector('.ant-form-item-label-left')).toBeFalsy();
+    });
+  });
+
+  describe('form labelWrap', () => {
+    it('set labelWrap true', () => {
+      const { container } = render(
+        <ConfigProvider form={{ labelWrap: true }}>
+          <Form>
+            <Form.Item label="姓名">
+              <input />
+            </Form.Item>
+          </Form>
+        </ConfigProvider>,
+      );
+      expect(container.querySelector('.ant-form-item-label-wrap')).toBeTruthy();
+    });
+
+    it('form labelWrap should override ConfigProvider labelWrap', () => {
+      const { container } = render(
+        <ConfigProvider form={{ labelWrap: true }}>
+          <Form labelWrap={false}>
+            <Form.Item label="姓名">
+              <input />
+            </Form.Item>
+          </Form>
+        </ConfigProvider>,
+      );
+      expect(container.querySelector('.ant-form-item-label-wrap')).toBeFalsy();
     });
   });
 

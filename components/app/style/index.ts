@@ -1,12 +1,15 @@
-import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook } from '../../theme/internal';
+import type { CSSObject } from '@ant-design/cssinjs';
 
-export type ComponentToken = {};
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks } from '../../theme/internal';
+
+// biome-ignore lint/suspicious/noEmptyInterface: ComponentToken need to be empty by default
+export interface ComponentToken {}
 
 interface AppToken extends FullToken<'App'> {}
 
 // =============================== Base ===============================
-const genBaseStyle: GenerateStyle<AppToken> = (token) => {
+const genBaseStyle: GenerateStyle<AppToken, CSSObject> = (token) => {
   const { componentCls, colorText, fontSize, lineHeight, fontFamily } = token;
   return {
     [componentCls]: {
@@ -14,9 +17,14 @@ const genBaseStyle: GenerateStyle<AppToken> = (token) => {
       fontSize,
       lineHeight,
       fontFamily,
+      [`&${componentCls}-rtl`]: {
+        direction: 'rtl',
+      },
     },
   };
 };
 
+export const prepareComponentToken: GetDefaultToken<'App'> = () => ({});
+
 // ============================== Export ==============================
-export default genComponentStyleHook('App', (token) => [genBaseStyle(token)]);
+export default genStyleHooks('App', genBaseStyle, prepareComponentToken);

@@ -1,7 +1,5 @@
-import { Button, Form, Input, Select } from 'antd';
 import React from 'react';
-
-const { Option } = Select;
+import { Button, Form, Input, Select, Space } from 'antd';
 
 const layout = {
   labelCol: { span: 8 },
@@ -55,14 +53,15 @@ const App: React.FC = () => {
       </Form.Item>
       <Form.Item name="gender" label="Gender" rules={[{ required: true }]}>
         <Select
+          allowClear
           placeholder="Select a option and change input text above"
           onChange={onGenderChange}
-          allowClear
-        >
-          <Option value="male">male</Option>
-          <Option value="female">female</Option>
-          <Option value="other">other</Option>
-        </Select>
+          options={[
+            { label: 'male', value: 'male' },
+            { label: 'female', value: 'female' },
+            { label: 'other', value: 'other' },
+          ]}
+        />
       </Form.Item>
       <Form.Item
         noStyle
@@ -77,15 +76,17 @@ const App: React.FC = () => {
         }
       </Form.Item>
       <Form.Item {...tailLayout}>
-        <Button type="primary" htmlType="submit">
-          Submit
-        </Button>
-        <Button htmlType="button" onClick={onReset}>
-          Reset
-        </Button>
-        <Button type="link" htmlType="button" onClick={onFill}>
-          Fill form
-        </Button>
+        <Space>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+          <Button htmlType="button" onClick={onReset}>
+            Reset
+          </Button>
+          <Button type="link" htmlType="button" onClick={onFill}>
+            Fill form
+          </Button>
+        </Space>
       </Form.Item>
     </Form>
   );

@@ -1,127 +1,279 @@
-import * as React from 'react';
-import { Typography, Skeleton, Carousel } from 'antd';
-import type { SerializedStyles } from '@emotion/react';
-import { css } from '@emotion/react';
-import type { Extra, Icon } from './util';
-import useSiteToken from '../../../hooks/useSiteToken';
-import SiteContext from '../../../theme/slots/SiteContext';
-import { useCarouselStyle } from './util';
+import React from 'react';
+import { raf } from '@rc-component/util';
+import { Alert, Badge, Carousel, Flex, Skeleton, Typography } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
 
-const useStyle = () => {
-  const { token } = useSiteToken();
-  const { carousel } = useCarouselStyle();
+import useLocale from '../../../hooks/useLocale';
+import SiteContext from '../../../theme/slots/SiteContext';
+import type { Extra, Icon } from './util';
+import { getCarouselStyle, useAntdSiteConfig } from './util';
+
+const useStyle = createStyles(({ cssVar, css, cx }) => {
+  const { carousel } = getCarouselStyle();
+
+  const itemBase = css`
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: stretch;
+    text-decoration: none;
+    background: ${cssVar.colorBgContainer};
+    background: color-mix(in srgb, ${cssVar.colorBgContainer} 30%, transparent);
+    backdrop-filter: blur(8px);
+    border: ${cssVar.lineWidth} solid ${cssVar.colorBorderSecondary};
+    border-radius: ${cssVar.borderRadiusLG};
+    transition: all ${cssVar.motionDurationSlow};
+    padding-block: ${cssVar.paddingMD};
+    padding-inline: ${cssVar.paddingLG};
+    box-sizing: border-box;
+    position: relative;
+
+    &:before {
+      content: '';
+      inset: calc(${cssVar.lineWidth} * -1);
+      position: absolute;
+
+      background: radial-gradient(
+        circle 150px at var(--mouse-x, 0) var(--mouse-y, 0),
+        ${cssVar.colorPrimaryBorderHover},
+        ${cssVar.colorBorderSecondary}
+      );
+      opacity: 0;
+      transition: all 0.3s ease;
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+      mask-composite: subtract;
+      -webkit-mask-composite: xor;
+      padding: 1px;
+      border-radius: inherit;
+    }
+
+    &:hover {
+      backdrop-filter: blur(0px);
+      background: color-mix(in srgb, ${cssVar.colorBgContainer} 90%, transparent);
+
+      &:before {
+        opacity: 1;
+      }
+    }
+  `;
 
   return {
-    itemBase: css`
-      display: flex;
-      flex: 1 1 0;
-      flex-direction: column;
-      align-items: stretch;
-      text-decoration: none;
-      background: ${token.colorBgContainer};
-      border: ${token.lineWidth}px solid ${token.colorBorderSecondary};
-      border-radius: ${token.borderRadiusLG}px;
-      transition: all ${token.motionDurationSlow};
-      padding-block: ${token.paddingMD}px;
-      padding-inline: ${token.paddingLG}px;
-    `,
-    cardItem: css`
-      width: 33%;
-      &:hover {
-        box-shadow: ${token.boxShadowCard};
+    itemBase,
+    ribbon: css`
+      & > .${cx(itemBase)} {
+        height: 100%;
       }
     `,
     sliderItem: css`
-      margin: 0 ${token.margin}px;
+      margin: 0 ${cssVar.margin};
       text-align: start;
     `,
     container: css`
       display: flex;
-      max-width: 1208px;
+      width: 100%;
+      max-width: 100%;
       margin-inline: auto;
       box-sizing: border-box;
-      padding-inline: ${token.marginXXL}px;
-      column-gap: ${token.paddingMD * 2}px;
+      column-gap: calc(${cssVar.paddingMD} * 2);
       align-items: stretch;
       text-align: start;
+      min-height: 178px;
+      > * {
+        width: calc((100% - calc(${cssVar.marginXXL} * 2)) / 3);
+      }
     `,
     carousel,
+    bannerBg: css`
+      height: ${cssVar.fontSize};
+    `,
   };
-};
+});
 
+// ======================================================================
+// ==                               Item                               ==
+// ======================================================================
 interface RecommendItemProps {
   extra: Extra;
   index: number;
-  icons: Icon[];
-  itemCss: SerializedStyles;
+  icons?: Icon[];
+  className?: string;
 }
-const RecommendItem = ({ extra, index, icons, itemCss }: RecommendItemProps) => {
-  const style = useStyle();
-  const { token } = useSiteToken();
 
+const RecommendItem: React.FC<RecommendItemProps> = (props) => {
+  const { extra, index, icons, className } = props;
+  const cardRef = React.useRef<HTMLAnchorElement>(null);
+
+  const { styles } = useStyle();
+
+  // ====================== MousePos ======================
+  const [mousePosition, setMousePosition] = React.useState<[number, number]>([0, 0]);
+  const [transMousePosition, setTransMousePosition] = React.useState<[number, number]>([0, 0]);
+
+  const onMouseMove: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+    if (!cardRef.current) {
+      return;
+    }
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setMousePosition([x, y]);
+  };
+
+  // Transition mouse position
+  React.useEffect(() => {
+    const [targetX, targetY] = mousePosition;
+    const [currentX, currentY] = transMousePosition;
+
+    if (Math.abs(targetX - currentX) < 0.5 && Math.abs(targetY - currentY) < 0.5) {
+      return;
+    }
+
+    const rafId = raf(() => {
+      setTransMousePosition((ori) => {
+        const [curX, curY] = ori;
+        const deltaX = (targetX - curX) * 0.1;
+        const deltaY = (targetY - curY) * 0.1;
+
+        return [curX + deltaX, curY + deltaY];
+      });
+    });
+
+    return () => raf.cancel(rafId);
+  }, [mousePosition, transMousePosition]);
+
+  // ======================= Render =======================
   if (!extra) {
     return <Skeleton key={index} />;
   }
-  const icon = icons.find((i) => i.name === extra.source);
 
-  return (
+  const icon = icons?.find((i) => i.name === extra.source);
+
+  const card = (
     <a
+      ref={cardRef}
       key={extra?.title}
       href={extra.href}
       target="_blank"
-      css={[style.itemBase, itemCss]}
-      rel="noreferrer"
+      className={clsx(styles.itemBase, className)}
+      style={{
+        '--mouse-x': `${transMousePosition[0]}px`,
+        '--mouse-y': `${transMousePosition[1]}px`,
+      }}
+      rel="noopener noreferrer"
+      onMouseMove={onMouseMove}
     >
       <Typography.Title level={5}>{extra?.title}</Typography.Title>
       <Typography.Paragraph type="secondary" style={{ flex: 'auto' }}>
         {extra.description}
       </Typography.Paragraph>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Flex justify="space-between" align="center">
         <Typography.Text>{extra.date}</Typography.Text>
-        {icon && <img src={icon.href} style={{ height: token.fontSize }} alt="banner" />}
-      </div>
+        {icon?.href && (
+          <img src={icon.href} draggable={false} className={styles.bannerBg} alt="banner" />
+        )}
+      </Flex>
     </a>
+  );
+
+  if (index === 0) {
+    return (
+      <Badge.Ribbon text="HOT" color="red" rootClassName={styles.ribbon}>
+        {card}
+      </Badge.Ribbon>
+    );
+  }
+
+  return card;
+};
+
+// ======================================================================
+// ==                             Fallback                             ==
+// ======================================================================
+export const BannerRecommendsFallback: React.FC = () => {
+  const { isMobile } = React.use(SiteContext);
+
+  const { styles } = useStyle();
+
+  const list = Array.from({ length: 3 });
+
+  return isMobile ? (
+    <Carousel className={styles.carousel}>
+      {list.map((_, index) => (
+        <div key={`mobile-${index}`} className={styles.itemBase}>
+          <Skeleton active style={{ padding: '0 24px' }} />
+        </div>
+      ))}
+    </Carousel>
+  ) : (
+    <div className={styles.container}>
+      {list.map((_, index) => (
+        <div key={`desktop-${index}`} className={styles.itemBase}>
+          <Skeleton active />
+        </div>
+      ))}
+    </div>
   );
 };
 
-export interface BannerRecommendsProps {
-  extras?: Extra[];
-  icons?: Icon[];
-}
+// ======================================================================
+// ==                            Recommends                            ==
+// ======================================================================
+const BannerRecommends: React.FC = () => {
+  const { styles } = useStyle();
+  const [, lang] = useLocale();
+  const { isMobile } = React.use(SiteContext);
+  const { data, error, isLoading } = useAntdSiteConfig();
 
-export default function BannerRecommends({ extras = [], icons = [] }: BannerRecommendsProps) {
-  const styles = useStyle();
-  const { isMobile } = React.useContext(SiteContext);
-  const first3 = extras.length === 0 ? Array(3).fill(null) : extras.slice(0, 3);
+  if (isLoading) {
+    return <BannerRecommendsFallback />;
+  }
 
-  return (
-    <div>
-      {isMobile ? (
-        <Carousel css={styles.carousel}>
-          {first3.map((extra, index) => (
-            <div key={index}>
-              <RecommendItem
-                extra={extra}
-                index={index}
-                icons={icons}
-                itemCss={styles.sliderItem}
-              />
-            </div>
-          ))}
-        </Carousel>
-      ) : (
-        <div css={styles.container}>
-          {first3.map((extra, index) => (
+  if (error) {
+    return (
+      <Alert
+        showIcon
+        type="error"
+        title={error.message}
+        description={process.env.NODE_ENV !== 'production' ? error.stack : undefined}
+      />
+    );
+  }
+
+  const extras = data?.extras?.[lang];
+
+  const mergedExtras =
+    !extras || !extras.length ? Array.from<Extra>({ length: 3 }) : extras.slice(0, 3);
+
+  if (isMobile) {
+    return (
+      <Carousel className={styles.carousel}>
+        {mergedExtras.map((extra, index) => (
+          <div key={`mobile-${index}`}>
             <RecommendItem
               extra={extra}
               index={index}
-              icons={icons}
-              itemCss={styles.cardItem}
-              key={index}
+              icons={data?.icons}
+              className={styles.sliderItem}
             />
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </Carousel>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      {mergedExtras.map((extra, index) => (
+        <RecommendItem key={`desktop-${index}`} extra={extra} index={index} icons={data?.icons} />
+      ))}
     </div>
   );
-}
+};
+
+export default BannerRecommends;

@@ -3,13 +3,12 @@ category: Components
 group: Feedback
 noinstant: true
 title: Message
-cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JjZBT6N1MusAAAAAAAAAAAAADrJ8AQ/original
-coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*7qMTRoq3ZGkAAAAAAAAAAAAADrJ8AQ/original
+description: Display global messages as feedback in response to user operations.
+cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Xl5ORK7Iy44AAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fv7mQIWdUgcAAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 ---
-
-Display global messages as feedback in response to user operations.
 
 ## When To Use
 
@@ -22,15 +21,18 @@ Display global messages as feedback in response to user operations.
 <code src="./demo/hooks.tsx">Hooks usage (recommended)</code>
 <code src="./demo/other.tsx">Other types of message</code>
 <code src="./demo/duration.tsx">Customize duration</code>
+<code src="./demo/stack.tsx" version="6.4.0">Stack</code>
 <code src="./demo/loading.tsx">Message with loading indicator</code>
 <code src="./demo/thenable.tsx">Promise interface</code>
-<code src="./demo/custom-style.tsx">Customized style</code>
+<code src="./demo/style-class.tsx" version="6.0.0">Custom semantic styles</code>
 <code src="./demo/update.tsx">Update Message Content</code>
 <code src="./demo/info.tsx">Static method (deprecated)</code>
 <code src="./demo/render-panel.tsx" debug>_InternalPanelDoNotUseOrYouWillBeFired</code>
 <code src="./demo/component-token.tsx" debug>Component Token</code>
 
 ## API
+
+Common props ref：[Common props](/docs/react/common-props)
 
 This component provides some static methods, with usage and arguments as following:
 
@@ -40,10 +42,10 @@ This component provides some static methods, with usage and arguments as followi
 - `message.warning(content, [duration], onClose)`
 - `message.loading(content, [duration], onClose)`
 
-| Argument | Description | Type | Default |
+| Property | Description | Type | Default |
 | --- | --- | --- | --- |
 | content | The content of the message | ReactNode \| config | - |
-| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 1.5 |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 |
 | onClose | Specify a function that will be called when the message is closed | function | - |
 
 `afterClose` can be called in thenable interface:
@@ -64,16 +66,19 @@ Supports passing parameters wrapped in an object:
 
 The properties of config are as follows:
 
-| Property | Description | Type | Default |
-| --- | --- | --- | --- |
-| className | Customized CSS class | string | - |
-| content | The content of the message | ReactNode | - |
-| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 |
-| icon | Customized Icon | ReactNode | - |
-| key | The unique identifier of the Message | string \| number | - |
-| style | Customized inline style | [CSSProperties](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e434515761b36830c3e58a970abf5186f005adac/types/react/index.d.ts#L794) | - |
-| onClick | Specify a function that will be called when the message is clicked | function | - |
-| onClose | Specify a function that will be called when the message is closed | function | - |
+| Property | Description | Type | Default | Version | [Global Config](/components/config-provider#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| className | Customized CSS class | string | - | - | 5.7.0 |
+| classNames | Customize class for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - | 6.0.0 | 6.0.0 |
+| content | The content of the message | ReactNode | - | - | × |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 | - | × |
+| icon | Customized Icon | ReactNode | - | - | × |
+| pauseOnHover | keep the timer running or not on hover | boolean | true | - | × |
+| key | The unique identifier of the Message | string \| number | - | - | × |
+| style | Customized inline style | [CSSProperties](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e434515761b36830c3e58a970abf5186f005adac/types/react/index.d.ts#L794) | - | - | 5.7.0 |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - | 6.0.0 | 6.0.0 |
+| onClick | Specify a function that will be called when the message is clicked | function | - | - | × |
+| onClose | Specify a function that will be called when the message is closed | function | - | - | × |
 
 ### Global static methods
 
@@ -82,7 +87,7 @@ Methods for global configuration and destruction are also provided:
 - `message.config(options)`
 - `message.destroy()`
 
-> use `message.destroy(key)` to remove a message。
+> use `message.destroy(key)` to remove a message.
 
 #### message.config
 
@@ -100,14 +105,19 @@ message.config({
 });
 ```
 
-| Argument | Description | Type | Default | Version |
-| --- | --- | --- | --- | --- |
-| duration | Time before auto-dismiss, in seconds | number | 3 |  |
-| getContainer | Return the mount node for Message, but still display at fullScreen | () => HTMLElement | () => document.body |  |
-| maxCount | Max message show, drop oldest if exceed limit | number | - |  |
-| prefixCls | The prefix className of message node | string | `ant-message` | 4.5.0 |
-| rtl | Whether to enable RTL mode | boolean | false |  |
-| top | Distance from top | number | 8 |  |
+| Property | Description | Type | Default | Version | [Global Config](/components/config-provider#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| duration | Time before auto-dismiss, in seconds | number | 3 |  | × |
+| getContainer | Return the mount node for Message, but still display at fullScreen | () => HTMLElement | () => document.body |  | × |
+| maxCount | Max message show, drop oldest if exceed limit | number | - |  | × |
+| prefixCls | The prefix className of message node | string | `ant-message` | 4.5.0 | × |
+| rtl | Whether to enable RTL mode | boolean | false |  | × |
+| stack | Messages will be stacked when amount is over threshold. Only the latest message is shown in the collapsed stack | boolean \| `{ threshold: number }` | false | 6.4.0 | × |
+| top | Distance from top | string \| number | 8 |  | × |
+
+## Semantic DOM
+
+<code src="./demo/_semantic.tsx" simplify="true"></code>
 
 ## Design Token
 
@@ -115,7 +125,7 @@ message.config({
 
 ## FAQ
 
-### Why I can not access context, redux, ConfigProvider `locale/prefixCls/theme` in message?
+### Why I can not access context, redux, ConfigProvider `locale/prefixCls/theme` in message? {#faq-context-redux}
 
 antd will dynamic create React instance by `ReactDOM.render` when call message methods. Whose context is different with origin code located context.
 
@@ -139,6 +149,6 @@ return (
 
 > [App Package Component](/components/app) can be used to simplify the problem of `useMessage` and other methods that need to manually implant contextHolder.
 
-### How to set static methods prefixCls ？
+### How to set static methods prefixCls ？ {#faq-set-prefix-cls}
 
 You can config with [`ConfigProvider.config`](/components/config-provider#configproviderconfig-4130)

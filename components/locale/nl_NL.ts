@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/nl_NL';
+import Pagination from '@rc-component/pagination/locale/nl_NL';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/nl_NL';
 import DatePicker from '../date-picker/locale/nl_NL';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/nl_NL';
 
 const typeTemplate = '${label} is geen geldige ${type}';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Maak een selectie',
+    close: 'Sluiten',
+    show: 'Weergeven',
+    hide: 'Verbergen',
   },
   Table: {
     cancelSort: 'Klik om sortering te annuleren',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     sortTitle: 'Sorteren',
     triggerAsc: 'Klik om oplopend te sorteren',
     triggerDesc: 'Klik om aflopend te sorteren',
+  },
+  Tour: {
+    Next: 'Volgende',
+    Previous: 'Vorige',
+    Finish: 'Voltooien',
   },
   Modal: {
     okText: 'OK',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'kopiëren',
     copied: 'Gekopieerd',
     expand: 'Uitklappen',
-  },
-  PageHeader: {
-    back: 'Terug',
   },
   Form: {
     optional: '(optioneel)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} komt niet overeen met het patroon ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Voorbeeld',
   },
 };
 

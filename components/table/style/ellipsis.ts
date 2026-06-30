@@ -1,4 +1,5 @@
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import { textEllipsis } from '../../style';
 import type { GenerateStyle } from '../../theme/internal';
 import type { TableToken } from './index';
@@ -13,20 +14,18 @@ const genEllipsisStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
 
         // Fixed first or last should special process
         [`
-          &${componentCls}-cell-fix-left-last,
-          &${componentCls}-cell-fix-right-first
+          &${componentCls}-cell-fix-start-shadow,
+          &${componentCls}-cell-fix-end-shadow
         `]: {
           overflow: 'visible',
           [`${componentCls}-cell-content`]: {
+            ...textEllipsis,
             display: 'block',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
           },
         },
 
         [`${componentCls}-column-title`]: {
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          ...textEllipsis,
           wordBreak: 'keep-all',
         },
       },

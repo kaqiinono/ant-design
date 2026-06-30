@@ -14,6 +14,16 @@ import { Layout, Menu, theme } from 'antd';
 
 const { Header, Content, Footer, Sider } = Layout;
 
+const siderStyle: React.CSSProperties = {
+  overflow: 'auto',
+  height: '100vh',
+  position: 'sticky',
+  insetInlineStart: 0,
+  top: 0,
+  scrollbarWidth: 'thin',
+  scrollbarGutter: 'stable',
+};
+
 const items: MenuProps['items'] = [
   UserOutlined,
   VideoCameraOutlined,
@@ -31,28 +41,27 @@ const items: MenuProps['items'] = [
 
 const App: React.FC = () => {
   const {
-    token: { colorBgContainer },
+    token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const currentYear = new Date().getFullYear();
 
   return (
     <Layout hasSider>
-      <Sider
-        style={{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      >
+      <Sider style={siderStyle}>
         <div className="demo-logo-vertical" />
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']} items={items} />
       </Sider>
-      <Layout className="site-layout" style={{ marginLeft: 200 }}>
+      <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }} />
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-          <div style={{ padding: 24, textAlign: 'center', background: colorBgContainer }}>
+          <div
+            style={{
+              padding: 24,
+              textAlign: 'center',
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
             <p>long content</p>
             {
               // indicates very long content
@@ -65,7 +74,9 @@ const App: React.FC = () => {
             }
           </div>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Footer>
+        <Footer style={{ textAlign: 'center' }}>
+          Ant Design ©{currentYear} Created by Ant UED
+        </Footer>
       </Layout>
     </Layout>
   );

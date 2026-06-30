@@ -2,6 +2,9 @@
 title: 新的 Tooltip 对齐方式
 date: 2023-02-15
 author: zombieJ
+zhihu_url: https://zhuanlan.zhihu.com/p/633332552
+yuque_url: https://www.yuque.com/ant-design/ant-design/lqtquocyv0k3xbg0
+juejin_url: https://juejin.cn/post/7322352551088390171
 ---
 
 在 `5.3.0` 版本中，我们将会更新 Tooltip 组件的底层依赖 `@rc-component/trigger` 使其更好的实现自适应对齐逻辑。在此之前，我们先聊聊此前版本遇到的一些问题。
@@ -28,7 +31,7 @@ Tooltip 支持在滚动范围内贴边展示。但是由于弹出层是整体，
 
 ### 缩放问题
 
-Tooltip 对齐底层使用 `dom-align` 库，它会直接为 dom 节点添加 `left` | `top` | `transform` 样式来实现对齐，因而为了使其支持 React 生命周期，我们在此之上封装了 `rc-align` 组件。此外，它只关注对齐实现，本身不关注触发时机。所以 `rc-align` 组件还会额外添加 ResizeObserver 监听尺寸变化，继而调用 `dom-align` 进行对齐。
+Tooltip 对齐底层使用 `dom-align` 库，它会直接为 DOM 节点添加 `left` | `top` | `transform` 样式来实现对齐，因而为了使其支持 React 生命周期，我们在此之上封装了 `rc-align` 组件。此外，它只关注对齐实现，本身不关注触发时机。所以 `rc-align` 组件还会额外添加 ResizeObserver 监听尺寸变化，继而调用 `dom-align` 进行对齐。
 
 `dom-align` 通过遍历父层节点累加计算出目标元素和弹出层各自的坐标位置，接着根据对齐规则计算差值。当父层节点有 `transform` 样式时，会导致计算出的坐标位置不准确，从而导致对齐不正确：
 
@@ -75,7 +78,7 @@ const scaledOffsetY = baseOffsetY / scaleY;
 
 ### 箭头优化
 
-在过去版本中，箭头由 `rc-tooltip` 添加而非 `rc-trigger` 管理。这使得 `rc-tooltip` 封装时已经丢失了对齐信息，以至于无法在 Popup 偏移时正确的调整箭头位置。为此，我们将箭头逻辑也整合到 `rc-trigger` 中，使得箭头的位置可以随着 Popup 的偏移而偏移。合并之后，箭头位置计算变得十分简单。我们只要取目标元素和 Popup 边界值最小值，再取中间值即可：
+在过去版本中，箭头由 `@rc-component/tooltip` 添加而非 `@rc-component/trigger` 管理。这使得 `@rc-component/tooltip` 封装时已经丢失了对齐信息，以至于无法在 Popup 偏移时正确的调整箭头位置。为此，我们将箭头逻辑也整合到 `@rc-component/trigger` 中，使得箭头的位置可以随着 Popup 的偏移而偏移。合并之后，箭头位置计算变得十分简单。我们只要取目标元素和 Popup 边界值最小值，再取中间值即可：
 
 #### 居中定位
 

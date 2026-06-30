@@ -1,10 +1,12 @@
-import classNames from 'classnames';
 import * as React from 'react';
 import { useContext, useMemo } from 'react';
-import warning from '../_util/warning';
+import { clsx } from 'clsx';
+
+import { devUseWarning } from '../_util/warning';
 import { ConfigContext } from '../config-provider';
 import type { FormItemStatusContextProps } from '../form/context';
 import { FormItemInputContext } from '../form/context';
+import Space from '../space';
 import useStyle from './style';
 
 export interface GroupProps {
@@ -20,14 +22,16 @@ export interface GroupProps {
   compact?: boolean;
 }
 
+/** @deprecated Please use `Space.Compact` */
 const Group: React.FC<GroupProps> = (props) => {
   const { getPrefixCls, direction } = useContext(ConfigContext);
   const { prefixCls: customizePrefixCls, className } = props;
   const prefixCls = getPrefixCls('input-group', customizePrefixCls);
   const inputPrefixCls = getPrefixCls('input');
-  const [wrapSSR, hashId] = useStyle(inputPrefixCls);
-  const cls = classNames(
+  const [hashId, cssVarCls] = useStyle(inputPrefixCls);
+  const cls = clsx(
     prefixCls,
+    cssVarCls,
     {
       [`${prefixCls}-lg`]: props.size === 'large',
       [`${prefixCls}-sm`]: props.size === 'small',
@@ -49,26 +53,24 @@ const Group: React.FC<GroupProps> = (props) => {
   );
 
   if (process.env.NODE_ENV !== 'production') {
-    warning(
-      false,
-      'Input.Group',
-      `'Input.Group' is deprecated. Please use 'Space.Compact' instead.`,
-    );
+    const warning = devUseWarning('Input.Group');
+
+    warning.deprecated(false, 'Input.Group', 'Space.Compact');
   }
 
-  return wrapSSR(
-    <span
-      className={cls}
-      style={props.style}
-      onMouseEnter={props.onMouseEnter}
-      onMouseLeave={props.onMouseLeave}
-      onFocus={props.onFocus}
-      onBlur={props.onBlur}
-    >
-      <FormItemInputContext.Provider value={groupFormItemContext}>
+  return (
+    <FormItemInputContext.Provider value={groupFormItemContext}>
+      <Space.Compact
+        className={cls}
+        style={props.style}
+        onMouseEnter={props.onMouseEnter}
+        onMouseLeave={props.onMouseLeave}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
+      >
         {props.children}
-      </FormItemInputContext.Provider>
-    </span>,
+      </Space.Compact>
+    </FormItemInputContext.Provider>
   );
 };
 

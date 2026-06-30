@@ -1,9 +1,13 @@
-import type { CSSInterpolation } from '@ant-design/cssinjs';
 import type React from 'react';
-import capitalize from '../../_util/capitalize';
+import { unit } from '@ant-design/cssinjs';
+import type { CSSInterpolation } from '@ant-design/cssinjs';
+import { FastColor } from '@ant-design/fast-color';
+
+import { AggregationColor } from '../../color-picker/color';
+import { isBright } from '../../color-picker/components/ColorPresets';
 import { resetComponent } from '../../style';
-import type { FullToken } from '../../theme/internal';
-import { genComponentStyleHook, genPresetColor, mergeToken } from '../../theme/internal';
+import type { FullToken, GenerateStyle, GenStyleFn, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks, mergeToken } from '../../theme/internal';
 
 export interface ComponentToken {
   /**
@@ -16,60 +20,28 @@ export interface ComponentToken {
    * @descEN Default text color
    */
   defaultColor: string;
+
+  /**
+   * @desc 默认实心标签的文本色
+   * @descEN Default text color for solid tag.
+   */
+  solidTextColor: string;
 }
 
-interface TagToken extends FullToken<'Tag'> {
+export interface TagToken extends FullToken<'Tag'> {
   tagFontSize: number;
   tagLineHeight: React.CSSProperties['lineHeight'];
-  tagIconSize: number;
+  tagIconSize: number | string;
   tagPaddingHorizontal: number;
   tagBorderlessBg: string;
 }
 
 // ============================== Styles ==============================
 
-type CssVariableType = 'Success' | 'Info' | 'Error' | 'Warning';
-
-const genTagStatusStyle = (
-  token: TagToken,
-  status: 'success' | 'processing' | 'error' | 'warning',
-  cssVariableType: CssVariableType,
-): CSSInterpolation => {
-  const capitalizedCssVariableType = capitalize<CssVariableType>(cssVariableType);
-  return {
-    [`${token.componentCls}-${status}`]: {
-      color: token[`color${cssVariableType}`],
-      background: token[`color${capitalizedCssVariableType}Bg`],
-      borderColor: token[`color${capitalizedCssVariableType}Border`],
-      [`&${token.componentCls}-borderless`]: {
-        borderColor: 'transparent',
-      },
-    },
-  };
-};
-
-const genPresetStyle = (token: TagToken) =>
-  genPresetColor(token, (colorKey, { textColor, lightBorderColor, lightColor, darkColor }) => ({
-    [`${token.componentCls}-${colorKey}`]: {
-      color: textColor,
-      background: lightColor,
-      borderColor: lightBorderColor,
-      // Inverse color
-      '&-inverse': {
-        color: token.colorTextLightSolid,
-        background: darkColor,
-        borderColor: darkColor,
-      },
-      [`&${token.componentCls}-borderless`]: {
-        borderColor: 'transparent',
-      },
-    },
-  }));
-
-const genBaseStyle = (token: TagToken): CSSInterpolation => {
-  const { paddingXXS, lineWidth, tagPaddingHorizontal, componentCls } = token;
-  const paddingInline = tagPaddingHorizontal - lineWidth;
-  const iconMarginInline = paddingXXS - lineWidth;
+const genBaseStyle: GenerateStyle<TagToken, CSSInterpolation> = (token) => {
+  const { paddingXXS, lineWidth, tagPaddingHorizontal, componentCls, calc } = token;
+  const paddingInline = calc(tagPaddingHorizontal).sub(lineWidth).equal();
+  const iconMarginInline = calc(paddingXXS).sub(lineWidth).equal();
 
   return {
     // Result
@@ -77,13 +49,12 @@ const genBaseStyle = (token: TagToken): CSSInterpolation => {
       ...resetComponent(token),
       display: 'inline-block',
       height: 'auto',
-      marginInlineEnd: token.marginXS,
       paddingInline,
       fontSize: token.tagFontSize,
       lineHeight: token.tagLineHeight,
       whiteSpace: 'nowrap',
-      background: token.defaultBg,
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBorder}`,
+      backgroundColor: token.defaultBg,
+      border: `${unit(token.lineWidth)} ${token.lineType} ${token.colorBorder}`,
       borderRadius: token.borderRadiusSM,
       opacity: 1,
       transition: `all ${token.motionDurationMid}`,
@@ -101,8 +72,8 @@ const genBaseStyle = (token: TagToken): CSSInterpolation => {
 
       [`${componentCls}-close-icon`]: {
         marginInlineStart: iconMarginInline,
-        color: token.colorTextDescription,
         fontSize: token.tagIconSize,
+        color: token.colorIcon,
         cursor: 'pointer',
         transition: `all ${token.motionDurationMid}`,
 
@@ -111,15 +82,7 @@ const genBaseStyle = (token: TagToken): CSSInterpolation => {
         },
       },
 
-      [`&${componentCls}-has-color`]: {
-        borderColor: 'transparent',
-
-        [`&, a, a:hover, ${token.iconCls}-close, ${token.iconCls}-close:hover`]: {
-          color: token.colorTextLightSolid,
-        },
-      },
-
-      [`&-checkable`]: {
+      '&-checkable': {
         backgroundColor: 'transparent',
         borderColor: 'transparent',
         cursor: 'pointer',
@@ -143,9 +106,40 @@ const genBaseStyle = (token: TagToken): CSSInterpolation => {
         '&:active': {
           backgroundColor: token.colorPrimaryActive,
         },
+
+        '&-disabled': {
+          cursor: 'not-allowed',
+
+          [`&:not(${componentCls}-checkable-checked)`]: {
+            color: token.colorTextDisabled,
+            '&:hover': {
+              backgroundColor: 'transparent',
+            },
+          },
+
+          [`&${componentCls}-checkable-checked`]: {
+            color: token.colorTextDisabled,
+            backgroundColor: token.colorBgContainerDisabled,
+          },
+
+          '&:hover, &:active': {
+            backgroundColor: token.colorBgContainerDisabled,
+            color: token.colorTextDisabled,
+          },
+
+          [`&:not(${componentCls}-checkable-checked):hover`]: {
+            color: token.colorTextDisabled,
+          },
+        },
+
+        '&-group': {
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: token.paddingXS,
+        },
       },
 
-      [`&-hidden`]: {
+      '&-hidden': {
         display: 'none',
       },
 
@@ -154,41 +148,96 @@ const genBaseStyle = (token: TagToken): CSSInterpolation => {
         marginInlineStart: paddingInline,
       },
     },
-    [`${componentCls}-borderless`]: {
+
+    [`&${token.componentCls}-solid`]: {
       borderColor: 'transparent',
-      background: token.tagBorderlessBg,
+      color: token.colorTextLightSolid,
+      backgroundColor: token.colorBgSolid,
+
+      [`&${componentCls}-default`]: {
+        color: token.solidTextColor,
+      },
+    },
+
+    [`${componentCls}-filled`]: {
+      borderColor: 'transparent',
+      backgroundColor: token.tagBorderlessBg,
+    },
+
+    [`&${componentCls}-disabled`]: {
+      color: token.colorTextDisabled,
+      cursor: 'not-allowed',
+      backgroundColor: token.colorBgContainerDisabled,
+      a: {
+        cursor: 'not-allowed',
+        pointerEvents: 'none',
+        color: token.colorTextDisabled,
+        '&:hover': {
+          color: token.colorTextDisabled,
+        },
+      },
+
+      'a&': {
+        '&:hover, &:active': {
+          color: token.colorTextDisabled,
+        },
+      },
+
+      [`&${componentCls}-outlined`]: {
+        borderColor: token.colorBorderDisabled,
+      },
+
+      [`&${componentCls}-solid, &${componentCls}-filled`]: {
+        color: token.colorTextDisabled,
+        [`${componentCls}-close-icon`]: {
+          color: token.colorTextDisabled,
+        },
+      },
+
+      [`${componentCls}-close-icon`]: {
+        cursor: 'not-allowed',
+        color: token.colorTextDisabled,
+        '&:hover': {
+          color: token.colorTextDisabled,
+        },
+      },
     },
   };
 };
 
 // ============================== Export ==============================
-export default genComponentStyleHook(
+export const prepareToken = (token: Parameters<GenStyleFn<'Tag'>>[0]) => {
+  const { lineWidth, fontSizeIcon, calc } = token;
+  const tagFontSize = token.fontSizeSM;
+  const tagToken = mergeToken<TagToken>(token, {
+    tagFontSize,
+    tagLineHeight: unit(calc(token.lineHeightSM).mul(tagFontSize).equal()),
+    tagIconSize: calc(fontSizeIcon).sub(calc(lineWidth).mul(2)).equal(), // Tag icon is much smaller
+    tagPaddingHorizontal: 8, // Fixed padding.
+    tagBorderlessBg: token.defaultBg,
+  });
+  return tagToken;
+};
+
+export const prepareComponentToken: GetDefaultToken<'Tag'> = (token) => {
+  const solidTextColor = isBright(new AggregationColor(token.colorBgSolid), '#fff')
+    ? '#000'
+    : '#fff';
+
+  return {
+    defaultBg: new FastColor(token.colorFillTertiary)
+      .onBackground(token.colorBgContainer)
+      .toHexString(),
+    defaultColor: token.colorText,
+    solidTextColor,
+  };
+};
+
+export default genStyleHooks<'Tag'>(
   'Tag',
   (token) => {
-    const { lineWidth, fontSizeIcon } = token;
-
-    const tagFontSize = token.fontSizeSM;
-    const tagLineHeight = `${token.lineHeightSM * tagFontSize}px`;
-
-    const tagToken = mergeToken<TagToken>(token, {
-      tagFontSize,
-      tagLineHeight,
-      tagIconSize: fontSizeIcon - 2 * lineWidth, // Tag icon is much smaller
-      tagPaddingHorizontal: 8, // Fixed padding.
-      tagBorderlessBg: token.colorFillTertiary,
-    });
-
-    return [
-      genBaseStyle(tagToken),
-      genPresetStyle(tagToken),
-      genTagStatusStyle(tagToken, 'success', 'Success'),
-      genTagStatusStyle(tagToken, 'processing', 'Info'),
-      genTagStatusStyle(tagToken, 'error', 'Error'),
-      genTagStatusStyle(tagToken, 'warning', 'Warning'),
-    ];
+    const tagToken = prepareToken(token);
+    return genBaseStyle(tagToken);
   },
-  (token) => ({
-    defaultBg: token.colorFillQuaternary,
-    defaultColor: token.colorText,
-  }),
+  prepareComponentToken,
 );

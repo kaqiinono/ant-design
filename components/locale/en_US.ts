@@ -1,5 +1,5 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/en_US';
+import Pagination from '@rc-component/pagination/locale/en_US';
+
 import type { Locale } from '.';
 import Calendar from '../calendar/locale/en_US';
 import DatePicker from '../date-picker/locale/en_US';
@@ -15,13 +15,17 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Please select',
+    close: 'Close',
+    sortable: 'sortable',
+    show: 'Show',
+    hide: 'Hide',
   },
   Table: {
     filterTitle: 'Filter menu',
     filterConfirm: 'OK',
     filterReset: 'Reset',
     filterEmptyText: 'No filters',
-    filterCheckall: 'Select all items',
+    filterCheckAll: 'Select all items',
     filterSearchPlaceholder: 'Search in filters',
     emptyText: 'No data',
     selectAll: 'Select current page',
@@ -58,6 +62,7 @@ const localeValues: Locale = {
     selectCurrent: 'Select current page',
     removeCurrent: 'Remove current page',
     selectAll: 'Select all data',
+    deselectAll: 'Deselect all data',
     removeAll: 'Remove all data',
     selectInvert: 'Invert current page',
   },
@@ -79,9 +84,7 @@ const localeValues: Locale = {
     copy: 'Copy',
     copied: 'Copied',
     expand: 'Expand',
-  },
-  PageHeader: {
-    back: 'Back',
+    collapse: 'Collapse',
   },
   Form: {
     optional: '(optional)',
@@ -133,15 +136,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: 'Preview',
-  },
   QRCode: {
     expired: 'QR code expired',
     refresh: 'Refresh',
+    scanned: 'Scanned',
   },
   ColorPicker: {
     presetEmpty: 'Empty',
+    transparent: 'Transparent',
+    singleColor: 'Single',
+    gradientColor: 'Gradient',
   },
 };
 

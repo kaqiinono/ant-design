@@ -1,15 +1,13 @@
 ---
 group: Feedback
 category: Components
-subtitle:
 title: Drawer
-cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*v3TvSq2E0HAAAAAAAAAAAAAADrJ8AQ/original
-coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*4wzwRIBLuqEAAAAAAAAAAAAADrJ8AQ/original
+description: A panel that slides out from the edge of the screen.
+cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BD2JSKm8I-kAAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*r29rQ51bNdwAAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 ---
-
-A panel which slides in from the edge of the screen.
 
 ## When To Use
 
@@ -19,17 +17,26 @@ A Drawer is a panel that is typically overlaid on top of a page and slides in fr
 - Processing subtasks. When subtasks are too heavy for a Popover and we still want to keep the subtasks in the context of the main task, Drawer comes very handy.
 - When the same Form is needed in multiple places.
 
+> Notes for developers
+>
+> Since the `5.17.0`, we provided the `loading` prop by the Spin. However, since the `5.18.0` version, we have fixed this design error and replaced the Spin with the Skeleton, and also modified the type of `loading` prop, which can only accept `boolean` type.
+
 ## Examples
 
 <!-- prettier-ignore -->
 <code src="./demo/basic-right.tsx">Basic</code>
 <code src="./demo/placement.tsx">Custom Placement</code>
+<code src="./demo/resizable.tsx" version="6.0.0">Resizable</code>
+<code src="./demo/loading.tsx" version="5.17.0">Loading</code>
 <code src="./demo/extra.tsx">Extra Actions</code>
 <code src="./demo/render-in-current.tsx">Render in current dom</code>
 <code src="./demo/form-in-drawer.tsx">Submit form in drawer</code>
 <code src="./demo/user-profile.tsx">Preview drawer</code>
 <code src="./demo/multi-level-drawer.tsx">Multi-level drawer</code>
 <code src="./demo/size.tsx">Preset size</code>
+<code src="./demo/mask.tsx">mask</code>
+<code src="./demo/closable-placement.tsx" version="5.28.0">Closable placement</code>
+<code src="./demo/style-class.tsx" version="6.0.0">Custom semantic dom styling</code>
 <code src="./demo/config-provider.tsx" debug>ConfigProvider</code>
 <code src="./demo/no-mask.tsx" debug>No mask</code>
 <code src="./demo/render-panel.tsx" debug>_InternalPanelDoNotUseOrYouWillBeFired</code>
@@ -38,39 +45,59 @@ A Drawer is a panel that is typically overlaid on top of a page and slides in fr
 
 ## API
 
-**🚨 Note:** v5 use `rootClassName` & `rootStyle` to config wrapper style instead of `className` & `style` in v4 to align the API with Modal.
+Common props ref：[Common props](/docs/react/common-props)
 
-| Props | Description | Type | Default | Version |
-| --- | --- | --- | --- | --- |
-| autoFocus | Whether Drawer should get focused after open | boolean | true | 4.17.0 |
-| afterOpenChange | Callback after the animation ends when switching drawers | function(open) | - |  |
-| bodyStyle | Style of the drawer content part | CSSProperties | - |  |
-| className | Config Drawer Panel className. Use `rootClassName` if want to config top dom style | string | - |  |
-| closeIcon | Custom close icon. 5.7.0: close button will be hidden when setting to `null` or `false` | boolean \| ReactNode | &lt;CloseOutlined /> |  |
-| contentWrapperStyle | Style of the drawer wrapper of content part | CSSProperties | - |  |
-| destroyOnClose | Whether to unmount child components on closing drawer or not | boolean | false |  |
-| extra | Extra actions area at corner | ReactNode | - | 4.17.0 |
-| footer | The footer for Drawer | ReactNode | - |  |
-| footerStyle | Style of the drawer footer part | CSSProperties | - |  |
-| forceRender | Pre-render Drawer component forcibly | boolean | false |  |
-| getContainer | mounted node and display window for Drawer | HTMLElement \| () => HTMLElement \| Selectors \| false | body |  |
-| headerStyle | Style of the drawer header part | CSSProperties | - |  |
-| height | Placement is `top` or `bottom`, height of the Drawer dialog | string \| number | 378 |  |
-| keyboard | Whether support press esc to close | boolean | true |  |
-| mask | Whether to show mask or not | boolean | true |  |
-| maskClosable | Clicking on the mask (area outside the Drawer) to close the Drawer or not | boolean | true |  |
-| maskStyle | Style for Drawer's mask element | CSSProperties | {} |  |
-| placement | The placement of the Drawer | `top` \| `right` \| `bottom` \| `left` | `right` |  |
-| push | Nested drawers push behavior | boolean \| { distance: string \| number } | { distance: 180 } | 4.5.0+ |
-| rootClassName | The class name of the container of the Drawer dialog | string | - |  |
-| rootStyle | Style of wrapper element which **contains mask** compare to `style` | CSSProperties | - |  |
-| style | Style of Drawer panel. Use `bodyStyle` if want to config body only | CSSProperties | - |  |
-| size | preset size of drawer, default `378px` and large `736px` | 'default' \| 'large' | 'default' | 4.17.0 |
-| title | The title for Drawer | ReactNode | - |  |
-| open | Whether the Drawer dialog is visible or not | boolean | false |  |
-| width | Width of the Drawer dialog | string \| number | 378 |  |
-| zIndex | The `z-index` of the Drawer | number | 1000 |  |
-| onClose | Specify a callback that will be called when a user clicks mask, close button or Cancel button | function(e) | - |  |
+| Property | Description | Type | Default | Version | [Global Config](/components/config-provider#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| afterOpenChange | Callback after the animation ends when switching drawers | function(open) | - |  | × |
+| ~~bodyStyle~~ | Style of the drawer body, please use `styles.body` instead | CSSProperties | - | - | × |
+| className | Config Drawer Panel className. Use `rootClassName` if want to config top DOM style | string | - |  | 5.7.0 |
+| classNames | Customize class for each semantic structure inside the Drawer component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  | 5.10.0 |
+| closable | Whether to show a close button. The position can be configured with `placement` | boolean \| { closeIcon?: React.ReactNode; disabled?: boolean; placement?: 'start' \| 'end' } | true | placement: 5.28.0 | 5.15.0, placement: 6.1.1 |
+| ~~contentWrapperStyle~~ | Style of the drawer wrapper, please use `styles.wrapper` instead | CSSProperties | - | - | × |
+| ~~destroyOnClose~~ | Whether to unmount child components on closing drawer or not | boolean | false |  | × |
+| ~~destroyInactivePanel~~ | Whether to unmount child components on closing drawer or not, please use `destroyOnHidden` instead | boolean | false | - | × |
+| destroyOnHidden | Whether to unmount child components on closing drawer or not | boolean | false | 5.25.0 | × |
+| ~~drawerStyle~~ | Style of the drawer panel, please use `styles.section` instead | CSSProperties | - | - | × |
+| extra | Extra actions area at corner | ReactNode | - | 4.17.0 | × |
+| footer | The footer for Drawer | ReactNode | - |  | × |
+| ~~footerStyle~~ | Style of the drawer footer, please use `styles.footer` instead | CSSProperties | - | - | × |
+| forceRender | Pre-render Drawer component forcibly | boolean | false |  | × |
+| focusable | Configuration for focus management in the Drawer | `{ trap?: boolean, focusTriggerAfterClose?: boolean }` | - | 6.2.0 | 6.4.0 |
+| getContainer | mounted node and display window for Drawer | HTMLElement \| () => HTMLElement \| Selectors \| false | body |  | × |
+| ~~headerStyle~~ | Style of the drawer header part, please use `styles.header` instead | CSSProperties | - |  | × |
+| ~~height~~ | Placement is `top` or `bottom`, height of the Drawer dialog, please use `size` instead | string \| number | 378 |  | × |
+| keyboard | Whether support press esc to close | boolean | true |  | × |
+| loading | Show the Skeleton | boolean | false | 5.17.0 | × |
+| mask | Mask effect | boolean \| `{ enabled?: boolean, blur?: boolean, closable?: boolean }` | true | mask.closable: 6.3.0 | 6.0.0, mask.closable: 6.3.0 |
+| ~~maskClosable~~ | Clicking on the mask (area outside the Drawer) to close the Drawer or not | boolean | true |  | × |
+| ~~maskStyle~~ | Style of the drawer mask, please use `styles.mask` instead | CSSProperties | - | - | × |
+| maxSize | Maximum size (width or height depending on `placement`) when resizable | number | - | 6.0.0 | × |
+| open | Whether the Drawer dialog is visible or not | boolean | false |  | × |
+| placement | The placement of the Drawer | `top` \| `right` \| `bottom` \| `left` | `right` |  | × |
+| push | Nested drawers push behavior | boolean \| { distance: string \| number } | { distance: 180 } | 4.5.0+ | × |
+| resizable | Enable resizable by dragging | boolean \| [ResizableConfig](#resizableconfig) | - | boolean: 6.1.0 | × |
+| rootStyle | Style of wrapper element which **contains mask** compare to `style` | CSSProperties | - |  | × |
+| size | preset size of drawer, default `378px` and large `736px`, or a custom number | 'default' \| 'large' \| number \| string | 'default' | 4.17.0, string: 6.2.0 | × |
+| style | Style of Drawer panel. Use `styles.body` if want to config body only | CSSProperties | - |  | 5.7.0 |
+| styles | Customize inline style for each semantic structure inside the Drawer component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  | 5.10.0 |
+| title | The title for Drawer | ReactNode | - |  | × |
+| ~~width~~ | Width of the Drawer dialog, please use `size` instead | string \| number | 378 |  | × |
+| zIndex | The `z-index` of the Drawer | number | 1000 |  | × |
+| onClose | Specify a callback that will be called when a user clicks mask, close button or Cancel button | function(e) | - |  | × |
+| drawerRender | Custom drawer content render | (node: ReactNode) => ReactNode | - | 5.18.0 | × |
+
+### ResizableConfig
+
+| Property      | Description                 | Type                   | Default | Version |
+| ------------- | --------------------------- | ---------------------- | ------- | ------- |
+| onResizeStart | Callback when resize starts | () => void             | -       | 6.0.0   |
+| onResize      | Callback during resizing    | (size: number) => void | -       | 6.0.0   |
+| onResizeEnd   | Callback when resize ends   | () => void             | -       | 6.0.0   |
+
+## Semantic DOM
+
+<code src="./demo/_semantic.tsx" simplify="true"></code>
 
 ## Design Token
 

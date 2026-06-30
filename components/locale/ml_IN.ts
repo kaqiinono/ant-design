@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/ml_IN';
+import Pagination from '@rc-component/pagination/locale/ml_IN';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ml_IN';
 import DatePicker from '../date-picker/locale/ml_IN';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ml_IN';
 
 const typeTemplate = '${label} അസാധുവായ ${type} ആണ്';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'ദയവായി തിരഞ്ഞെടുക്കുക',
+    close: 'മുടക്കുക',
+    show: 'കാണിക്കുക',
+    hide: 'മറയ്ക്കുക',
   },
   Table: {
     filterTitle: 'ഫിൽറ്റർ',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'അവരോഹണ ക്രമത്തിനായി ക്ലിക്ക് ചെയ്യുക',
     triggerAsc: 'ആരോഹണ ക്രമത്തിനായി ക്ലിക്ക് ചെയ്യുക',
     cancelSort: 'ക്രമീകരണം ഒഴിവാക്കുന്നതിനായി ക്ലിക്ക് ചെയ്യുക',
+  },
+  Tour: {
+    Next: 'അടുത്തത്',
+    Previous: 'മുമ്പത്തെ',
+    Finish: 'അവസാനിക്കുക',
   },
   Modal: {
     okText: 'ശരിയാണ്',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'കോപ്പി ചെയ്യുക',
     copied: 'കോപ്പി ചെയ്തു',
     expand: 'വികസിപ്പിക്കുക',
-  },
-  PageHeader: {
-    back: 'തിരികെ',
   },
   Form: {
     optional: '(optional)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} ${pattern} മാതൃകയുമായി യോജിക്കുന്നില്ല',
       },
     },
-  },
-  Image: {
-    preview: 'പ്രിവ്യൂ',
   },
 };
 

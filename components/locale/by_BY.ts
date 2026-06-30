@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/by_BY';
+import Pagination from '@rc-component/pagination/locale/by_BY';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/by_BY';
 import DatePicker from '../date-picker/locale/by_BY';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/by_BY';
 
 const typeTemplate: string = "${label} не з'яўляецца тыпам ${type}";
@@ -15,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Калі ласка, выберыце',
+    close: 'Закрыць',
+    show: 'Паказаць',
+    hide: 'Схаваць',
   },
   Table: {
     filterTitle: 'Фільтр',
     filterConfirm: 'OK',
     filterReset: 'Скінуць',
     filterEmptyText: 'Без фільтраў',
-    filterCheckall: 'Выбраць усё',
+    filterCheckAll: 'Выбраць усё',
     filterSearchPlaceholder: 'Пошук фільтраў',
     emptyText: 'Няма даных',
     selectAll: 'Выбраць усё',
@@ -34,6 +37,11 @@ const localeValues: Locale = {
     triggerDesc: 'Націсніце для сартавання па ўбыванні',
     triggerAsc: 'Націсніце для сартавання па ўзрастанні',
     cancelSort: 'Націсніце, каб адмяніць сартаванне',
+  },
+  Tour: {
+    Next: 'Наступны',
+    Previous: 'Папярэдняя',
+    Finish: 'Завяршыць',
   },
   Modal: {
     okText: 'OK',
@@ -74,9 +82,6 @@ const localeValues: Locale = {
     copy: 'Капіяваць',
     copied: 'Капіяванне завершана',
     expand: 'Разгарнуць',
-  },
-  PageHeader: {
-    back: 'Назад',
   },
   Form: {
     optional: '(не абавязкова)',
@@ -127,9 +132,6 @@ const localeValues: Locale = {
         mismatch: 'Значэнне поля «${label}» не адпавядае шаблону ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Preview',
   },
 };
 

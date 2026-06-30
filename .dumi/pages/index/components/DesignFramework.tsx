@@ -1,11 +1,13 @@
+import React from 'react';
 import { Col, Row, Typography } from 'antd';
-import React, { useContext } from 'react';
-import { css } from '@emotion/react';
-import { Link, useLocation } from 'dumi';
+import { createStyles, useTheme } from 'antd-style';
+import { useLocation } from 'dumi';
+
 import useLocale from '../../../hooks/useLocale';
-import useSiteToken from '../../../hooks/useSiteToken';
-import * as utils from '../../../theme/utils';
+import Link from '../../../theme/common/Link';
 import SiteContext from '../../../theme/slots/SiteContext';
+import * as utils from '../../../theme/utils';
+import { DarkContext } from './../../../hooks/useDark';
 
 const SECONDARY_LIST = [
   {
@@ -13,6 +15,7 @@ const SECONDARY_LIST = [
     key: 'mobile',
     url: 'https://mobile.ant.design/',
     imgScale: 1.5,
+    scaleOrigin: '15px',
   },
   {
     img: 'https://gw.alipayobjects.com/zos/antfincdn/FLrTNDvlna/antv.png',
@@ -61,45 +64,47 @@ const locales = {
   },
 };
 
-const useStyle = () => {
-  const { token } = useSiteToken();
-
+const useStyle = createStyles(({ cssVar, css }, isDark: boolean) => {
   return {
     card: css`
-      padding: ${token.paddingSM}px;
-      border-radius: ${token.borderRadius * 2}px;
-      background: #fff;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02),
+      padding: ${cssVar.paddingSM};
+      border-radius: calc(${cssVar.borderRadius} * 2);
+      background: ${isDark ? 'rgba(0, 0, 0, 0.45)' : cssVar.colorBgElevated};
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 1px 6px -1px rgba(0, 0, 0, 0.02),
         0 2px 4px rgba(0, 0, 0, 0.02);
 
       img {
         width: 100%;
         vertical-align: top;
-        border-radius: ${token.borderRadius}px;
+        border-radius: ${cssVar.borderRadius};
       }
     `,
 
     cardMini: css`
       display: block;
-      border-radius: ${token.borderRadius * 2}px;
-      padding: ${token.paddingMD}px ${token.paddingLG}px;
-      background: rgba(0, 0, 0, 0.02);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: calc(${cssVar.borderRadius} * 2);
+      padding: ${cssVar.paddingMD} ${cssVar.paddingLG};
+      background: ${isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.02)'};
+      border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.06)'};
 
       img {
         height: 48px;
       }
     `,
   };
-};
+});
 
-export default function DesignFramework() {
+const DesignFramework: React.FC = () => {
   const [locale] = useLocale(locales);
-  const { token } = useSiteToken();
-  const style = useStyle();
+  const token = useTheme();
+  const { isMobile } = React.use(SiteContext);
+  const isDark = React.use(DarkContext);
+  const { styles } = useStyle(isDark);
   const { pathname, search } = useLocation();
   const isZhCN = utils.isZhCN(pathname);
-  const { isMobile } = useContext(SiteContext);
+
   const colSpan = isMobile ? 24 : 8;
 
   const MAINLY_LIST = [
@@ -129,8 +134,8 @@ export default function DesignFramework() {
         return (
           <Col key={index} span={colSpan}>
             <Link to={path}>
-              <div css={style.card}>
-                <img alt={title} src={img} />
+              <div className={styles.card}>
+                <img draggable={false} alt={title} src={img} />
 
                 <Typography.Title
                   level={4}
@@ -147,14 +152,19 @@ export default function DesignFramework() {
         );
       })}
 
-      {SECONDARY_LIST.map(({ img, key, url, imgScale = 1 }, index) => {
+      {SECONDARY_LIST.map(({ img, key, url, imgScale = 1, scaleOrigin }, index) => {
         const title = locale[key as keyof typeof locale];
         const desc = locale[`${key}Desc` as keyof typeof locale];
 
         return (
           <Col key={index} span={colSpan}>
-            <a css={style.cardMini} target="_blank" href={url} rel="noreferrer">
-              <img alt={title} src={img} style={{ transform: `scale(${imgScale})` }} />
+            <a className={styles.cardMini} target="_blank" href={url} rel="noopener noreferrer">
+              <img
+                draggable={false}
+                alt={title}
+                src={img}
+                style={{ transform: `scale(${imgScale})`, transformOrigin: scaleOrigin }}
+              />
 
               <Typography.Title
                 level={4}
@@ -171,4 +181,6 @@ export default function DesignFramework() {
       })}
     </Row>
   );
-}
+};
+
+export default DesignFramework;

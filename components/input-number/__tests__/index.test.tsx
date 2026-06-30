@@ -1,5 +1,6 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import React from 'react';
+import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+
 import InputNumber from '..';
 import focusTest from '../../../tests/shared/focusTest';
 import mountTest from '../../../tests/shared/mountTest';
@@ -23,13 +24,13 @@ describe('InputNumber', () => {
   it('should call onStep when press up or down button', () => {
     const onStep = jest.fn();
     const { container } = render(<InputNumber defaultValue={1} onStep={onStep} />);
-    fireEvent.mouseDown(container.querySelector('.ant-input-number-handler-up')!);
+    fireEvent.mouseDown(container.querySelector('.ant-input-number-action-up')!);
     expect(onStep).toHaveBeenCalledTimes(1);
-    expect(onStep).toHaveBeenLastCalledWith(2, { offset: 1, type: 'up' });
+    expect(onStep).toHaveBeenLastCalledWith(2, { emitter: 'handler', offset: 1, type: 'up' });
 
-    fireEvent.mouseDown(container.querySelector('.ant-input-number-handler-down')!);
+    fireEvent.mouseDown(container.querySelector('.ant-input-number-action-down')!);
     expect(onStep).toHaveBeenCalledTimes(2);
-    expect(onStep).toHaveBeenLastCalledWith(1, { offset: 1, type: 'down' });
+    expect(onStep).toHaveBeenLastCalledWith(1, { emitter: 'handler', offset: 1, type: 'down' });
   });
 
   it('renders correctly when controls is boolean', () => {
@@ -52,6 +53,20 @@ describe('InputNumber', () => {
       />,
     );
     expect(asFragment().firstChild).toMatchSnapshot();
+  });
+
+  it('renders spinner mode', () => {
+    const { container } = render(
+      <InputNumber
+        mode="spinner"
+        controls={{
+          upIcon: 'foo',
+          downIcon: 'bar',
+        }}
+      />,
+    );
+    expect(container.querySelector('.ant-input-number-action-up')).toHaveTextContent('foo');
+    expect(container.querySelector('.ant-input-number-action-down')).toHaveTextContent('bar');
   });
 
   it('should support className', () => {
@@ -95,5 +110,21 @@ describe('InputNumber', () => {
         .querySelector('.ant-input-number')
         ?.className.includes('ant-input-number-out-of-range'),
     ).toBe(true);
+  });
+
+  it('Deprecation and usage tips', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(<InputNumber bordered={false} type="number" changeOnWheel />);
+    expect(errorSpy).toHaveBeenNthCalledWith(
+      1,
+      'Warning: [antd: InputNumber] `bordered` is deprecated. Please use `variant` instead.',
+    );
+    expect(errorSpy).toHaveBeenNthCalledWith(
+      2,
+      'Warning: [antd: InputNumber] When `type=number` is used together with `changeOnWheel`, changeOnWheel may not work properly. Please delete `type=number` if it is not necessary.',
+    );
+
+    expect(container.querySelector('.ant-input-number-borderless')).toBeTruthy();
+    errorSpy.mockRestore();
   });
 });

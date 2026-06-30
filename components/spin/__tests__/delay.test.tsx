@@ -1,6 +1,7 @@
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { debounce } from 'throttle-debounce';
+
 import Spin from '..';
 import { waitFakeTimer } from '../../../tests/utils';
 
@@ -12,9 +13,7 @@ jest.mock('throttle-debounce');
 describe('delay spinning', () => {
   it("should render with delay when it's mounted with spinning=true and delay", () => {
     const { container } = render(<Spin spinning delay={500} />);
-    expect(container.querySelector('.ant-spin')?.classList.contains('ant-spin-spinning')).toEqual(
-      false,
-    );
+    expect(container.querySelector('.ant-spin')).not.toHaveClass('ant-spin-spinning');
   });
 
   it('should render when delay is init set', async () => {

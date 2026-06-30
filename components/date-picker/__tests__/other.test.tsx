@@ -1,14 +1,17 @@
 import dayjs from 'dayjs';
+
 import 'dayjs/locale/zh-cn';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 import React from 'react';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 import DatePicker from '..';
+import { render } from '../../../tests/utils';
 import ConfigProvider from '../../config-provider';
 import type { Locale } from '../../locale';
-import locale from '../../locale/zh_CN';
 import jaJP from '../../locale/ja_JP';
+import locale from '../../locale/zh_CN';
 import zhTW from '../locale/zh_TW';
-import { render } from '../../../tests/utils';
 
 dayjs.extend(customParseFormat);
 
@@ -65,7 +68,7 @@ describe('Override locale setting of the ConfigProvider', () => {
         <DatePicker locale={zhTW} />
       </ConfigProvider>,
     );
-    expect(container.querySelector('input')?.placeholder).toEqual('請選擇日期');
+    expect(container.querySelector('input')?.placeholder).toBe('請選擇日期');
   });
   it('RangePicker', () => {
     const { container } = render(
@@ -73,7 +76,7 @@ describe('Override locale setting of the ConfigProvider', () => {
         <DatePicker.RangePicker locale={zhTW} />
       </ConfigProvider>,
     );
-    expect(container.querySelectorAll('input')[0]?.placeholder).toEqual('開始日期');
-    expect(container.querySelectorAll('input')[1]?.placeholder).toEqual('結束日期');
+    expect(container.querySelectorAll('input')[0]?.placeholder).toBe('開始日期');
+    expect(container.querySelectorAll('input')[1]?.placeholder).toBe('結束日期');
   });
 });

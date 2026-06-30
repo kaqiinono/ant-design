@@ -1,6 +1,7 @@
 import React, { memo, useContext } from 'react';
-import { fireEvent, pureRender } from '../../../tests/utils';
+
 import LocaleProvider from '..';
+import { fireEvent, pureRender } from '../../../tests/utils';
 import LocaleContext from '../context';
 
 let innerCount = 0;
@@ -11,14 +12,14 @@ const handleClick = () => {
 };
 
 // we use'memo' here in order to only render inner component while context changed.
-const CacheInner: React.FC = memo(() => {
+const CacheInner = memo(() => {
   innerCount++;
   // subscribe locale context
   useContext(LocaleContext);
   return null;
 });
 
-const CacheOuter: React.FC = memo(() => (
+const CacheOuter = memo(() => (
   <>
     <button type="button" onClick={handleClick} id="parent_btn">
       Click

@@ -1,22 +1,22 @@
 /*
 .typography-title(@fontSize; @fontWeight; @lineHeight; @headingColor; @headingMarginBottom;) {
-  margin-bottom: @headingMarginBottom;
-  color: @headingColor;
-  font-weight: @fontWeight;
-  fontSize: @fontSize;
-  line-height: @lineHeight;
+ margin-bottom: @headingMarginBottom;
+ color: @headingColor;
+ font-weight: @fontWeight;
+ fontSize: @fontSize;
+ line-height: @lineHeight;
 }
 */
 import { gold } from '@ant-design/colors';
+import { unit } from '@ant-design/cssinjs';
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { TypographyToken } from '.';
-import { initInputToken } from '../../input/style';
-import { operationUnit } from '../../style';
+import { operationUnit, textEllipsis } from '../../style';
 import type { GenerateStyle } from '../../theme/internal';
 
-// eslint-disable-next-line import/prefer-default-export
 const getTitleStyle = (
-  fontSize: number,
+  fontSize: number | string,
   lineHeight: number,
   color: string,
   token: TypographyToken,
@@ -32,11 +32,10 @@ const getTitleStyle = (
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const getTitleStyles: GenerateStyle<TypographyToken, CSSObject> = (token) => {
   const headings = [1, 2, 3, 4, 5] as const;
 
-  const styles = {} as CSSObject;
+  const styles: CSSObject = {};
   headings.forEach((headingLevel) => {
     styles[
       `
@@ -57,15 +56,12 @@ export const getTitleStyles: GenerateStyle<TypographyToken, CSSObject> = (token)
 
 export const getLinkStyles: GenerateStyle<TypographyToken, CSSObject> = (token) => {
   const { componentCls } = token;
+  const linkCls = `${componentCls}-link`;
 
   return {
-    'a&, a': {
+    [`&${linkCls}`]: {
       ...operationUnit(token),
-      textDecoration: token.linkDecoration,
-
-      '&:active, &:hover': {
-        textDecoration: token.linkHoverDecoration,
-      },
+      userSelect: 'text',
 
       [`&[disabled], &${componentCls}-disabled`]: {
         color: token.colorTextDisabled,
@@ -77,13 +73,20 @@ export const getLinkStyles: GenerateStyle<TypographyToken, CSSObject> = (token) 
 
         '&:active': {
           pointerEvents: 'none',
+
+          // Action buttons (copy, edit, expand) must remain interactive even when
+          // the disabled link is being clicked, otherwise their click events get
+          // swallowed by the parent's pointer-events: none during :active.
+          [`${componentCls}-actions`]: {
+            pointerEvents: 'auto',
+          },
         },
       },
     },
   };
 };
 
-export const getResetStyles: GenerateStyle<TypographyToken, CSSObject> = (token): CSSObject => ({
+export const getResetStyles: GenerateStyle<TypographyToken, CSSObject> = (token) => ({
   code: {
     margin: '0 0.2em',
     paddingInline: '0.4em',
@@ -123,7 +126,7 @@ export const getResetStyles: GenerateStyle<TypographyToken, CSSObject> = (token)
   },
 
   strong: {
-    fontWeight: 600,
+    fontWeight: token.fontWeightStrong,
   },
 
   // list
@@ -184,28 +187,79 @@ export const getResetStyles: GenerateStyle<TypographyToken, CSSObject> = (token)
     borderInlineStart: '4px solid rgba(100, 100, 100, 0.2)',
     opacity: 0.85,
   },
+
+  // table - Follow Table component default style
+  table: {
+    width: '100%',
+    textAlign: 'start',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
+    marginBlock: '1em',
+
+    'th, td': {
+      padding: unit(token.padding),
+      overflowWrap: 'break-word',
+      borderBottom: `${unit(token.lineWidth)} ${token.lineType} ${token.colorSplit}`,
+    },
+
+    'thead > tr:first-child > th:first-child': {
+      borderStartStartRadius: token.borderRadiusLG,
+    },
+
+    'thead > tr:first-child > th:last-child': {
+      borderStartEndRadius: token.borderRadiusLG,
+    },
+
+    'thead > tr > th': {
+      textAlign: 'start',
+      position: 'relative',
+      color: token.colorTextHeading,
+      fontWeight: token.fontWeightStrong,
+      backgroundColor: token.colorFillAlter,
+      transition: `background-color ${token.motionDurationMid} ease`,
+
+      '&:not(:last-child)::before': {
+        position: 'absolute',
+        top: '50%',
+        insetInlineEnd: 0,
+        width: 1,
+        height: '1.6em',
+        backgroundColor: token.colorSplit,
+        transform: 'translateY(-50%)',
+        content: '""',
+      },
+    },
+
+    'tbody > tr': {
+      '> th, > td': {
+        transition: `background-color ${token.motionDurationMid} ease`,
+      },
+      '&:hover > th, &:hover > td': {
+        backgroundColor: token.colorFillAlter,
+      },
+    },
+  },
 });
 
 export const getEditableStyles: GenerateStyle<TypographyToken, CSSObject> = (token) => {
-  const { componentCls } = token;
+  const { componentCls, paddingSM } = token;
 
-  const inputToken = initInputToken(token);
-  const inputShift = inputToken.inputPaddingVertical + 1;
+  const inputShift = paddingSM;
   return {
     '&-edit-content': {
       position: 'relative',
 
       'div&': {
-        insetInlineStart: -token.paddingSM,
-        marginTop: -inputShift,
-        marginBottom: `calc(1em - ${inputShift}px)`,
+        insetInlineStart: token.calc(token.paddingSM).mul(-1).equal(),
+        insetBlockStart: token.calc(inputShift).div(-2).add(1).equal(),
+        marginBottom: token.calc(inputShift).div(2).sub(2).equal(),
       },
 
       [`${componentCls}-edit-content-confirm`]: {
         position: 'absolute',
-        insetInlineEnd: token.marginXS + 2,
+        insetInlineEnd: token.calc(token.marginXS).add(2).equal(),
         insetBlockEnd: token.marginXS,
-        color: token.colorTextDescription,
+        color: token.colorIcon,
         // default style
         fontWeight: 'normal',
         fontSize: token.fontSize,
@@ -224,36 +278,39 @@ export const getEditableStyles: GenerateStyle<TypographyToken, CSSObject> = (tok
 };
 
 export const getCopyableStyles: GenerateStyle<TypographyToken, CSSObject> = (token) => ({
-  '&-copy-success': {
-    [`
-    &,
-    &:hover,
-    &:focus`]: {
+  [`${token.componentCls}-copy-success`]: {
+    '&, &:hover, &:focus': {
       color: token.colorSuccess,
     },
+  },
+  [`${token.componentCls}-copy-icon-only`]: {
+    marginInlineStart: 0,
   },
 });
 
 export const getEllipsisStyles = (): CSSObject => ({
-  [`
-  a&-ellipsis,
-  span&-ellipsis
-  `]: {
+  'a&-ellipsis, span&-ellipsis': {
     display: 'inline-block',
     maxWidth: '100%',
   },
 
-  '&-single-line': {
-    whiteSpace: 'nowrap',
-  },
-
   '&-ellipsis-single-line': {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    ...textEllipsis,
 
     // https://blog.csdn.net/iefreer/article/details/50421025
     'a&, span&': {
       verticalAlign: 'bottom',
+    },
+
+    '> code': {
+      paddingBlock: 0,
+      maxWidth: 'calc(100% - 1.2em)',
+      display: 'inline-block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      verticalAlign: 'bottom',
+      // https://github.com/ant-design/ant-design/issues/45953
+      boxSizing: 'content-box',
     },
   },
 

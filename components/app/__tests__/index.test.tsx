@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
+import { SmileOutlined } from '@ant-design/icons';
+
 import App from '..';
 import mountTest from '../../../tests/shared/mountTest';
 import rtlTest from '../../../tests/shared/rtlTest';
 import { render, waitFakeTimer } from '../../../tests/utils';
+import ConfigProvider from '../../config-provider';
+import type { NotificationConfig } from '../../notification/interface';
 import type { AppConfig } from '../context';
 import { AppConfigContext } from '../context';
 
@@ -51,9 +55,9 @@ describe('App', () => {
       useEffect(() => {
         message.success('Message 1');
         message.success('Message 2');
-        notification.success({ message: 'Notification 1' });
-        notification.success({ message: 'Notification 2' });
-        notification.success({ message: 'Notification 3' });
+        notification.success({ title: 'Notification 1' });
+        notification.success({ title: 'Notification 2' });
+        notification.success({ title: 'Notification 3' });
       }, [message, notification]);
 
       return <div />;
@@ -123,6 +127,48 @@ describe('App', () => {
     expect(config?.notification).toStrictEqual({ maxCount: 30, bottom: 41 });
   });
 
+  it('should respect notification placement config from props in priority', async () => {
+    let consumedConfig: AppConfig | undefined;
+
+    const Consumer = () => {
+      const { notification } = App.useApp();
+      consumedConfig = React.useContext(AppConfigContext);
+
+      useEffect(() => {
+        notification.success({ title: 'Notification 1' });
+        notification.success({ title: 'Notification 2' });
+        notification.success({ title: 'Notification 3' });
+      }, [notification]);
+
+      return <div />;
+    };
+
+    const config: NotificationConfig = {
+      placement: 'bottomLeft',
+      top: 100,
+      bottom: 50,
+    };
+
+    const Wrapper = () => (
+      <App notification={config}>
+        <Consumer />
+      </App>
+    );
+
+    render(<Wrapper />);
+    await waitFakeTimer();
+
+    expect(consumedConfig?.notification).toStrictEqual(config);
+    expect(document.querySelector('.ant-notification-topRight')).not.toBeInTheDocument();
+    expect(document.querySelector('.ant-notification-bottomLeft')).toHaveStyle({
+      top: 'auto',
+      left: '0px',
+      bottom:
+        'calc(var(--notification-bottom, var(--notification-margin-edge, 0px)) - var(--notification-margin-edge, 0px))',
+      '--notification-bottom': '50px',
+    });
+  });
+
   it('support className', () => {
     const { container } = render(
       <App className="test-class">
@@ -138,6 +184,85 @@ describe('App', () => {
         <div>test</div>
       </App>,
     );
-    expect(container.querySelector<HTMLDivElement>('.ant-app')).toHaveStyle('color: blue;');
+    expect(container.querySelector<HTMLDivElement>('.ant-app')).toHaveStyle(
+      'color: rgb(0, 0, 255);',
+    );
+  });
+
+  // https://github.com/ant-design/ant-design/issues/41197#issuecomment-1465803061
+  describe('restIcon style', () => {
+    beforeEach(() => {
+      Array.from(document.querySelectorAll('style')).forEach((style) => {
+        style.parentNode?.removeChild(style);
+      });
+    });
+
+    it('should work by default', () => {
+      const { container } = render(
+        <App>
+          <SmileOutlined />
+        </App>,
+      );
+
+      expect(container.querySelector('.anticon')).toBeTruthy();
+      const dynamicStyles = Array.from(document.querySelectorAll('style[data-css-hash]'));
+      // Self-contained .anticon style
+      const regex = /(?:^|\})\s*\.anticon\s*{[^}]*}/;
+      expect(
+        dynamicStyles.some((style) => {
+          const { innerHTML } = style;
+          return regex.test(innerHTML);
+        }),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('component', () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    afterEach(() => {
+      errorSpy.mockReset();
+    });
+
+    afterAll(() => {
+      errorSpy.mockRestore();
+    });
+
+    it('replace', () => {
+      const { container } = render(
+        <App component="section">
+          <p />
+        </App>,
+      );
+
+      expect(container.querySelector('section.ant-app')).toBeTruthy();
+    });
+
+    it('should warn if component is false and cssVarCls is not empty', () => {
+      render(
+        <ConfigProvider>
+          <App component={false} />
+        </ConfigProvider>,
+      );
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Warning: [antd: App] When using cssVar, ensure `component` is assigned a valid React component string.',
+      );
+    });
+
+    it('should warn if component is false and ref is not empty', () => {
+      const domRef = React.createRef<HTMLSpanElement>();
+      render(<App ref={domRef} component={false} />);
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Warning: [antd: App] `ref` is not supported when `component` is `false`. Please provide a valid `component` instead.',
+      );
+    });
+
+    it('App should support Ref', () => {
+      const domRef = React.createRef<HTMLSpanElement>();
+      const { container } = render(<App ref={domRef} className="bamboo" component="span" />);
+      expect(domRef.current).toBe(container.querySelector('.bamboo'));
+    });
   });
 });

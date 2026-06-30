@@ -1,50 +1,69 @@
-import { TinyColor, type ColorInput } from '@ctrl/tinycolor';
-import { css } from '@emotion/react';
 import * as React from 'react';
-import useSiteToken from '../../../hooks/useSiteToken';
+import { FastColor } from '@ant-design/fast-color';
+import type { ColorInput } from '@ant-design/fast-color';
+import { Popover } from 'antd';
+import { createStyles } from 'antd-style';
+
+const useStyle = createStyles(({ css, cssVar, token }) => ({
+  codeSpan: css`
+    padding: 0.2em 0.4em;
+    font-size: 0.9em;
+    background: ${token.siteMarkdownCodeBg};
+    border-radius: ${cssVar.borderRadius};
+    font-family: monospace;
+  `,
+  dot: css`
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-inline-end: ${cssVar.marginXXS};
+    border: 1px solid ${cssVar.colorSplit};
+  `,
+}));
 
 interface ColorChunkProps {
-  children?: React.ReactNode;
-  color?: ColorInput;
+  value: ColorInput;
+  enablePopover?: boolean;
 }
 
-const useStyle = () => {
-  const { token } = useSiteToken();
+const ColorChunk: React.FC<React.PropsWithChildren<ColorChunkProps>> = (props) => {
+  const { styles, theme } = useStyle();
+  const { value, children, enablePopover } = props;
 
-  return {
-    codeSpan: css`
-      padding: 0.2em 0.4em;
-      font-size: 0.9em;
-      background: ${token.siteMarkdownCodeBg};
-      border-radius: ${token.borderRadius}px;
-      font-family: monospace;
-    `,
-    dot: css`
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      margin-inline-end: 4px;
-      border: 1px solid ${token.colorSplit};
-    `,
-  };
-};
+  const dotColor = React.useMemo(() => new FastColor(value).toHexString(), [value]);
 
-const ColorChunk: React.FC<ColorChunkProps> = (props) => {
-  const styles = useStyle();
-  const { color, children } = props;
-
-  const dotColor = React.useMemo(() => {
-    const _color = new TinyColor(color).toHex8String();
-    return _color.endsWith('ff') ? _color.slice(0, -2) : _color;
-  }, [color]);
-
-  return (
-    <span css={styles.codeSpan}>
-      <span css={styles.dot} style={{ backgroundColor: dotColor }} />
+  let dotNode = (
+    <span className={styles.codeSpan}>
+      <span className={styles.dot} style={{ backgroundColor: dotColor }} />
       {children ?? dotColor}
     </span>
   );
+
+  if (enablePopover) {
+    dotNode = (
+      <Popover
+        destroyOnHidden
+        placement="left"
+        content={<div hidden />}
+        styles={{
+          container: {
+            backgroundColor: dotColor,
+            width: 120,
+            height: 120,
+            borderRadius: theme.borderRadiusLG,
+          },
+          root: {
+            '--ant-tooltip-arrow-background-color': dotColor,
+          },
+        }}
+      >
+        {dotNode}
+      </Popover>
+    );
+  }
+
+  return dotNode;
 };
 
 export default ColorChunk;

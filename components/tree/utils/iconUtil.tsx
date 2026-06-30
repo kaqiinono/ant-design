@@ -1,30 +1,36 @@
+import * as React from 'react';
 import CaretDownFilled from '@ant-design/icons/CaretDownFilled';
 import FileOutlined from '@ant-design/icons/FileOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 import MinusSquareOutlined from '@ant-design/icons/MinusSquareOutlined';
 import PlusSquareOutlined from '@ant-design/icons/PlusSquareOutlined';
-import classNames from 'classnames';
-import * as React from 'react';
-import { cloneElement, isValidElement } from '../../_util/reactNode';
+import { clsx } from 'clsx';
+
+import { isFunction, isPlainObject } from '../../_util/is';
+import { cloneElement } from '../../_util/reactNode';
 import type { AntTreeNodeProps, SwitcherIcon, TreeLeafIcon } from '../Tree';
 
 interface SwitcherIconProps {
   prefixCls: string;
   treeNodeProps: AntTreeNodeProps;
   switcherIcon?: SwitcherIcon;
+  switcherLoadingIcon?: React.ReactNode;
   showLine?: boolean | { showLeafIcon: boolean | TreeLeafIcon };
 }
 
 const SwitcherIconCom: React.FC<SwitcherIconProps> = (props) => {
-  const { prefixCls, switcherIcon, treeNodeProps, showLine } = props;
+  const { prefixCls, switcherIcon, treeNodeProps, showLine, switcherLoadingIcon } = props;
 
   const { isLeaf, expanded, loading } = treeNodeProps;
 
   if (loading) {
+    if (React.isValidElement(switcherLoadingIcon)) {
+      return switcherLoadingIcon;
+    }
     return <LoadingOutlined className={`${prefixCls}-switcher-loading-icon`} />;
   }
   let showLeafIcon: boolean | TreeLeafIcon;
-  if (showLine && typeof showLine === 'object') {
+  if (isPlainObject(showLine)) {
     showLeafIcon = showLine.showLeafIcon;
   }
 
@@ -33,18 +39,17 @@ const SwitcherIconCom: React.FC<SwitcherIconProps> = (props) => {
       return null;
     }
 
-    if (typeof showLeafIcon !== 'boolean' && !!showLeafIcon) {
-      const leafIcon =
-        typeof showLeafIcon === 'function' ? showLeafIcon(treeNodeProps) : showLeafIcon;
+    if (typeof showLeafIcon !== 'boolean' && showLeafIcon) {
+      const leafIcon = isFunction(showLeafIcon) ? showLeafIcon(treeNodeProps) : showLeafIcon;
       const leafCls = `${prefixCls}-switcher-line-custom-icon`;
 
-      if (isValidElement(leafIcon)) {
+      if (React.isValidElement<{ className?: string }>(leafIcon)) {
         return cloneElement(leafIcon, {
-          className: classNames(leafIcon.props.className || '', leafCls),
+          className: clsx(leafIcon.props?.className, leafCls),
         });
       }
 
-      return leafIcon as unknown as React.ReactElement;
+      return leafIcon as unknown as React.ReactElement<any>;
     }
 
     return showLeafIcon ? (
@@ -56,16 +61,19 @@ const SwitcherIconCom: React.FC<SwitcherIconProps> = (props) => {
 
   const switcherCls = `${prefixCls}-switcher-icon`;
 
-  const switcher = typeof switcherIcon === 'function' ? switcherIcon(treeNodeProps) : switcherIcon;
+  const switcher = isFunction(switcherIcon) ? switcherIcon(treeNodeProps) : switcherIcon;
 
-  if (isValidElement(switcher)) {
+  if (React.isValidElement<{ className?: string }>(switcher)) {
     return cloneElement(switcher, {
-      className: classNames(switcher.props.className || '', switcherCls),
+      className: clsx(
+        switcher.props?.className,
+        showLine ? `${prefixCls}-switcher-line-icon` : switcherCls,
+      ),
     });
   }
 
   if (switcher !== undefined) {
-    return switcher as unknown as React.ReactElement;
+    return switcher as unknown as React.ReactElement<any>;
   }
 
   if (showLine) {

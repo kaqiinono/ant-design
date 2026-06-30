@@ -1,20 +1,26 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-
-import classNames from 'classnames';
-import { Panel } from 'rc-dialog';
-import type { PanelProps } from 'rc-dialog/lib/Dialog/Content/Panel';
 import * as React from 'react';
+import { Panel } from '@rc-component/dialog';
+import { clsx } from 'clsx';
+
+import { useMergeSemantic } from '../_util/hooks/useMergeSemantic';
+import { withPureRenderTheme } from '../_util/PurePanel';
 import { ConfigContext } from '../config-provider';
+import { useComponentConfig } from '../config-provider/context';
+import useCSSVarCls from '../config-provider/hooks/useCSSVarCls';
 import { ConfirmContent } from './ConfirmDialog';
-import type { ModalFuncProps } from './interface';
+import type { ModalFuncProps, ModalSemanticAllType } from './interface';
 import { Footer, renderCloseIcon } from './shared';
 import useStyle from './style';
 
+type PanelProps = React.ComponentPropsWithoutRef<typeof Panel>;
+
 export interface PurePanelProps
-  extends Omit<PanelProps, 'prefixCls'>,
-    Pick<ModalFuncProps, 'type'> {
+  extends Omit<PanelProps, 'prefixCls' | 'footer' | 'classNames' | 'styles'>,
+    Pick<ModalFuncProps, 'type' | 'footer'> {
   prefixCls?: string;
   style?: React.CSSProperties;
+  classNames?: ModalSemanticAllType['classNames'];
+  styles?: ModalSemanticAllType['styles'];
 }
 
 const PurePanel: React.FC<PurePanelProps> = (props) => {
@@ -26,14 +32,31 @@ const PurePanel: React.FC<PurePanelProps> = (props) => {
     type,
     title,
     children,
+    footer,
+    classNames,
+    styles,
     ...restProps
   } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
+  const {
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('modal');
 
   const rootPrefixCls = getPrefixCls();
   const prefixCls = customizePrefixCls || getPrefixCls('modal');
+  const rootCls = useCSSVarCls(rootPrefixCls);
+  const [hashId, cssVarCls] = useStyle(prefixCls, rootCls);
 
-  const [, hashId] = useStyle(prefixCls);
+  const [mergedClassNames, mergedStyles] = useMergeSemantic(
+    [contextClassNames, classNames],
+    [contextStyles, styles],
+    {
+      props,
+    },
+  );
 
   const confirmPrefixCls = `${prefixCls}-confirm`;
 
@@ -47,6 +70,7 @@ const PurePanel: React.FC<PurePanelProps> = (props) => {
       children: (
         <ConfirmContent
           {...props}
+          prefixCls={prefixCls}
           confirmPrefixCls={confirmPrefixCls}
           rootPrefixCls={rootPrefixCls}
           content={children}
@@ -57,7 +81,7 @@ const PurePanel: React.FC<PurePanelProps> = (props) => {
     additionalProps = {
       closable: closable ?? true,
       title,
-      footer: props.footer === undefined ? <Footer {...props} /> : props.footer,
+      footer: footer !== null && <Footer {...props} />,
       children,
     };
   }
@@ -65,19 +89,26 @@ const PurePanel: React.FC<PurePanelProps> = (props) => {
   return (
     <Panel
       prefixCls={prefixCls}
-      className={classNames(
+      className={clsx(
         hashId,
         `${prefixCls}-pure-panel`,
         type && confirmPrefixCls,
         type && `${confirmPrefixCls}-${type}`,
         className,
+        contextClassName,
+        cssVarCls,
+        rootCls,
+        mergedClassNames.root,
       )}
+      style={{ ...contextStyle, ...mergedStyles.root }}
       {...restProps}
       closeIcon={renderCloseIcon(prefixCls, closeIcon)}
       closable={closable}
+      classNames={mergedClassNames}
+      styles={mergedStyles}
       {...additionalProps}
     />
   );
 };
 
-export default PurePanel;
+export default withPureRenderTheme(PurePanel);

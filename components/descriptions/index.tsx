@@ -1,116 +1,93 @@
 /* eslint-disable react/no-array-index-key */
-import classNames from 'classnames';
-import toArray from 'rc-util/lib/Children/toArray';
 import * as React from 'react';
-import { cloneElement } from '../_util/reactNode';
-import type { Breakpoint, ScreenMap } from '../_util/responsiveObserver';
-import useResponsiveObserver, { responsiveArray } from '../_util/responsiveObserver';
-import warning from '../_util/warning';
-import { ConfigContext } from '../config-provider';
+import { clsx } from 'clsx';
+
+import { useMergeSemantic, useSemanticRootStyle } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
+import { isNumber } from '../_util/is';
+import type { Breakpoint } from '../_util/responsiveObserver';
+import { matchScreen } from '../_util/responsiveObserver';
+import { devUseWarning } from '../_util/warning';
+import { useComponentConfig } from '../config-provider/context';
 import useSize from '../config-provider/hooks/useSize';
+import type { SizeType } from '../config-provider/SizeContext';
+import useBreakpoint from '../grid/hooks/useBreakpoint';
+import DEFAULT_COLUMN_MAP from './constant';
 import DescriptionsContext from './DescriptionsContext';
+import type { DescriptionsContextProps } from './DescriptionsContext';
+import useItems from './hooks/useItems';
+import useRow from './hooks/useRow';
+import type { DescriptionsItemProps } from './Item';
 import DescriptionsItem from './Item';
 import Row from './Row';
 import useStyle from './style';
-
-const DEFAULT_COLUMN_MAP: Record<Breakpoint, number> = {
-  xxl: 3,
-  xl: 3,
-  lg: 3,
-  md: 3,
-  sm: 2,
-  xs: 1,
-};
-
-function getColumn(column: DescriptionsProps['column'], screens: ScreenMap): number {
-  if (typeof column === 'number') {
-    return column;
-  }
-
-  if (typeof column === 'object') {
-    for (let i = 0; i < responsiveArray.length; i++) {
-      const breakpoint: Breakpoint = responsiveArray[i];
-      if (screens[breakpoint] && column[breakpoint] !== undefined) {
-        return column[breakpoint] || DEFAULT_COLUMN_MAP[breakpoint];
-      }
-    }
-  }
-
-  return 3;
-}
-
-function getFilledItem(
-  node: React.ReactElement,
-  rowRestCol: number,
-  span?: number,
-): React.ReactElement {
-  let clone = node;
-
-  if (span === undefined || span > rowRestCol) {
-    clone = cloneElement(node, {
-      span: rowRestCol,
-    });
-    warning(
-      span === undefined,
-      'Descriptions',
-      'Sum of column `span` in a line not match `column` of Descriptions.',
-    );
-  }
-
-  return clone;
-}
-
-function getRows(children: React.ReactNode, column: number) {
-  const childNodes = toArray(children).filter((n) => n);
-  const rows: React.ReactElement[][] = [];
-
-  let tmpRow: React.ReactElement[] = [];
-  let rowRestCol = column;
-
-  childNodes.forEach((node, index) => {
-    const span: number = node.props?.span;
-    const mergedSpan = span || 1;
-
-    // Additional handle last one
-    if (index === childNodes.length - 1) {
-      tmpRow.push(getFilledItem(node, rowRestCol, span));
-      rows.push(tmpRow);
-      return;
-    }
-
-    if (mergedSpan < rowRestCol) {
-      rowRestCol -= mergedSpan;
-      tmpRow.push(node);
-    } else {
-      tmpRow.push(getFilledItem(node, rowRestCol, mergedSpan));
-      rows.push(tmpRow);
-      rowRestCol = column;
-      tmpRow = [];
-    }
-  });
-
-  return rows;
-}
 
 interface CompoundedComponent {
   Item: typeof DescriptionsItem;
 }
 
-export interface DescriptionsProps {
+export interface InternalDescriptionsItemType extends Omit<DescriptionsItemProps, 'span'> {
+  key?: React.Key;
+  filled?: boolean;
+  span?: number;
+}
+
+export interface DescriptionsItemType extends Omit<DescriptionsItemProps, 'prefixCls'> {
+  key?: React.Key;
+}
+
+export type DescriptionsSemanticType = {
+  classNames?: {
+    root?: string;
+    header?: string;
+    title?: string;
+    extra?: string;
+    label?: string;
+    content?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    header?: React.CSSProperties;
+    title?: React.CSSProperties;
+    extra?: React.CSSProperties;
+    label?: React.CSSProperties;
+    content?: React.CSSProperties;
+  };
+};
+
+export type DescriptionsSemanticAllType = GenerateSemantic<
+  DescriptionsSemanticType,
+  DescriptionsProps
+>;
+
+export interface DescriptionsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   prefixCls?: string;
-  className?: string;
   rootClassName?: string;
-  style?: React.CSSProperties;
   bordered?: boolean;
-  size?: 'middle' | 'small' | 'default';
+  /**
+   * Note: `default` is deprecated and will be removed in v7, please use `medium` instead.
+   */
+  size?: SizeType | 'default';
+  /**
+   * @deprecated use `items` instead
+   */
   children?: React.ReactNode;
   title?: React.ReactNode;
   extra?: React.ReactNode;
   column?: number | Partial<Record<Breakpoint, number>>;
   layout?: 'horizontal' | 'vertical';
   colon?: boolean;
+  /**
+   * @deprecated use `styles.label` instead
+   */
   labelStyle?: React.CSSProperties;
+  /**
+   * @deprecated use `styles.content` instead
+   */
   contentStyle?: React.CSSProperties;
+  classNames?: DescriptionsSemanticAllType['classNamesAndFn'];
+  styles?: DescriptionsSemanticAllType['stylesAndFn'];
+  items?: DescriptionsItemType[];
 }
 
 const Descriptions: React.FC<DescriptionsProps> & CompoundedComponent = (props) => {
@@ -118,7 +95,7 @@ const Descriptions: React.FC<DescriptionsProps> & CompoundedComponent = (props) 
     prefixCls: customizePrefixCls,
     title,
     extra,
-    column = DEFAULT_COLUMN_MAP,
+    column,
     colon = true,
     bordered,
     layout,
@@ -129,64 +106,143 @@ const Descriptions: React.FC<DescriptionsProps> & CompoundedComponent = (props) 
     size: customizeSize,
     labelStyle,
     contentStyle,
+    styles,
+    items,
+    classNames,
     ...restProps
   } = props;
-  const { getPrefixCls, direction, descriptions } = React.useContext(ConfigContext);
+  const {
+    getPrefixCls,
+    direction,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('descriptions');
   const prefixCls = getPrefixCls('descriptions', customizePrefixCls);
-  const [screens, setScreens] = React.useState<ScreenMap>({});
-  const mergedColumn = getColumn(column, screens);
+  const screens = useBreakpoint();
+
+  // ============================== Warn ==============================
+  if (process.env.NODE_ENV !== 'production') {
+    const warning = devUseWarning('Descriptions');
+
+    warning.deprecated(customizeSize !== 'default', 'size="default"', 'size="large"');
+
+    [
+      ['labelStyle', 'styles.label'],
+      ['contentStyle', 'styles.content'],
+    ].forEach(([deprecatedName, newName]) => {
+      warning.deprecated(!(deprecatedName in props), deprecatedName, newName);
+    });
+  }
+  // Column count
+  // Mobile-first cascade: try the user-supplied map first (scanning large→small
+  // over cumulative min-width screens, so a lower breakpoint like `md` is still
+  // "active" on an `lg` viewport).  Only fall back to DEFAULT_COLUMN_MAP when
+  // no user-supplied breakpoint is active at all.
+  const mergedColumn = React.useMemo(() => {
+    if (isNumber(column)) {
+      return column;
+    }
+
+    return matchScreen(screens, column) ?? matchScreen(screens, DEFAULT_COLUMN_MAP) ?? 3;
+  }, [screens, column]);
+
+  // Items with responsive
+  const mergedItems = useItems(screens, items, children);
 
   const mergedSize = useSize(customizeSize);
+  const rows = useRow(mergedColumn, mergedItems);
 
-  const [wrapSSR, hashId] = useStyle(prefixCls);
-  const responsiveObserver = useResponsiveObserver();
+  const [hashId, cssVarCls] = useStyle(prefixCls);
 
-  // Responsive
-  React.useEffect(() => {
-    const token = responsiveObserver.subscribe((newScreens) => {
-      if (typeof column !== 'object') {
-        return;
-      }
-      setScreens(newScreens);
-    });
+  // =========== Merged Props for Semantic ==========
+  const mergedProps: DescriptionsProps = {
+    ...props,
+    column: mergedColumn,
+    items: mergedItems,
+    size: mergedSize,
+  };
 
-    return () => {
-      responsiveObserver.unsubscribe(token);
-    };
-  }, []);
+  const contextStyleRoot = useSemanticRootStyle(contextStyle);
+  const styleRoot = useSemanticRootStyle(style);
 
-  // Children
-  const rows = getRows(children, mergedColumn);
-  const contextValue = React.useMemo(
-    () => ({ labelStyle, contentStyle }),
-    [labelStyle, contentStyle],
+  const [mergedClassNames, mergedStyles] = useMergeSemantic<
+    DescriptionsSemanticAllType['classNames'],
+    DescriptionsSemanticAllType['styles'],
+    DescriptionsProps
+  >([contextClassNames, classNames], [contextStyles, contextStyleRoot, styles, styleRoot], {
+    props: mergedProps,
+  });
+
+  // ======================== Render ========================
+  const memoizedValue = React.useMemo<DescriptionsContextProps>(
+    () => ({
+      labelStyle,
+      contentStyle,
+      styles: {
+        label: mergedStyles.label,
+        content: mergedStyles.content,
+      },
+      classNames: {
+        label: mergedClassNames.label,
+        content: mergedClassNames.content,
+      },
+    }),
+    [
+      labelStyle,
+      contentStyle,
+      mergedStyles.label,
+      mergedStyles.content,
+      mergedClassNames.label,
+      mergedClassNames.content,
+    ],
   );
 
-  return wrapSSR(
-    <DescriptionsContext.Provider value={contextValue}>
+  return (
+    <DescriptionsContext.Provider value={memoizedValue}>
       <div
-        className={classNames(
+        className={clsx(
           prefixCls,
-          descriptions?.className,
+          contextClassName,
+          mergedClassNames.root,
           {
-            [`${prefixCls}-${mergedSize}`]: mergedSize && mergedSize !== 'default',
+            [`${prefixCls}-medium`]: mergedSize === 'medium' || mergedSize === 'middle',
+            [`${prefixCls}-small`]: mergedSize === 'small',
             [`${prefixCls}-bordered`]: !!bordered,
             [`${prefixCls}-rtl`]: direction === 'rtl',
           },
           className,
           rootClassName,
           hashId,
+          cssVarCls,
         )}
-        style={{ ...descriptions?.style, ...style }}
+        style={mergedStyles.root}
         {...restProps}
       >
         {(title || extra) && (
-          <div className={`${prefixCls}-header`}>
-            {title && <div className={`${prefixCls}-title`}>{title}</div>}
-            {extra && <div className={`${prefixCls}-extra`}>{extra}</div>}
+          <div
+            className={clsx(`${prefixCls}-header`, mergedClassNames.header)}
+            style={mergedStyles.header}
+          >
+            {title && (
+              <div
+                className={clsx(`${prefixCls}-title`, mergedClassNames.title)}
+                style={mergedStyles.title}
+              >
+                {title}
+              </div>
+            )}
+            {extra && (
+              <div
+                className={clsx(`${prefixCls}-extra`, mergedClassNames.extra)}
+                style={mergedStyles.extra}
+              >
+                {extra}
+              </div>
+            )}
           </div>
         )}
-
         <div className={`${prefixCls}-view`}>
           <table>
             <tbody>
@@ -205,7 +261,7 @@ const Descriptions: React.FC<DescriptionsProps> & CompoundedComponent = (props) 
           </table>
         </div>
       </div>
-    </DescriptionsContext.Provider>,
+    </DescriptionsContext.Provider>
   );
 };
 
@@ -213,7 +269,7 @@ if (process.env.NODE_ENV !== 'production') {
   Descriptions.displayName = 'Descriptions';
 }
 
-export type { DescriptionsContextProps } from './DescriptionsContext';
+export type { DescriptionsContextProps };
 export { DescriptionsContext };
 
 Descriptions.Item = DescriptionsItem;

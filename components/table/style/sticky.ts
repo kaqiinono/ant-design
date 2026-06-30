@@ -1,4 +1,6 @@
+import { unit } from '@ant-design/cssinjs';
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { GenerateStyle } from '../../theme/internal';
 import type { TableToken } from './index';
 
@@ -10,23 +12,27 @@ const genStickyStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
     tableScrollThumbBgHover,
     tableScrollThumbSize,
     tableScrollBg,
-    zIndexTableSticky,
+    stickyScrollBarBorderRadius,
+    lineWidth,
+    lineType,
+    tableBorderColor,
+    zIndexTableFixed,
   } = token;
-  const tableBorder = `${token.lineWidth}px ${token.lineType} ${token.tableBorderColor}`;
+  const tableBorder = `${unit(lineWidth)} ${lineType} ${tableBorderColor}`;
   return {
     [`${componentCls}-wrapper`]: {
       [`${componentCls}-sticky`]: {
         '&-holder': {
           position: 'sticky',
-          zIndex: zIndexTableSticky,
+          zIndex: `calc(var(--columns-count) * 2 + ${zIndexTableFixed} + 1)`,
           background: token.colorBgContainer,
         },
 
         '&-scroll': {
           position: 'sticky',
           bottom: 0,
-          height: `${tableScrollThumbSize}px !important`,
-          zIndex: zIndexTableSticky,
+          height: `${unit(tableScrollThumbSize)} !important`,
+          zIndex: `calc(var(--columns-count) * 2 + ${zIndexTableFixed} + 1)`,
           display: 'flex',
           alignItems: 'center',
           background: tableScrollBg,
@@ -41,8 +47,8 @@ const genStickyStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
           '&-bar': {
             height: tableScrollThumbSize,
             backgroundColor: tableScrollThumbBg,
-            borderRadius: 100,
-            transition: `all ${token.motionDurationSlow}, transform none`,
+            borderRadius: stickyScrollBarBorderRadius,
+            transition: `all ${token.motionDurationSlow}, transform 0s`,
             position: 'absolute',
             bottom: 0,
 

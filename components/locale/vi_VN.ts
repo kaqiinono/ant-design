@@ -1,7 +1,8 @@
-import Pagination from 'rc-pagination/lib/locale/vi_VN';
+import Pagination from '@rc-component/pagination/locale/vi_VN';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/vi_VN';
 import DatePicker from '../date-picker/locale/vi_VN';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/vi_VN';
 
 const typeTemplate = '${label} không phải kiểu ${type} hợp lệ';
@@ -14,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Vui lòng chọn',
+    close: 'Đóng',
+    show: 'Hiển thị',
+    hide: 'Ẩn',
   },
   Table: {
     filterTitle: 'Bộ lọc',
     filterConfirm: 'Đồng ý',
     filterReset: 'Bỏ lọc',
     filterEmptyText: 'Không có bộ lọc',
-    filterCheckall: 'Chọn tất cả',
+    filterCheckAll: 'Chọn tất cả',
     filterSearchPlaceholder: 'Tìm kiếm bộ lọc',
     emptyText: 'Trống',
     selectAll: 'Chọn tất cả',
@@ -59,6 +63,7 @@ const localeValues: Locale = {
     selectAll: 'Chọn tất cả',
     removeAll: 'Gỡ bỏ tất cả',
     selectInvert: 'Đảo ngược trang hiện tại',
+    deselectAll: 'Bỏ chọn tất cả',
   },
   Upload: {
     uploading: 'Đang tải lên...',
@@ -78,9 +83,7 @@ const localeValues: Locale = {
     copy: 'Sao chép',
     copied: 'Đã sao chép',
     expand: 'Mở rộng',
-  },
-  PageHeader: {
-    back: 'Quay lại',
+    collapse: 'Thu gọn',
   },
   Form: {
     optional: '(Tùy chọn)',
@@ -132,12 +135,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: 'Xem trước',
-  },
   QRCode: {
     expired: 'Mã QR hết hạn',
     refresh: 'Làm mới',
+    scanned: 'Đã quét',
+  },
+  ColorPicker: {
+    presetEmpty: 'Trống',
+    transparent: 'Trong suốt',
+    singleColor: 'Màu đơn',
+    gradientColor: 'Màu chuyển sắc',
   },
 };
 

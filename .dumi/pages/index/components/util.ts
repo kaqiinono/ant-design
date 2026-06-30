@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { css } from '@emotion/react';
+import { css } from 'antd-style';
+import useSWR from 'swr';
 
 export interface Author {
   avatar: string;
@@ -25,6 +25,7 @@ export interface Recommendation {
 }
 
 type SourceType = 'zhihu' | 'yuque';
+
 export interface Extra {
   title: string;
   description: string;
@@ -58,7 +59,15 @@ export type Extras = {
 
 export type Icons = Icon[];
 
+export type HeadingBanner = {
+  [key in 'cn' | 'en']: {
+    title?: string;
+    href?: string;
+  };
+};
+
 export type SiteData = {
+  headingBanner: HeadingBanner;
   articles: Articles;
   authors: Authors;
   recommendations: Recommendations;
@@ -80,26 +89,36 @@ export function preLoad(list: string[]) {
   }
 }
 
-export function useSiteData(): [Partial<SiteData>, boolean] {
-  const [data, setData] = React.useState<Partial<SiteData>>({});
-  const [loading, setLoading] = React.useState<boolean>(false);
+/**
+ * Banner 硬编码，以防止页面闪烁问题
+ * 返回 null 表示不显示
+ */
+export const getBannerData = (): null | {
+  title: string;
+  href: string;
+} => {
+  // return {
+  //   title: 'See Conf 2025 震撼来袭 - 探索 AI 时代的用户体验与工程实践',
+  //   href: 'https://seeconf.antfin.com/',
+  // };
+  return null;
+};
 
-  React.useEffect(() => {
-    if (Object.keys(data ?? {}).length === 0 && typeof fetch !== 'undefined') {
-      setLoading(true);
-      fetch(`https://render.alipay.com/p/h5data/antd4-config_website-h5data.json`)
-        .then((res) => res.json())
-        .then((result) => {
-          setData(result);
-          setLoading(false);
-        });
-    }
-  }, []);
+export const useAntdSiteConfig = () => {
+  const { data, error, isLoading } = useSWR<Partial<SiteData>, Error>(
+    `https://render.alipay.com/p/h5data/antd4-config_website-h5data.json`,
+    (url: string) => fetch(url).then((res) => res.json()),
+    {
+      suspense: false,
+      // revalidateOnMount: false,
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+    },
+  );
+  return { data, error, isLoading };
+};
 
-  return [data, loading];
-}
-
-export const useCarouselStyle = () => ({
+export const getCarouselStyle = () => ({
   carousel: css`
     .slick-dots.slick-dots-bottom {
       bottom: -22px;

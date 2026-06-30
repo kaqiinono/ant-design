@@ -1,6 +1,6 @@
+import React from 'react';
 import { CustomerServiceOutlined, QuestionCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
-import React from 'react';
 
 /** Test usage. Do not use in your production. */
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalFloatButton } = FloatButton;
@@ -11,7 +11,7 @@ const App: React.FC = () => (
     <InternalFloatButton icon={<CustomerServiceOutlined />} />
     <InternalFloatButton
       icon={<QuestionCircleOutlined />}
-      description="HELP"
+      content="HELP"
       shape="square"
       type="primary"
     />

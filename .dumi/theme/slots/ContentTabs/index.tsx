@@ -4,18 +4,33 @@ import { CodeOutlined, SkinOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { useRouteMeta } from 'dumi';
 import type { IContentTabsProps } from 'dumi/theme-default/slots/ContentTabs';
-import type { TabsProps } from 'rc-tabs';
+import type { TabsProps } from '@rc-component/tabs';
 
-const titleMap: Record<string, string> = {
-  design: '设计',
-};
+import useLocale from '../../../hooks/useLocale';
 
 const iconMap: Record<string, ReactNode> = {
   design: <SkinOutlined />,
 };
 
+const locales = {
+  cn: {
+    development: '开发',
+    design: '设计',
+  },
+  en: {
+    development: 'Development',
+    design: 'Design',
+  },
+};
+
 const ContentTabs: FC<IContentTabsProps> = ({ tabs, tabKey, onChange }) => {
   const meta = useRouteMeta();
+
+  const [locale] = useLocale(locales);
+
+  const titleMap: Record<string, ReactNode> = {
+    design: locale.design,
+  };
 
   if (!meta.tabs) {
     return null;
@@ -23,24 +38,17 @@ const ContentTabs: FC<IContentTabsProps> = ({ tabs, tabKey, onChange }) => {
 
   const items: TabsProps['items'] = [
     {
-      label: (
-        <span>
-          <CodeOutlined />
-          开发
-        </span>
-      ),
       key: 'development',
+      label: locale.development,
+      icon: <CodeOutlined />,
     },
   ];
+
   tabs?.forEach((tab) => {
     items.push({
-      label: (
-        <span>
-          {iconMap[tab.key]}
-          {titleMap[tab.key]}
-        </span>
-      ),
       key: tab.key,
+      label: titleMap[tab.key],
+      icon: iconMap[tab.key],
     });
   });
 
@@ -48,7 +56,7 @@ const ContentTabs: FC<IContentTabsProps> = ({ tabs, tabKey, onChange }) => {
     <Tabs
       items={items}
       activeKey={tabKey || 'development'}
-      onChange={(key) => onChange(tabs.find((tab) => tab.key === key))}
+      onChange={(key) => onChange(tabs?.find((tab) => tab.key === key))}
       style={{ margin: '32px 0 -16px' }}
     />
   );

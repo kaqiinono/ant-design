@@ -1,6 +1,6 @@
+import React from 'react';
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Breadcrumb, ConfigProvider } from 'antd';
-import React from 'react';
 
 const menuItems = [
   {
@@ -28,6 +28,7 @@ const menuItems = [
     ),
   },
 ];
+
 export default () => (
   <ConfigProvider
     theme={{

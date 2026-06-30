@@ -1,5 +1,5 @@
-import { ConfigProvider, Radio, Space } from 'antd';
 import React from 'react';
+import { ConfigProvider, Radio, Space } from 'antd';
 
 const App: React.FC = () => (
   <ConfigProvider
@@ -21,7 +21,7 @@ const App: React.FC = () => (
       },
     }}
   >
-    <Space direction="vertical">
+    <Space vertical>
       <Radio checked>Test</Radio>
       <Radio checked disabled>
         Disabled

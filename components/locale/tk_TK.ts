@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/tk_TK';
+import Pagination from '@rc-component/pagination/locale/tk_TK';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/tk_TK';
 import DatePicker from '../date-picker/locale/tk_TK';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/tk_TK';
 
 const typeTemplate: string = '${label} ${type} görnüşinde däl';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Saýlaň',
+    close: 'Ýagty',
+    show: 'Görkez',
+    hide: 'Gizle',
   },
   Table: {
     filterTitle: 'Filter',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'Kemelýän tertipde tertiple',
     triggerAsc: 'Artýan tertipde tertiple',
     cancelSort: 'Tertipleri arassala',
+  },
+  Tour: {
+    Next: 'Indiki',
+    Previous: 'Öňki',
+    Finish: 'Tamamla',
   },
   Modal: {
     okText: 'Bolýar',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'Göçürmek',
     copied: 'Göçürildi',
     expand: 'Ýygnamak',
-  },
-  PageHeader: {
-    back: 'Yza',
   },
   Form: {
     defaultValidateMessages: {
@@ -123,9 +128,6 @@ const localeValues: Locale = {
         mismatch: '${label} meýdany ${pattern} şablony bilen gabat gelmeýär',
       },
     },
-  },
-  Image: {
-    preview: 'Öňünden görmek',
   },
 };
 

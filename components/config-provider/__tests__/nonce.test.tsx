@@ -1,14 +1,20 @@
+import React from 'react';
 import { createCache, StyleProvider } from '@ant-design/cssinjs';
 import { SmileOutlined } from '@ant-design/icons';
 import IconContext from '@ant-design/icons/lib/components/Context';
-import React from 'react';
+
 import ConfigProvider from '..';
 import { render } from '../../../tests/utils';
 import Button from '../../button';
 
+declare module '@ant-design/icons/lib/components/Context' {
+  interface IconContextProps {
+    zeroRuntime?: boolean;
+  }
+}
+
 describe('ConfigProvider.Icon', () => {
   beforeEach(() => {
-    // eslint-disable-next-line jest/no-standalone-expect
     expect(document.querySelectorAll('style')).toHaveLength(0);
   });
 
@@ -26,7 +32,7 @@ describe('ConfigProvider.Icon', () => {
         </ConfigProvider>,
       );
       const styleNode = document.querySelector('style');
-      expect(styleNode?.nonce).toEqual('little');
+      expect(styleNode?.nonce).toBe('little');
     });
 
     it('mix with iconPrefixCls', () => {
@@ -39,7 +45,7 @@ describe('ConfigProvider.Icon', () => {
       const styleNode = document.querySelector('style');
 
       expect(container.querySelector('.bamboo-smile')).toBeTruthy();
-      expect(styleNode?.nonce).toEqual('light');
+      expect(styleNode?.nonce).toBe('light');
     });
   });
 
@@ -61,8 +67,23 @@ describe('ConfigProvider.Icon', () => {
     const styleNode = document.querySelector('style');
 
     expect(container.querySelector('.bamboo-smile')).toBeTruthy();
-    expect(styleNode?.nonce).toEqual('light');
-    expect(container.querySelector('#csp')?.innerHTML).toEqual('light');
+    expect(styleNode?.nonce).toBe('light');
+    expect(container.querySelector('#csp')?.innerHTML).toBe('light');
+  });
+
+  it('passes zeroRuntime theme config to icon context', () => {
+    const Checker = () => {
+      const { zeroRuntime } = React.useContext(IconContext);
+      return <div id="zero-runtime">{String(zeroRuntime)}</div>;
+    };
+
+    const { container } = render(
+      <ConfigProvider theme={{ zeroRuntime: true }}>
+        <Checker />
+      </ConfigProvider>,
+    );
+
+    expect(container.querySelector('#zero-runtime')?.innerHTML).toBe('true');
   });
 
   it('cssinjs should support nonce', () => {
@@ -78,7 +99,22 @@ describe('ConfigProvider.Icon', () => {
 
     expect(styleList.length).toBeTruthy();
     styleList.forEach((style) => {
-      expect(style.nonce).toEqual('bamboo');
+      expect(style.nonce).toBe('bamboo');
+    });
+  });
+
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('nonce applies to all style tags', () => {
+    render(
+      <ConfigProvider csp={{ nonce: 'bamboo' }} theme={{ token: { borderRadius: 2 } }}>
+        <Button />
+      </ConfigProvider>,
+    );
+
+    const styleNodes = document.querySelectorAll('style');
+
+    styleNodes.forEach((node) => {
+      expect(node?.nonce).toBe('bamboo');
     });
   });
 });

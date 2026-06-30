@@ -1,23 +1,26 @@
-import { css } from '@emotion/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { createStaticStyles } from 'antd-style';
+import { useSearchParams } from 'dumi';
+
 import CommonHelmet from '../../common/CommonHelmet';
 import Content from '../../slots/Content';
 import Sidebar from '../../slots/Sidebar';
 
-const useStyle = () => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   main: css`
     display: flex;
-    margin-top: 40px;
+    margin-top: ${cssVar.marginXL};
   `,
-});
+}));
 
-const SidebarLayout: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-  const { main } = useStyle();
+const SidebarLayout: React.FC<PropsWithChildren> = ({ children }) => {
+  const [searchParams] = useSearchParams();
+  const hideLayout = searchParams.get('layout') === 'false';
   return (
-    <main css={main}>
+    <main className={styles.main}>
       <CommonHelmet />
-      <Sidebar />
+      {!hideLayout && <Sidebar />}
       <Content>{children}</Content>
     </main>
   );

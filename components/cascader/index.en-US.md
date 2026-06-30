@@ -2,18 +2,17 @@
 category: Components
 group: Data Entry
 title: Cascader
-cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tokLTp73TsQAAAAAAAAAAAAADrJ8AQ/original
-coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5-ArSLl5UBsAAAAAAAAAAAAADrJ8AQ/original
+description: Cascade selection box.
+cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ngTnQZNOcK0AAAAAAAAAAAAADrJ8AQ/original
+coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Nt8xR7afyr0AAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 ---
 
-Cascade selection box.
-
 ## When To Use
 
 - When you need to select from a set of associated data set. Such as province/city/district, company level, things classification.
-- When selecting from a large data set, with multi-stage classification separated for easy selection.
+- When selecting from a large data set, with multi-stage classifications separated for easy selection.
 - Chooses cascade items in one float layer for better user experience.
 
 ## Examples
@@ -32,70 +31,92 @@ Cascade selection box.
 <code src="./demo/search.tsx">Search</code>
 <code src="./demo/lazy.tsx">Load Options Lazily</code>
 <code src="./demo/fields-name.tsx">Custom Field Names</code>
-<code src="./demo/suffix.tsx" debug>Custom Icons</code>
+<code src="./demo/suffix.tsx" version="5.22.0">Prefix and Suffix</code>
 <code src="./demo/custom-dropdown.tsx">Custom dropdown</code>
 <code src="./demo/placement.tsx">Placement</code>
+<code src="./demo/variant.tsx" version="5.13.0">Variants</code>
 <code src="./demo/status.tsx">Status</code>
+<code src="./demo/style-class.tsx" version="6.0.0">Custom semantic dom styling</code>
+<code src="./demo/panel.tsx" version=">= 5.10.0">Panel</code>
+<code src="./demo/ellipsis-debug.tsx" debug>Menu item ellipsis</code>
 <code src="./demo/render-panel.tsx" debug>_InternalPanelDoNotUseOrYouWillBeFired</code>
+<code src="./demo/component-token.tsx" debug>Component Token</code>
 
 ## API
+
+Common props ref：[Common props](/docs/react/common-props)
 
 ```jsx
 <Cascader options={options} onChange={onChange} />
 ```
 
-| Property | Description | Type | Default | Version |
-| --- | --- | --- | --- | --- |
-| allowClear | Whether allow clear | boolean | true |  |
-| autoFocus | If get focus when component mounted | boolean | false |  |
-| bordered | Whether has border style | boolean | true |  |
-| clearIcon | The custom clear icon | ReactNode | - |  |
-| changeOnSelect | (Work on single select) Change value on each selection if set to true, see above demo for details | boolean | false |  |
-| className | The additional css class | string | - |  |
-| defaultValue | Initial selected value | string\[] \| number\[] | \[] |  |
-| disabled | Whether disabled select | boolean | false |  |
-| displayRender | The render function of displaying selected options | (label, selectedOptions) => ReactNode | label => label.join(`/`) | `multiple`: 4.18.0 |
-| tagRender | Custom render function for tags in `multiple` mode | (label: string, onClose: function, value: string) => ReactNode | - |  |
-| popupClassName | The additional className of popup overlay | string | - | 4.23.0 |
-| dropdownRender | Customize dropdown content | (menus: ReactNode) => ReactNode | - | 4.4.0 |
-| expandIcon | Customize the current item expand icon | ReactNode | - | 4.4.0 |
-| expandTrigger | expand current item when click or hover, one of `click` `hover` | string | `click` |  |
-| fieldNames | Custom field name for label and value and children | object | { label: `label`, value: `value`, children: `children` } |  |
-| getPopupContainer | Parent Node which the selector should be rendered to. Default to `body`. When position issues happen, try to modify it into scrollable content and position it relative. [example](https://codepen.io/afc163/pen/zEjNOy?editors=0010) | function(triggerNode) | () => document.body |  |
-| loadData | To load option lazily, and it cannot work with `showSearch` | (selectedOptions) => void | - |  |
-| maxTagCount | Max tag count to show. `responsive` will cost render performance | number \| `responsive` | - | 4.17.0 |
-| maxTagPlaceholder | Placeholder for not showing tags | ReactNode \| function(omittedValues) | - | 4.17.0 |
-| maxTagTextLength | Max tag text length to show | number | - | 4.17.0 |
-| notFoundContent | Specify content to show when no result matches | string | `Not Found` |  |
-| open | Set visible of cascader popup | boolean | - | 4.17.0 |
-| options | The data options of cascade | [Option](#option)\[] | - |  |
-| placeholder | The input placeholder | string | `Please select` |  |
-| placement | Use preset popup align config from builtinPlacements | `bottomLeft` `bottomRight` `topLeft` `topRight` | `bottomLeft` | 4.17.0 |
-| showSearch | Whether show search input in single mode | boolean \| [Object](#showsearch) | false |  |
-| size | The input size | `large` \| `middle` \| `small` | - |  |
-| status | Set validation status | 'error' \| 'warning' | - | 4.19.0 |
-| style | The additional style | CSSProperties | - |  |
-| suffixIcon | The custom suffix icon | ReactNode | - |  |
-| value | The selected value | string\[] \| number\[] | - |  |
-| onChange | Callback when finishing cascader select | (value, selectedOptions) => void | - |  |
-| onDropdownVisibleChange | Callback when popup shown or hidden | (value) => void | - | 4.17.0 |
-| multiple | Support multiple or not | boolean | - | 4.17.0 |
-| removeIcon | The custom remove icon | ReactNode | - |  |
-| showCheckedStrategy | The way show selected item in box. ** `SHOW_CHILD`: ** just show child treeNode. **`Cascader.SHOW_PARENT`:** just show parent treeNode (when all child treeNode under the parent treeNode are checked) | `Cascader.SHOW_PARENT` \| `Cascader.SHOW_CHILD` | `Cascader.SHOW_PARENT` | 4.20.0 |
-| searchValue | Set search value，Need work with `showSearch` | string | - | 4.17.0 |
-| onSearch | The callback function triggered when input changed | (search: string) => void | - | 4.17.0 |
-| dropdownMenuColumnStyle | The style of the drop-down menu column | CSSProperties | - |  |
-| loadingIcon | The appearance of lazy loading (now is useless) | ReactNode | - |  |
+| Property | Description | Type | Default | Version | [Global Config](/components/config-provider#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| allowClear | Show clear button | boolean \| { clearIcon?: ReactNode } | true | 5.8.0: Support object type | `clearIcon`: 6.4.0 |
+| ~~autoClearSearchValue~~ | Whether the current search will be cleared on selecting an item. Only applies when `multiple` is `true` | boolean | true | 5.9.0 | × |
+| ~~bordered~~ | Whether has border style, please use `variant` instead | boolean | true | - | × |
+| changeOnSelect | Change value on each selection if set to true, see above demo for details | boolean | false |  | × |
+| classNames | Customize class for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - |  | 5.25.0 |
+| defaultOpen | Initial visible of cascader popup | boolean | - |  | × |
+| defaultValue | Initial selected value | string\[] \| number\[] | \[] |  | × |
+| disabled | Whether disabled select | boolean | false |  | × |
+| displayRender | The render function of displaying selected options | (label, selectedOptions) => ReactNode | label => label.join(`/`) | `multiple`: 4.18.0 | × |
+| tagRender | Custom render function for tags in `multiple` mode | (label: string, onClose: function, value: string) => ReactNode | - |  | × |
+| ~~popupClassName~~ | The additional className of popup overlay, use `classNames.popup.root` instead | string | - | 4.23.0 | × |
+| ~~dropdownClassName~~ | The additional className of popup overlay, please use `classNames.popup.root` instead | string | - | - | × |
+| ~~dropdownRender~~ | Customize dropdown content, use `popupRender` instead | (menus: ReactNode) => ReactNode | - | 4.4.0 | × |
+| popupRender | Customize dropdown content | (menus: ReactNode) => ReactNode | - |  | × |
+| ~~dropdownStyle~~ | The style of dropdown menu, use `styles.popup.root` instead | CSSProperties | - |  | × |
+| expandIcon | Customize the current item expand icon | ReactNode | - | 4.4.0 | 6.3.0 |
+| expandTrigger | expand current item when click or hover, one of `click` `hover` | string | `click` |  | × |
+| fieldNames | Custom field name for label and value and children | object | { label: `label`, value: `value`, children: `children` } |  | × |
+| getPopupContainer | Parent Node which the selector should be rendered to. Default to `body`. When position issues happen, try to modify it into scrollable content and position it relative. [example](https://codepen.io/afc163/pen/zEjNOy?editors=0010) | function(triggerNode) | () => document.body |  | × |
+| loadData | To load option lazily, and it cannot work with `showSearch` | (selectedOptions) => void | - |  | × |
+| loadingIcon | Customize the loading icon | ReactNode | - |  | 6.3.0 |
+| maxTagCount | Max tag count to show. `responsive` will cost render performance | number \| `responsive` | - | 4.17.0 | × |
+| maxTagPlaceholder | Placeholder for not showing tags | ReactNode \| function(omittedValues) | - | 4.17.0 | × |
+| maxTagTextLength | Max tag text length to show | number | - | 4.17.0 | × |
+| notFoundContent | Specify content to show when no result matches | ReactNode | `Not Found` |  | × |
+| open | Set visible of cascader popup | boolean | - | 4.17.0 | × |
+| options | The data options of cascade | [Option](#option)\[] | - |  | × |
+| placeholder | The input placeholder | string | - |  | × |
+| placement | Use preset popup align config from builtinPlacements | `bottomLeft` `bottomRight` `topLeft` `topRight` | `bottomLeft` | 4.17.0 | × |
+| prefix | The custom prefix | ReactNode | - | 5.22.0 | × |
+| ~~showArrow~~ | Whether to show the arrow icon, please use `suffixIcon={null}` instead | boolean | true | - | × |
+| showSearch | Whether show search input in single mode | boolean \| [Object](#showsearch) | false |  | `searchIcon`: 6.4.0 |
+| size | The input size | `large` \| `medium` \| `small` | `medium` |  | × |
+| status | Set validation status | 'error' \| 'warning' | - | 4.19.0 | × |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - |  | 5.25.0 |
+| suffixIcon | The custom suffix icon | ReactNode | - |  | 6.4.0 |
+| value | The selected value | string\[] \| number\[] | - |  | × |
+| variant | Variants of selector | `outlined` \| `borderless` \| `filled` \| `underlined` | `outlined` | 5.13.0 \| `underlined`: 5.24.0 | 5.19.0 |
+| onChange | Callback when finishing cascader select | (value, selectedOptions) => void | - |  | × |
+| onClear | Called when clear | () => void | - | - | × |
+| ~~onDropdownVisibleChange~~ | Callback when popup shown or hidden, use `onOpenChange` instead | (value) => void | - | 4.17.0 | × |
+| onOpenChange | Callback when popup shown or hidden | (value) => void | - |  | × |
+| ~~onPopupVisibleChange~~ | Callback when popup shown or hidden, please use `onOpenChange` instead | (value) => void | - | - | × |
+| multiple | Support multiple or not | boolean | - | 4.17.0 | × |
+| removeIcon | The custom remove icon | ReactNode | - |  | 6.4.0 |
+| showCheckedStrategy | The way to show selected items in the box (only effective when `multiple` is `true`). `Cascader.SHOW_CHILD`: just show child treeNode. `Cascader.SHOW_PARENT`: just show parent treeNode (when all child treeNode under the parent treeNode are checked) | `Cascader.SHOW_PARENT` \| `Cascader.SHOW_CHILD` | `Cascader.SHOW_PARENT` | 4.20.0 | × |
+| ~~searchValue~~ | Set search value, Need work with `showSearch` | string | - | 4.17.0 | × |
+| ~~onSearch~~ | The callback function triggered when input changed | (search: string) => void | - | 4.17.0 | × |
+| ~~dropdownMenuColumnStyle~~ | The style of the drop-down menu column, use `styles.popup.listItem` instead | CSSProperties | - |  | × |
+| ~~popupMenuColumnStyle~~ | The style of the drop-down menu column, use `styles.popup.listItem` instead | CSSProperties | - |  | × |
+| optionRender | Customize the rendering dropdown options | (option: Option) => React.ReactNode | - | 5.16.0 | × |
 
 ### showSearch
 
 | Property | Description | Type | Default | Version |
 | --- | --- | --- | --- | --- |
+| autoClearSearchValue | Whether the current search will be cleared on selecting an item. Only applies when `multiple` is `true` | boolean | true | 5.9.0 |
 | filter | The function will receive two arguments, inputValue and option, if the function returns true, the option will be included in the filtered set; Otherwise, it will be excluded | function(inputValue, path): boolean | - |  |
 | limit | Set the count of filtered items | number \| false | 50 |  |
 | matchInputWidth | Whether the width of list matches input, ([how it looks](https://github.com/ant-design/ant-design/issues/25779)) | boolean | true |  |
 | render | Used to render filtered options | function(inputValue, path): ReactNode | - |  |
 | sort | Used to sort filtered options | function(a, b, inputValue) | - |  |
+| searchValue | Set search value, Need work with `showSearch` | string | - | 4.17.0 |
+| onSearch | The callback function triggered when input changed | (search: string) => void | - | 4.17.0 |
+| searchIcon | Customize the search icon | ReactNode | - | 6.3.0 |
 
 ### Option
 
@@ -118,6 +139,10 @@ interface Option {
 | ------- | ------------ | ------- |
 | blur()  | Remove focus |         |
 | focus() | Get focus    |         |
+
+## Semantic DOM
+
+<code src="./demo/_semantic.tsx" simplify="true"></code>
 
 ## Design Token
 

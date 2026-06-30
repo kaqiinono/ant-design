@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/ga_IE';
+import Pagination from '@rc-component/pagination/locale/ga_IE';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ga_IE';
 import DatePicker from '../date-picker/locale/ga_IE';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ga_IE';
 
 const typeTemplate = '${label} is not a valid ${type}';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Please select',
+    close: 'Dún',
+    show: 'Taispeáin',
+    hide: 'Folaigh',
   },
   Table: {
     filterTitle: 'Filter menu',
@@ -29,6 +32,11 @@ const localeValues: Locale = {
     triggerDesc: 'Click to sort descending',
     triggerAsc: 'Click to sort ascending',
     cancelSort: 'Click to cancel sorting',
+  },
+  Tour: {
+    Next: 'Aghaidh',
+    Previous: 'Roimh',
+    Finish: 'Dhéanamh',
   },
   Modal: {
     okText: 'OK',
@@ -69,9 +77,6 @@ const localeValues: Locale = {
     copy: 'Copy',
     copied: 'Copied',
     expand: 'Expand',
-  },
-  PageHeader: {
-    back: 'Back',
   },
   Form: {
     defaultValidateMessages: {

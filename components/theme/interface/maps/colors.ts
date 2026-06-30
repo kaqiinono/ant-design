@@ -9,10 +9,16 @@ export interface ColorNeutralMapToken {
    */
   colorBgBase: string;
 
+  /**
+   * @internal
+   */
+  colorShadow: string;
+
   // ----------   Text   ---------- //
 
   /**
    * @nameZH 一级文本色
+   * @nameEN Text Color
    * @desc 最深的文本色。为了符合W3C标准，默认的文本颜色使用了该色，同时这个颜色也是最深的中性色。
    * @descEN Default text color which comply with W3C standards, and this color is also the darkest neutral color.
    */
@@ -20,6 +26,7 @@ export interface ColorNeutralMapToken {
 
   /**
    * @nameZH 二级文本色
+   * @nameEN Secondary Text Color
    * @desc 作为第二梯度的文本色，一般用在不那么需要强化文本颜色的场景，例如 Label 文本、Menu 的文本选中态等场景。
    * @descEN The second level of text color is generally used in scenarios where text color is not emphasized, such as label text, menu text selection state, etc.
    */
@@ -57,6 +64,14 @@ export interface ColorNeutralMapToken {
    */
   colorBorderSecondary: string;
 
+  /**
+   * @nameZH 禁用态边框颜色
+   * @nameEN Disabled state border color
+   * @desc 控制元素在禁用状态下的边框颜色。
+   * @descEN Control the border color of the element in the disabled state.
+   */
+  colorBorderDisabled: string;
+
   // ----------   Fill   ---------- //
 
   /**
@@ -91,6 +106,7 @@ export interface ColorNeutralMapToken {
 
   /**
    * @nameZH 布局背景色
+   * @nameEN Layout Background Color
    * @desc 该色用于页面整体布局的背景色，只有需要在页面中处于 B1 的视觉层级时才会使用该 token，其他用法都是错误的
    * @descEN This color is used for the background color of the overall layout of the page. This token will only be used when it is necessary to be at the B1 visual level in the page. Other usages are wrong.
    */
@@ -116,6 +132,31 @@ export interface ColorNeutralMapToken {
    * @descEN This color is used to draw the user's strong attention to the background color, and is currently only used in the background color of Tooltip.
    */
   colorBgSpotlight: string;
+  /**
+   * @nameZH 毛玻璃容器背景色
+   * @nameEN Frosted glass container background color
+   * @desc 控制毛玻璃容器的背景色，通常为透明色。
+   * @descEN Control the background color of frosted glass container, usually transparent.
+   */
+  colorBgBlur: string;
+
+  // ----------   Solid   ---------- //
+
+  /**
+   * @desc 实心的背景颜色，目前只用在默认实心按钮背景色上。
+   * @descEN Solid background color, currently only used for the default solid button background color.
+   */
+  colorBgSolid: string;
+  /**
+   * @desc 实心的背景颜色激活态，目前只用在默认实心按钮的 active 效果。
+   * @descEN Solid background color active state, currently only used in the active effect of the default solid button.
+   */
+  colorBgSolidActive: string;
+  /**
+   * @desc 实心的背景颜色悬浮态，目前只用在默认实心按钮的 hover 效果。
+   * @descEN Solid background color hover state, currently only used in the hover effect of the default solid button.
+   */
+  colorBgSolidHover: string;
 }
 
 /**
@@ -467,6 +508,22 @@ interface ColorErrorMapToken {
   colorErrorBgHover: string; // 2
 
   /**
+   * @nameZH 错误色的浅色填充背景色悬浮态
+   * @nameEN Wrong color fill background color suspension state
+   * @desc 错误色的浅色填充背景色悬浮态，目前只用在危险填充按钮的 hover 效果。
+   * @descEN The wrong color fills the background color of the suspension state, which is currently only used in the hover effect of the dangerous filled button.
+   */
+  colorErrorBgFilledHover: string; // 2.5
+
+  /**
+   * @nameZH 错误色的浅色背景色激活态
+   * @nameEN Error background color active state
+   * @desc 错误色的浅色背景色激活态
+   * @descEN The active state background color of the error state.
+   */
+  colorErrorBgActive: string; // 3
+
+  /**
    * @nameZH 错误色的描边色
    * @nameEN Error border color
    * @desc 错误色的描边色
@@ -574,8 +631,8 @@ export interface ColorMapToken
   /**
    * @nameZH 浮层的背景蒙层颜色
    * @nameEN Background color of the mask
-   * @desc 浮层的背景蒙层颜色，用于遮罩浮层下面的内容，Modal、Drawer 等组件的蒙层使用的是该 token
-   * @descEN The background color of the mask, used to cover the content below the mask, Modal, Drawer and other components use this token
+   * @desc 浮层的背景蒙层颜色，用于遮罩浮层下面的内容，Modal、Drawer、Image 等组件的蒙层使用的是该 token
+   * @descEN The background color of the mask, used to cover the content below the mask, Modal, Drawer, Image and other components use this token
    */
   colorBgMask: string;
 
@@ -584,5 +641,4 @@ export interface ColorMapToken
    * @desc 不随主题变化的纯黑色
    * @default #0000
    */
-  // colorBlack: string;
 }

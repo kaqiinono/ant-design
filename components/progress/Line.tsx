@@ -1,15 +1,26 @@
-import { presetPrimaryColors } from '@ant-design/colors';
 import * as React from 'react';
+import { presetPrimaryColors } from '@ant-design/colors';
+import { clsx } from 'clsx';
+
+import { devUseWarning } from '../_util/warning';
 import type { DirectionType } from '../config-provider';
-import warning from '../_util/warning';
-import type { ProgressGradient, ProgressProps, StringGradients } from './progress';
+import type {
+  PercentPositionType,
+  ProgressGradient,
+  ProgressProps,
+  ProgressSemanticAllType,
+  StringGradients,
+} from './progress';
+import { LineStrokeColorVar } from './style';
 import { getSize, getSuccessPercent, validProgress } from './utils';
 
-interface LineProps extends ProgressProps {
+interface LineProps extends Omit<ProgressProps, 'classNames' | 'styles'> {
   prefixCls: string;
   direction?: DirectionType;
-  children: React.ReactNode;
   strokeColor?: string | ProgressGradient;
+  percentPosition: PercentPositionType;
+  classNames: NonNullable<ProgressSemanticAllType['classNames']>;
+  styles: NonNullable<ProgressSemanticAllType['styles']>;
 }
 
 /**
@@ -23,14 +34,11 @@ interface LineProps extends ProgressProps {
  *   }
  */
 export const sortGradient = (gradients: StringGradients) => {
-  let tempArr: any[] = [];
+  let tempArr: { key: number; value?: string }[] = [];
   Object.keys(gradients).forEach((key) => {
-    const formattedKey = parseFloat(key.replace(/%/g, ''));
-    if (!isNaN(formattedKey)) {
-      tempArr.push({
-        key: formattedKey,
-        value: gradients[key],
-      });
+    const formattedKey = Number.parseFloat(key.replace(/%/g, ''));
+    if (!Number.isNaN(formattedKey)) {
+      tempArr.push({ key: formattedKey, value: gradients[key] });
     }
   });
   tempArr = tempArr.sort((a, b) => a.key - b.key);
@@ -62,14 +70,18 @@ export const handleGradient = (
   } = strokeColor;
   if (Object.keys(rest).length !== 0) {
     const sortedGradients = sortGradient(rest as StringGradients);
-    return { backgroundImage: `linear-gradient(${direction}, ${sortedGradients})` };
+    const background = `linear-gradient(${direction}, ${sortedGradients})`;
+    return { background, [LineStrokeColorVar]: background };
   }
-  return { backgroundImage: `linear-gradient(${direction}, ${from}, ${to})` };
+  const background = `linear-gradient(${direction}, ${from}, ${to})`;
+  return { background, [LineStrokeColorVar]: background };
 };
 
 const Line: React.FC<LineProps> = (props) => {
   const {
     prefixCls,
+    classNames,
+    styles,
     direction: directionConfig,
     percent,
     size,
@@ -77,35 +89,45 @@ const Line: React.FC<LineProps> = (props) => {
     strokeColor,
     strokeLinecap = 'round',
     children,
-    trailColor = null,
+    railColor,
+    trailColor,
+    percentPosition,
     success,
   } = props;
 
-  const backgroundProps: React.CSSProperties =
-    strokeColor && typeof strokeColor !== 'string'
-      ? handleGradient(strokeColor, directionConfig)
-      : { backgroundColor: strokeColor };
+  const { align: infoAlign, type: infoPosition } = percentPosition;
+
+  const mergedRailColor = railColor ?? trailColor;
 
   const borderRadius = strokeLinecap === 'square' || strokeLinecap === 'butt' ? 0 : undefined;
 
-  const trailStyle: React.CSSProperties = {
-    backgroundColor: trailColor || undefined,
-    borderRadius,
-  };
+  if (process.env.NODE_ENV !== 'production') {
+    const warning = devUseWarning('Progress');
 
+    warning.deprecated(!('strokeWidth' in props), 'strokeWidth', 'size');
+  }
+
+  // ========================= Size =========================
   const mergedSize = size ?? [-1, strokeWidth || (size === 'small' ? 6 : 8)];
 
   const [width, height] = getSize(mergedSize, 'line', { strokeWidth });
 
-  if (process.env.NODE_ENV !== 'production') {
-    warning(
-      !('strokeWidth' in props),
-      'Progress',
-      '`strokeWidth` is deprecated. Please use `size` instead.',
-    );
-  }
+  // ========================= Rail =========================
+  const railStyle: React.CSSProperties = {
+    backgroundColor: mergedRailColor || undefined,
+    borderRadius,
+    height,
+  };
 
-  const percentStyle: React.CSSProperties = {
+  // ======================== Tracks ========================
+  const trackCls = `${prefixCls}-track`;
+
+  const backgroundProps =
+    strokeColor && typeof strokeColor !== 'string'
+      ? handleGradient(strokeColor, directionConfig)
+      : { [LineStrokeColorVar]: strokeColor, background: strokeColor };
+
+  const percentTrackStyle: React.CSSProperties = {
     width: `${validProgress(percent)}%`,
     height,
     borderRadius,
@@ -114,30 +136,53 @@ const Line: React.FC<LineProps> = (props) => {
 
   const successPercent = getSuccessPercent(props);
 
-  const successPercentStyle: React.CSSProperties = {
+  const successTrackStyle: React.CSSProperties = {
     width: `${validProgress(successPercent)}%`,
     height,
     borderRadius,
     backgroundColor: success?.strokeColor,
   };
 
-  const outerStyle: React.CSSProperties = {
-    width: width < 0 ? '100%' : width,
-    height,
-  };
-
+  // ======================== Render ========================
   return (
-    <>
-      <div className={`${prefixCls}-outer`} style={outerStyle}>
-        <div className={`${prefixCls}-inner`} style={trailStyle}>
-          <div className={`${prefixCls}-bg`} style={percentStyle} />
-          {successPercent !== undefined ? (
-            <div className={`${prefixCls}-success-bg`} style={successPercentStyle} />
-          ) : null}
+    <div
+      className={clsx(`${prefixCls}-body`, classNames.body, {
+        [`${prefixCls}-body-layout-bottom`]: infoAlign === 'center' && infoPosition === 'outer',
+      })}
+      style={{ width: width > 0 ? width : '100%', ...styles.body }}
+    >
+      {/************** Rail **************/}
+      <div
+        className={clsx(`${prefixCls}-rail`, classNames.rail)}
+        style={{ ...railStyle, ...styles.rail }}
+      >
+        {/************* Track *************/}
+        {/* Percent */}
+        <div
+          className={clsx(trackCls, classNames.track)}
+          style={{
+            ...percentTrackStyle,
+            ...styles.track,
+          }}
+        >
+          {infoPosition === 'inner' && children}
         </div>
+
+        {/* Success */}
+        {successPercent !== undefined && (
+          <div
+            className={clsx(trackCls, `${trackCls}-success`, classNames.track)}
+            style={{
+              ...successTrackStyle,
+              ...styles.track,
+            }}
+          />
+        )}
       </div>
-      {children}
-    </>
+
+      {/* Indicator */}
+      {infoPosition === 'outer' && children}
+    </div>
   );
 };
 

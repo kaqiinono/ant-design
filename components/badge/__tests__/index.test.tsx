@@ -1,10 +1,11 @@
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+
+import Badge from '..';
+import type { GetRef } from '../../_util/type';
 import mountTest from '../../../tests/shared/mountTest';
 import rtlTest from '../../../tests/shared/rtlTest';
+import { act, fireEvent, render, waitFakeTimer19 } from '../../../tests/utils';
 import Tooltip from '../../tooltip';
-import Badge from '../index';
 
 describe('Badge', () => {
   mountTest(Badge);
@@ -25,19 +26,31 @@ describe('Badge', () => {
     jest.useRealTimers();
   });
 
-  it('no strict warning', () => {
+  it('no strict warning', async () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { rerender } = render(
-      <Badge dot>
-        <span />
-      </Badge>,
-    );
+    const Comp = () => {
+      const [count, setCount] = React.useState<number | null>(9999);
 
-    rerender(
-      <Badge>
-        <span />
-      </Badge>,
-    );
+      return (
+        <>
+          <Badge count={count}>
+            <span>Badge</span>
+          </Badge>
+
+          <br />
+          <br />
+          <br />
+
+          <button type="button" onClick={() => setCount(null)}>
+            click
+          </button>
+        </>
+      );
+    };
+    const { container } = render(<Comp />);
+
+    fireEvent.click(container.querySelector('button')!);
+    await waitFakeTimer19();
 
     expect(errSpy).not.toHaveBeenCalled();
     errSpy.mockRestore();
@@ -50,10 +63,10 @@ describe('Badge', () => {
 
   it('badge should support float number', () => {
     const { container } = render(<Badge count={3.5} />);
-    expect(container.querySelectorAll('.ant-badge-multiple-words')[0].textContent).toEqual('3.5');
+    expect(container.querySelectorAll('.ant-badge-multiple-words')[0].textContent).toBe('3.5');
 
     const { container: anotherContainer, unmount } = render(<Badge count="3.5" />);
-    expect(anotherContainer.querySelectorAll('.ant-badge-multiple-words')[0].textContent).toEqual(
+    expect(anotherContainer.querySelectorAll('.ant-badge-multiple-words')[0].textContent).toBe(
       '3.5',
     );
 
@@ -67,14 +80,25 @@ describe('Badge', () => {
 
   it('should have an overridden title attribute', () => {
     const { container } = render(<Badge count={10} title="Custom title" />);
-    expect((container.querySelector('.ant-scroll-number')! as HTMLElement).title).toEqual(
-      'Custom title',
+    expect(container.querySelector<HTMLElement>('.ant-scroll-number')?.title).toBe('Custom title');
+  });
+
+  it('should not render title attribute when title is null or false', () => {
+    const { container } = render(
+      <>
+        <Badge count={10} title={null} />
+        <Badge count={11} title={false} />
+      </>,
     );
+
+    const badgeNodes = container.querySelectorAll<HTMLElement>('.ant-scroll-number');
+    expect(badgeNodes[0]).not.toHaveAttribute('title');
+    expect(badgeNodes[1]).not.toHaveAttribute('title');
   });
 
   // https://github.com/ant-design/ant-design/issues/10626
   it('should be composable with Tooltip', () => {
-    const ref = React.createRef<typeof Tooltip>();
+    const ref = React.createRef<GetRef<typeof Tooltip>>();
     const { container } = render(
       <Tooltip title="Fix the error" ref={ref}>
         <Badge status="error" />
@@ -133,11 +157,11 @@ describe('Badge', () => {
   // https://github.com/ant-design/ant-design/issues/15349
   it('should color style  works on Badge', () => {
     const { container } = render(
-      <Badge style={{ color: 'red' }} status="success" text="Success" />,
+      <Badge style={{ color: 'rgb(255, 0, 0)' }} status="success" text="Success" />,
     );
-    expect((container.querySelector('.ant-badge-status-text')! as HTMLElement).style.color).toEqual(
-      'red',
-    );
+    expect(container.querySelector<HTMLElement>('.ant-badge-status-text')).toHaveStyle({
+      color: 'rgb(255, 0, 0)',
+    });
   });
 
   // https://github.com/ant-design/ant-design/issues/15799
@@ -222,31 +246,17 @@ describe('Badge', () => {
     expect(container.querySelectorAll('[title="0"]')).toHaveLength(4);
   });
 
-  it('should support classNames and styles', () => {
-    const { container } = render(
-      <Badge
-        count={10}
-        classNames={{
-          root: 'test-root',
-          indicator: 'test-indicator',
-        }}
-        styles={{
-          root: { backgroundColor: 'yellow' },
-          indicator: { backgroundColor: 'blue' },
-        }}
-      >
-        test
-      </Badge>,
-    );
+  // https://github.com/ant-design/ant-design/issues/49149
+  it('should display custom color and number is 0 when showZero is false visibility', () => {
+    const { container, rerender } = render(<Badge count={0} color="#ff0" />);
+    expect(container.querySelectorAll('.ant-badge-status-dot')).toHaveLength(0);
+    rerender(<Badge count={0} showZero color="#ff0" />);
+    expect(container.querySelectorAll('[title="0"]')).toHaveLength(1);
+  });
 
-    const element = container.querySelector<HTMLSpanElement>('.ant-badge');
-
-    // classNames
-    expect(element).toHaveClass('test-root');
-    expect(element?.querySelector<HTMLElement>('sup')).toHaveClass('test-indicator');
-
-    // styles
-    expect(element).toHaveStyle({ backgroundColor: 'yellow' });
-    expect(element?.querySelector<HTMLElement>('sup')).toHaveStyle({ backgroundColor: 'bule' });
+  it('should support ref when exist status & text', () => {
+    const badgeRef = React.createRef<HTMLSpanElement>();
+    const { container } = render(<Badge ref={badgeRef} status="success" text="Success" />);
+    expect(badgeRef.current).toBe(container.querySelector('.ant-badge'));
   });
 });

@@ -1,4 +1,5 @@
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { GenerateStyle } from '../../theme/internal';
 import type { TableToken } from './index';
 
@@ -11,10 +12,7 @@ const genEmptyStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
         textAlign: 'center',
         color: token.colorTextDisabled,
 
-        [`
-          &:hover > th,
-          &:hover > td,
-        `]: {
+        '&:hover > th, &:hover > td': {
           background: token.colorBgContainer,
         },
       },

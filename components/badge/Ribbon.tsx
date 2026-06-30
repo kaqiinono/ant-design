@@ -1,12 +1,30 @@
-import classNames from 'classnames';
 import * as React from 'react';
+import { clsx } from 'clsx';
+
 import type { PresetColorType } from '../_util/colors';
 import { isPresetColor } from '../_util/colors';
+import { useMergeSemantic } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
 import type { LiteralUnion } from '../_util/type';
-import { ConfigContext } from '../config-provider';
-import useStyle from './style';
+import { useComponentConfig } from '../config-provider/context';
+import useStyle from './style/ribbon';
 
 type RibbonPlacement = 'start' | 'end';
+
+export type RibbonSemanticType = {
+  classNames?: {
+    root?: string;
+    content?: string;
+    indicator?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    content?: React.CSSProperties;
+    indicator?: React.CSSProperties;
+  };
+};
+
+export type RibbonSemanticAllType = GenerateSemantic<RibbonSemanticType, RibbonProps>;
 
 export interface RibbonProps {
   className?: string;
@@ -16,6 +34,9 @@ export interface RibbonProps {
   color?: LiteralUnion<PresetColorType>;
   children?: React.ReactNode;
   placement?: RibbonPlacement;
+  rootClassName?: string;
+  classNames?: RibbonSemanticAllType['classNamesAndFn'];
+  styles?: RibbonSemanticAllType['stylesAndFn'];
 }
 
 const Ribbon: React.FC<RibbonProps> = (props) => {
@@ -27,11 +48,39 @@ const Ribbon: React.FC<RibbonProps> = (props) => {
     children,
     text,
     placement = 'end',
+    rootClassName,
+    styles,
+    classNames: ribbonClassNames,
   } = props;
-  const { getPrefixCls, direction } = React.useContext(ConfigContext);
+  const {
+    getPrefixCls,
+    direction,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('ribbon');
   const prefixCls = getPrefixCls('ribbon', customizePrefixCls);
+
+  const wrapperCls = `${prefixCls}-wrapper`;
+  const [hashId, cssVarCls] = useStyle(prefixCls, wrapperCls);
+
+  // =========== Merged Props for Semantic ===========
+  const mergedProps: RibbonProps = {
+    ...props,
+    placement,
+  };
+
+  const [mergedClassNames, mergedStyles] = useMergeSemantic(
+    [contextClassNames, ribbonClassNames],
+    [contextStyles, styles],
+    {
+      props: mergedProps,
+    },
+  );
+
   const colorInPreset = isPresetColor(color, false);
-  const ribbonCls = classNames(
+  const ribbonCls = clsx(
     prefixCls,
     `${prefixCls}-placement-${placement}`,
     {
@@ -39,22 +88,35 @@ const Ribbon: React.FC<RibbonProps> = (props) => {
       [`${prefixCls}-color-${color}`]: colorInPreset,
     },
     className,
+    contextClassName,
+    mergedClassNames.indicator,
   );
-  const [wrapSSR, hashId] = useStyle(prefixCls);
+
   const colorStyle: React.CSSProperties = {};
   const cornerColorStyle: React.CSSProperties = {};
   if (color && !colorInPreset) {
     colorStyle.background = color;
     cornerColorStyle.color = color;
   }
-  return wrapSSR(
-    <div className={classNames(`${prefixCls}-wrapper`, hashId)}>
+  return (
+    <div
+      className={clsx(wrapperCls, rootClassName, hashId, cssVarCls, mergedClassNames.root)}
+      style={mergedStyles.root}
+    >
       {children}
-      <div className={classNames(ribbonCls, hashId)} style={{ ...colorStyle, ...style }}>
-        <span className={`${prefixCls}-text`}>{text}</span>
+      <div
+        className={clsx(ribbonCls, hashId)}
+        style={{ ...colorStyle, ...mergedStyles.indicator, ...contextStyle, ...style }}
+      >
+        <span
+          className={clsx(`${prefixCls}-content`, mergedClassNames.content)}
+          style={mergedStyles.content}
+        >
+          {text}
+        </span>
         <div className={`${prefixCls}-corner`} style={cornerColorStyle} />
       </div>
-    </div>,
+    </div>
   );
 };
 

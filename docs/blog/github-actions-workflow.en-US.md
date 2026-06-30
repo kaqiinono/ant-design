@@ -2,6 +2,7 @@
 title: Hi, GitHub Actions
 date: 2023-06-06
 author: Wxh16144
+zhihu_url: https://zhuanlan.zhihu.com/p/639266855
 ---
 
 Hi, I'm [Wxh16144](https://github.com/Wxh16144). I have discovered some tools that can improve development efficiency and code quality through learning Ant Design's component library and participating in community contributions. I'd like to take this opportunity to share my experience with you. To help better understand Ant Design, and to apply these techniques to your own projects.
@@ -40,7 +41,7 @@ As a feature on the GitHub platform, issues serve as a centralized information h
 
 ### Ensuring the Quality of Issues
 
-Ensuring issues contain sufficient information helps us to analyze and prioritize. We provide an [issue assistant](http://new-issue.ant.design) to standardize the process of creating issues. Additionally, we use GitHub Actions to check the issues created to auto close if it not pass the assistant's checks. Which will be labeled as [Invalid](https://github.com/ant-design/ant-design/issues?q=label%3AInvalid), aand leaving comment to remind the creator how to ask a question proporly.
+Ensuring issues contain sufficient information helps us to analyze and prioritize. We provide an [issue assistant](http://new-issue.ant.design) to standardize the process of creating issues. Additionally, we use GitHub Actions to check the issues created to auto close if it not pass the assistant's checks. Which will be labeled as [Invalid](https://github.com/ant-design/ant-design/issues?q=label%3AInvalid), and leaving comment to remind the creator how to ask a question properly.
 
 ![invalid-issue-preview](https://user-images.githubusercontent.com/32004925/231660945-509cf97c-43eb-4a1c-acd2-81eeedfe4a73.png)
 
@@ -97,7 +98,7 @@ For every pull request created, GitHub Actions will trigger the build process to
 ### Other Reviews
 
 - The [size-limit.yml](https://github.com/ant-design/ant-design/blob/5dfce5443744271f778313c23eb8ec3a5af481f8/.github/workflows/size-limit.ym) job checks the size of the product resulting from the PR.
-- Recently, the team has added chatGPT to GitHub Actions to perform AI-based code review. The specific job can be found in the [chatgpt-cr.yml](https://github.com/ant-design/ant-design/blob/f7fd474cf8792ea01d03461d407c0edc11828a1c/.github/workflows/chatgpt-cr.yml) file.
+- Recently, the team has added ChatGPT to GitHub Actions to perform AI-based code review. The specific job can be found in the [chatgpt-cr.yml](https://github.com/ant-design/ant-design/blob/f7fd474cf8792ea01d03461d407c0edc11828a1c/.github/workflows/chatgpt-cr.yml) file.
 
 ## Unit Testing
 
@@ -173,12 +174,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
+      - name: Setup utoo
+        uses: utooland/setup-utoo@v1
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -233,7 +232,7 @@ To further optimize dependency installation speed, we can add pnpm caching. Afte
     echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
 - name: Setup pnpm cache
-  uses: actions/cache@v3
+  uses: actions/cache@v4
   with:
     path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}

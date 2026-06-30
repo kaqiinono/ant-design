@@ -1,15 +1,18 @@
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { css } from '@emotion/react';
-import type { MenuProps } from 'antd';
-import type { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import useMenu from '../../hooks/useMenu';
-import useSiteToken from '../../hooks/useSiteToken';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import type { GetProp, MenuProps } from 'antd';
+import { createStyles } from 'antd-style';
+import { clsx } from 'clsx';
 
-const useStyle = () => {
-  const { token } = useSiteToken();
-  const { colorSplit, iconCls, fontSizeIcon } = token;
+import useMenu from '../../hooks/useMenu';
+import SiteContext from '../slots/SiteContext';
+
+type MenuItemType = Extract<GetProp<MenuProps, 'items'>[number], { type?: 'item' }>;
+
+const useStyle = createStyles(({ cssVar, token, css }) => {
+  const { iconCls } = token;
+  const { colorSplit, fontSizeIcon } = cssVar;
 
   return {
     prevNextNav: css`
@@ -17,7 +20,7 @@ const useStyle = () => {
       margin-inline-end: 170px;
       margin-inline-start: 64px;
       overflow: hidden;
-      font-size: 14px;
+      font-size: ${cssVar.fontSize};
       border-top: 1px solid ${colorSplit};
       display: flex;
     `,
@@ -29,12 +32,12 @@ const useStyle = () => {
 
       ${iconCls} {
         color: #999;
-        font-size: ${fontSizeIcon}px;
-        transition: all 0.3s;
+        font-size: ${fontSizeIcon};
+        transition: all ${cssVar.motionDurationSlow};
       }
 
       .chinese {
-        margin-inline-start: 4px;
+        margin-inline-start: ${cssVar.marginXXS};
       }
     `,
     prevNav: css`
@@ -51,7 +54,7 @@ const useStyle = () => {
         position: relative;
         line-height: 0;
         vertical-align: middle;
-        transition: inset-inline-end 0.3s;
+        transition: inset-inline-end ${cssVar.motionDurationSlow};
         margin-inline-end: 1em;
         inset-inline-end: 0;
       }
@@ -75,7 +78,7 @@ const useStyle = () => {
         margin-bottom: 1px;
         line-height: 0;
         vertical-align: middle;
-        transition: inset-inline-start 0.3s;
+        transition: inset-inline-start ${cssVar.motionDurationSlow};
         margin-inline-start: 1em;
         inset-inline-start: 0;
       }
@@ -85,7 +88,7 @@ const useStyle = () => {
       }
     `,
   };
-};
+});
 
 const flattenMenu = (menuItems: MenuProps['items']): MenuProps['items'] | null => {
   if (Array.isArray(menuItems)) {
@@ -103,7 +106,7 @@ const flattenMenu = (menuItems: MenuProps['items']): MenuProps['items'] | null =
 };
 
 const PrevAndNext: React.FC<{ rtl?: boolean }> = ({ rtl }) => {
-  const styles = useStyle();
+  const { styles } = useStyle();
   const beforeProps = { className: 'footer-nav-icon-before' };
   const afterProps = { className: 'footer-nav-icon-after' };
 
@@ -111,6 +114,8 @@ const PrevAndNext: React.FC<{ rtl?: boolean }> = ({ rtl }) => {
   const after = rtl ? <LeftOutlined {...afterProps} /> : <RightOutlined {...afterProps} />;
 
   const [menuItems, selectedKey] = useMenu({ before, after });
+
+  const { isMobile } = React.use(SiteContext);
 
   const [prev, next] = useMemo(() => {
     const flatMenu = flattenMenu(menuItems);
@@ -129,15 +134,19 @@ const PrevAndNext: React.FC<{ rtl?: boolean }> = ({ rtl }) => {
     ];
   }, [menuItems, selectedKey]);
 
+  if (isMobile) {
+    return null;
+  }
+
   return (
-    <section css={styles.prevNextNav}>
+    <section className={styles.prevNextNav}>
       {prev &&
-        React.cloneElement(prev.label as ReactElement, {
-          css: [styles.pageNav, styles.prevNav],
+        React.cloneElement(prev.label as ReactElement<{ className: string }>, {
+          className: clsx(styles.pageNav, styles.prevNav, prev.className),
         })}
       {next &&
-        React.cloneElement(next.label as ReactElement, {
-          css: [styles.pageNav, styles.nextNav],
+        React.cloneElement(next.label as ReactElement<{ className: string }>, {
+          className: clsx(styles.pageNav, styles.nextNav, next.className),
         })}
     </section>
   );

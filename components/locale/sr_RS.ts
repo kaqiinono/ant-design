@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/sr_RS';
+import Pagination from '@rc-component/pagination/locale/sr_RS';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/sr_RS';
 import DatePicker from '../date-picker/locale/sr_RS';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/sr_RS';
 
 const typeTemplate = '${label} nije važeći ${type}';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Izaberi',
+    close: 'Zatvori',
+    show: 'Prikaži',
+    hide: 'Sakrij',
   },
   Table: {
     filterTitle: 'Meni filtera',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'Klikni da sortiraš po padajućem redosledu',
     triggerAsc: 'Klikni da sortiraš po rastućem redosledu',
     cancelSort: 'Klikni da otkažeš sortiranje',
+  },
+  Tour: {
+    Next: 'Sledeće',
+    Previous: 'Prethodno',
+    Finish: 'Završi',
   },
   Modal: {
     okText: 'U redu',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'Kopiraj',
     copied: 'Kopirano',
     expand: 'Proširi',
-  },
-  PageHeader: {
-    back: 'Nazad',
   },
   Form: {
     optional: '(opcionalno)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} ne odgovara obrascu ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Pregled',
   },
 };
 

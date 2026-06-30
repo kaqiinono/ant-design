@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/ro_RO';
+import Pagination from '@rc-component/pagination/locale/ro_RO';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ro_RO';
 import DatePicker from '../date-picker/locale/ro_RO';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ro_RO';
 
 const typeTemplate = '${label} nu conține tipul corect (${type})';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Selectează',
+    close: 'Închide',
+    show: 'Arată',
+    hide: 'Ascunde',
   },
   Table: {
     filterTitle: 'Filtrează',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'Apasă pentru ordonare descrescătoare',
     triggerAsc: 'Apasă pentru ordonare crescătoare',
     cancelSort: 'Apasă pentru a anula ordonarea',
+  },
+  Tour: {
+    Next: 'Următorul',
+    Previous: 'Înapoi',
+    Finish: 'Finalizare',
   },
   Modal: {
     okText: 'OK',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'copiază',
     copied: 'copiat',
     expand: 'extinde',
-  },
-  PageHeader: {
-    back: 'înapoi',
   },
   Form: {
     optional: '(opțional)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} nu respectă șablonul ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Preview',
   },
 };
 

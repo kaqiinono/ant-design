@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/pt_BR';
+import Pagination from '@rc-component/pagination/locale/pt_BR';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/pt_BR';
 import DatePicker from '../date-picker/locale/pt_BR';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/pt_BR';
 
 const typeTemplate = '${label} não é um ${type} válido';
@@ -15,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Por favor escolha',
+    close: 'Fechar',
+    show: 'Mostrar',
+    hide: 'Ocultar',
   },
   Table: {
     filterTitle: 'Menu de Filtro',
     filterConfirm: 'OK',
     filterReset: 'Resetar',
     filterEmptyText: 'Sem filtros',
-    filterCheckall: 'Selecionar todos os itens',
+    filterCheckAll: 'Selecionar todos os itens',
     filterSearchPlaceholder: 'Pesquisar nos filtros',
     emptyText: 'Sem conteúdo',
     selectAll: 'Selecionar página atual',
@@ -80,9 +83,6 @@ const localeValues: Locale = {
     copied: 'copiado',
     expand: 'expandir',
   },
-  PageHeader: {
-    back: 'Retornar',
-  },
   Form: {
     optional: '(opcional)',
     defaultValidateMessages: {
@@ -133,8 +133,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: 'Pré-visualização',
+  QRCode: {
+    expired: 'Código QR expirado',
+    refresh: 'Atualizar',
+    scanned: 'Escaneado',
+  },
+  ColorPicker: {
+    presetEmpty: 'Vazio',
+    transparent: 'Transparente',
+    singleColor: 'Único',
+    gradientColor: 'Gradiente',
   },
 };
 

@@ -1,9 +1,10 @@
-/* eslint-disable import/prefer-default-export */
 import type { CSSInterpolation, CSSObject } from '@ant-design/cssinjs';
-import type { DerivativeToken, FullToken } from '../theme/internal';
-import type { OverrideComponent } from '../theme/util/genComponentStyleHook';
+
+import type { AliasToken, CSSUtil, FullToken, OverrideComponent } from '../theme/internal';
 
 interface CompactItemOptions {
+  componentCls?: string;
+
   focus?: boolean;
   /**
    * Some component borders are implemented on child elements
@@ -19,30 +20,44 @@ interface CompactItemOptions {
 
 // handle border collapse
 function compactItemBorder(
-  token: DerivativeToken,
+  token: AliasToken & CSSUtil,
   parentCls: string,
   options: CompactItemOptions,
+  prefixCls: string,
 ): CSSObject {
   const { focusElCls, focus, borderElCls } = options;
   const childCombinator = borderElCls ? '> *' : '';
-  const hoverEffects = ['hover', focus ? 'focus' : null, 'active']
-    .filter(Boolean)
-    .map((n) => `&:${n} ${childCombinator}`)
-    .join(',');
+  const suffix = childCombinator ? ` ${childCombinator}` : '';
+  const genEffects = (effects: (string | null)[]) =>
+    effects
+      .filter(Boolean)
+      .map((n) => `&:${n}${suffix}`)
+      .join(',');
+  const hoverEffects = genEffects(['hover', focusElCls ? `hover${focusElCls}` : null]);
+  const focusEffects = genEffects([focus ? 'focus' : null, 'active']);
+
   return {
     [`&-item:not(${parentCls}-last-item)`]: {
-      marginInlineEnd: -token.lineWidth,
+      marginInlineEnd: token.calc(token.lineWidth).mul(-1).equal(),
+    },
+
+    [`&-item:not(${prefixCls}-status-success)`]: {
+      zIndex: 2,
     },
 
     '&-item': {
+      [focusEffects]: {
+        zIndex: 3,
+      },
+
       [hoverEffects]: {
-        zIndex: 2,
+        zIndex: 4,
       },
 
       ...(focusElCls
         ? {
             [`&${focusElCls}`]: {
-              zIndex: 2,
+              zIndex: 3,
             },
           }
         : {}),
@@ -91,13 +106,16 @@ export function genCompactItemStyle<T extends OverrideComponent>(
   options: CompactItemOptions = { focus: true },
 ): CSSInterpolation {
   const { componentCls } = token;
+  const { componentCls: customizePrefixCls } = options;
 
-  const compactCls = `${componentCls}-compact`;
+  const mergedComponentCls = customizePrefixCls || componentCls;
+
+  const compactCls = `${mergedComponentCls}-compact`;
 
   return {
     [compactCls]: {
-      ...compactItemBorder(token, compactCls, options),
-      ...compactItemBorderRadius(componentCls, compactCls, options),
+      ...compactItemBorder(token, compactCls, options, mergedComponentCls),
+      ...compactItemBorderRadius(mergedComponentCls, compactCls, options),
     },
   };
 }

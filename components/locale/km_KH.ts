@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/km_KH';
+import Pagination from '@rc-component/pagination/locale/km_KH';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/km_KH';
 import DatePicker from '../date-picker/locale/km_KH';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/km_KH';
 
 const typeTemplate = '${label} is not a valid ${type}';
@@ -13,6 +13,11 @@ const localeValues: Locale = {
   DatePicker,
   TimePicker,
   Calendar,
+  global: {
+    close: 'បិទ',
+    show: 'បង្ហាញ',
+    hide: 'លាក់',
+  },
   Table: {
     filterTitle: 'បញ្ចីតម្រៀប',
     filterConfirm: 'យល់ព្រម',
@@ -29,6 +34,11 @@ const localeValues: Locale = {
     triggerDesc: 'ចុចដើម្បីរៀបតាមលំដាប់ធំ',
     triggerAsc: 'ចុចដើម្បីរៀបតាមលំដាប់តូច​',
     cancelSort: 'ចុចដើម្បីបោះបង់',
+  },
+  Tour: {
+    Next: 'បន្ទាប់',
+    Previous: 'មុន',
+    Finish: 'បញ្ចប់',
   },
   Modal: {
     okText: 'យល់ព្រម',

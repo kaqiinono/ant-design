@@ -1,9 +1,10 @@
-import { Image } from 'antd';
 import React from 'react';
+import { Image } from 'antd';
 
 const App: React.FC = () => (
   <Image
     width={200}
+    alt="basic image"
     preview={{
       imageRender: () => (
         <video
@@ -13,7 +14,7 @@ const App: React.FC = () => (
           src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*uYT7SZwhJnUAAAAAAAAAAAAADgCCAQ"
         />
       ),
-      toolbarRender: () => null,
+      actionsRender: () => null,
     }}
     src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
   />

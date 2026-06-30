@@ -1,133 +1,72 @@
+// [Legacy]
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { StepsToken } from '.';
 import type { GenerateStyle } from '../../theme/internal';
+import { genCssVar } from '../../theme/util/genStyleUtils';
+import { getItemWithWidthStyle } from './util';
 
-const genStepsProgressDotStyle: GenerateStyle<StepsToken, CSSObject> = (token) => {
+const genDotStyle: GenerateStyle<StepsToken, CSSObject> = (token) => {
   const {
     componentCls,
-    descriptionMaxWidth,
-    lineHeight,
-    dotCurrentSize,
+    iconSize,
     dotSize,
-    motionDurationSlow,
+    dotCurrentSize,
+    marginXXS,
+    lineWidthBold,
+    fontSizeSM,
+    antCls,
   } = token;
 
+  const itemCls = `${componentCls}-item`;
+
+  const [varName, varRef] = genCssVar(antCls, 'cmp-steps');
+
   return {
-    [`&${componentCls}-dot, &${componentCls}-dot${componentCls}-small`]: {
-      [`${componentCls}-item`]: {
-        '&-title': {
-          lineHeight,
-        },
+    [`${componentCls}${componentCls}-dot`]: {
+      [varName('icon-size-active')]: dotCurrentSize,
+      [varName('icon-size')]: dotSize,
+      [varName('dot-icon-size')]: dotSize,
+      [varName('dot-icon-border-width')]: lineWidthBold,
+      [varName('rail-size')]: lineWidthBold,
+      [varName('icon-border-width')]: lineWidthBold,
 
-        '&-tail': {
-          top: Math.floor((token.dotSize - token.lineWidth * 3) / 2),
-          width: '100%',
-          marginTop: 0,
-          marginBottom: 0,
-          marginInline: `${descriptionMaxWidth / 2}px 0`,
-          padding: 0,
+      // ========================= Shared ==========================
+      // Icon
+      [`${itemCls}-custom ${itemCls}-icon`]: {
+        fontSize: fontSizeSM,
+      },
 
-          '&::after': {
-            width: `calc(100% - ${token.marginSM * 2}px)`,
-            height: token.lineWidth * 3,
-            marginInlineStart: token.marginSM,
+      [`${itemCls}-icon`]: {
+        position: 'relative',
+
+        '&:after': {
+          content: '""',
+          width: iconSize,
+          height: iconSize,
+          display: 'block',
+          position: 'absolute',
+          top: '50%',
+          left: {
+            _skip_check_: true,
+            value: '50%',
           },
-        },
-        '&-icon': {
-          width: dotSize,
-          height: dotSize,
-          marginInlineStart: (token.descriptionMaxWidth - dotSize) / 2,
-          paddingInlineEnd: 0,
-          lineHeight: `${dotSize}px`,
-          background: 'transparent',
-          border: 0,
-
-          [`${componentCls}-icon-dot`]: {
-            position: 'relative',
-            float: 'left',
-            width: '100%',
-            height: '100%',
-            borderRadius: 100, // very large number
-            transition: `all ${motionDurationSlow}`,
-
-            /* expand hover area */
-            '&::after': {
-              position: 'absolute',
-              top: -token.marginSM,
-              insetInlineStart: (dotSize - token.controlHeightLG * 1.5) / 2,
-              width: token.controlHeightLG * 1.5,
-              height: token.controlHeight,
-              background: 'transparent',
-              content: '""',
-            },
-          },
-        },
-
-        '&-content': {
-          width: descriptionMaxWidth,
-        },
-        [`&-process ${componentCls}-item-icon`]: {
-          position: 'relative',
-          top: (dotSize - dotCurrentSize) / 2,
-          width: dotCurrentSize,
-          height: dotCurrentSize,
-          lineHeight: `${dotCurrentSize}px`,
-          background: 'none',
-          marginInlineStart: (token.descriptionMaxWidth - dotCurrentSize) / 2,
-        },
-        [`&-process ${componentCls}-icon`]: {
-          [`&:first-child ${componentCls}-icon-dot`]: {
-            insetInlineStart: 0,
-          },
-        },
-      },
-    },
-    [`&${componentCls}-vertical${componentCls}-dot`]: {
-      [`${componentCls}-item-icon`]: {
-        marginTop: (token.controlHeight - dotSize) / 2,
-        marginInlineStart: 0,
-        background: 'none',
-      },
-      [`${componentCls}-item-process ${componentCls}-item-icon`]: {
-        marginTop: (token.controlHeight - dotCurrentSize) / 2,
-        top: 0,
-        insetInlineStart: (dotSize - dotCurrentSize) / 2,
-        marginInlineStart: 0,
-      },
-
-      // https://github.com/ant-design/ant-design/issues/18354
-      [`${componentCls}-item > ${componentCls}-item-container > ${componentCls}-item-tail`]: {
-        top: (token.controlHeight - dotSize) / 2,
-        insetInlineStart: 0,
-        margin: 0,
-        padding: `${dotSize + token.paddingXS}px 0 ${token.paddingXS}px`,
-
-        '&::after': {
-          marginInlineStart: (dotSize - token.lineWidth) / 2,
+          transform: 'translate(-50%, -50%)',
         },
       },
 
-      [`&${componentCls}-small`]: {
-        [`${componentCls}-item-icon`]: {
-          marginTop: (token.controlHeightSM - dotSize) / 2,
-        },
-        [`${componentCls}-item-process ${componentCls}-item-icon`]: {
-          marginTop: (token.controlHeightSM - dotCurrentSize) / 2,
-        },
-
-        [`${componentCls}-item > ${componentCls}-item-container > ${componentCls}-item-tail`]: {
-          top: (token.controlHeightSM - dotSize) / 2,
-        },
+      // // >>> active
+      [`${itemCls}-active ${itemCls}-icon`]: {
+        [varName('icon-size')]: varRef('icon-size-active'),
       },
 
-      [`${componentCls}-item:first-child ${componentCls}-icon-dot`]: {
-        insetInlineStart: 0,
-      },
-      [`${componentCls}-item-content`]: {
-        width: 'inherit',
+      // ======================= Horizontal ========================
+      [`&${componentCls}-horizontal`]: {
+        // With descriptionMaxWidth
+        [`&, &${componentCls}-small`]: getItemWithWidthStyle(token, marginXXS),
       },
     },
   };
 };
 
-export default genStepsProgressDotStyle;
+export default genDotStyle;

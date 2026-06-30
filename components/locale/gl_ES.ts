@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/gl_ES';
+import Pagination from '@rc-component/pagination/locale/gl_ES';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/gl_ES';
 import DatePicker from '../date-picker/locale/gl_ES';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/gl_ES';
 
 const typeTemplate = '${label} non é un ${type} válido';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Escolla',
+    close: 'Cerrar',
+    show: 'Mostrar',
+    hide: 'Ocultar',
   },
   Table: {
     filterTitle: 'Filtrar menú',
@@ -23,6 +26,11 @@ const localeValues: Locale = {
     selectAll: 'Seleccionar todo',
     selectInvert: 'Invertir selección',
     sortTitle: 'Ordenar',
+  },
+  Tour: {
+    Next: 'Avanzar',
+    Previous: 'Anterior',
+    Finish: 'Finalizar',
   },
   Modal: {
     okText: 'Aceptar',
@@ -57,9 +65,6 @@ const localeValues: Locale = {
     copy: 'copiar',
     copied: 'copiado',
     expand: 'expandir',
-  },
-  PageHeader: {
-    back: 'voltar',
   },
   Form: {
     defaultValidateMessages: {

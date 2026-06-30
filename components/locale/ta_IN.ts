@@ -1,7 +1,8 @@
-import Pagination from 'rc-pagination/lib/locale/ta_IN';
+import Pagination from '@rc-component/pagination/locale/ta_IN';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ta_IN';
 import DatePicker from '../date-picker/locale/ta_IN';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ta_IN';
 
 const typeTemplate = '${label} is not a valid ${type}';
@@ -15,6 +16,9 @@ const localeValues: Locale = {
   // locales for all comoponents
   global: {
     placeholder: 'தேதியைத் தேர்ந்தெடுக்கவும்',
+    close: 'மூடு',
+    show: 'காட்டு',
+    hide: 'மறை',
   },
   Table: {
     filterTitle: 'பட்டியலை மூடு',
@@ -25,13 +29,18 @@ const localeValues: Locale = {
     selectInvert: 'தலைகீழாக மாற்று',
     sortTitle: 'தலைப்பை வரிசைப்படுத்தவும்',
     filterEmptyText: 'No filters',
-    filterCheckall: 'அனைத்து பொருட்களையும் தேர்ந்தெடுக்கவும்',
+    filterCheckAll: 'அனைத்து பொருட்களையும் தேர்ந்தெடுக்கவும்',
     filterSearchPlaceholder: 'வடிப்பான்களில் தேடவும்',
     expand: 'வரிசையை விரிவாக்கு',
     collapse: 'வரிசையைச் சுருக்கு',
     triggerDesc: 'இறங்குவரிசையை வரிசைப்படுத்த கிளிக் செய்யவும்',
     triggerAsc: 'ஏறுவரிசையில் வரிசைப்படுத்த கிளிக் செய்யவும்',
     cancelSort: 'வரிசையாக்கத்தை ரத்து செய்ய கிளிக் செய்யவும்',
+  },
+  Tour: {
+    Next: 'அடுத்தது',
+    Previous: 'முந்தையது',
+    Finish: 'முடிக்கவும்',
   },
   Modal: {
     okText: 'சரி',
@@ -67,9 +76,6 @@ const localeValues: Locale = {
     copy: 'நகல் எடு',
     copied: 'நகல் எடுக்கப்பட்டது',
     expand: 'விரிவாக்கவும்',
-  },
-  PageHeader: {
-    back: 'பின் செல்லவும்',
   },
   Form: {
     optional: '(optional)',
@@ -120,9 +126,6 @@ const localeValues: Locale = {
         mismatch: '${label} ஆனது ${pattern} வடிவத்துடன் பொருந்தவில்லை',
       },
     },
-  },
-  Image: {
-    preview: 'முன்னோட்ட',
   },
   QRCode: {
     expired: 'QR குறியீடு காலாவதியானது',

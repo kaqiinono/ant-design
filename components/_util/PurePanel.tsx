@@ -1,6 +1,16 @@
-import useMergedState from 'rc-util/lib/hooks/useMergedState';
 import * as React from 'react';
+import { useControlledState } from '@rc-component/util';
+
 import ConfigProvider, { ConfigContext } from '../config-provider';
+import type { AnyObject } from './type';
+
+export function withPureRenderTheme<T extends AnyObject = AnyObject>(Component: React.FC<T>) {
+  return (props: T) => (
+    <ConfigProvider theme={{ token: { motion: false, zIndexPopupBase: 0 } }}>
+      <Component {...props} />
+    </ConfigProvider>
+  );
+}
 
 export interface BaseProps {
   prefixCls?: string;
@@ -8,23 +18,22 @@ export interface BaseProps {
 }
 
 /* istanbul ignore next */
-export default function genPurePanel<ComponentProps extends BaseProps>(
-  Component: any,
-  defaultPrefixCls?: string,
-  getDropdownCls?: null | ((prefixCls: string) => string),
+const genPurePanel = <ComponentProps extends BaseProps = BaseProps>(
+  Component: React.ComponentType<Readonly<ComponentProps>>,
+  alignPropName?: 'align' | 'dropdownAlign' | 'popupAlign',
   postProps?: (props: ComponentProps) => ComponentProps,
-) {
-  type WrapProps = Omit<ComponentProps, 'open' | 'visible'> & { open?: boolean };
+  defaultPrefixCls?: string,
+  getDropdownCls?: (prefixCls: string) => string,
+) => {
+  type WrapProps = ComponentProps & AnyObject;
 
-  return function PurePanel(props: WrapProps) {
+  const PurePanel: React.FC<WrapProps> = (props) => {
     const { prefixCls: customizePrefixCls, style } = props;
 
     const holderRef = React.useRef<HTMLDivElement>(null);
     const [popupHeight, setPopupHeight] = React.useState(0);
     const [popupWidth, setPopupWidth] = React.useState(0);
-    const [open, setOpen] = useMergedState(false, {
-      value: props.open,
-    });
+    const [open, setOpen] = useControlledState(false, props.open);
 
     const { getPrefixCls } = React.useContext(ConfigContext);
     const prefixCls = getPrefixCls(defaultPrefixCls || 'select', customizePrefixCls);
@@ -35,7 +44,7 @@ export default function genPurePanel<ComponentProps extends BaseProps>(
 
       if (typeof ResizeObserver !== 'undefined') {
         const resizeObserver = new ResizeObserver((entries) => {
-          const element: HTMLDivElement = entries[0].target as any;
+          const element = entries[0].target as HTMLDivElement;
           setPopupHeight(element.offsetHeight + 8);
           setPopupWidth(element.offsetWidth);
         });
@@ -45,7 +54,6 @@ export default function genPurePanel<ComponentProps extends BaseProps>(
             ? `.${getDropdownCls(prefixCls)}`
             : `.${prefixCls}-dropdown`;
           const popup = holderRef.current?.querySelector(dropdownCls);
-
           if (popup) {
             clearInterval(interval);
             resizeObserver.observe(popup);
@@ -57,7 +65,7 @@ export default function genPurePanel<ComponentProps extends BaseProps>(
           resizeObserver.disconnect();
         };
       }
-    }, []);
+    }, [prefixCls]);
 
     let mergedProps: WrapProps = {
       ...props,
@@ -66,33 +74,36 @@ export default function genPurePanel<ComponentProps extends BaseProps>(
         margin: 0,
       },
       open,
-      visible: open,
       getPopupContainer: () => holderRef.current!,
     };
 
     if (postProps) {
-      mergedProps = postProps(mergedProps as ComponentProps);
+      mergedProps = postProps(mergedProps);
     }
-
-    return (
-      <ConfigProvider
-        theme={{
-          token: {
-            motion: false,
+    if (alignPropName) {
+      mergedProps = {
+        ...mergedProps,
+        [alignPropName]: {
+          overflow: {
+            adjustX: false,
+            adjustY: false,
           },
-        }}
-      >
-        <div
-          ref={holderRef}
-          style={{
-            paddingBottom: popupHeight,
-            position: 'relative',
-            minWidth: popupWidth,
-          }}
-        >
-          <Component {...mergedProps} />
-        </div>
-      </ConfigProvider>
+        },
+      };
+    }
+    const mergedStyle: React.CSSProperties = {
+      paddingBottom: popupHeight,
+      position: 'relative',
+      minWidth: popupWidth,
+    };
+    return (
+      <div ref={holderRef} style={mergedStyle}>
+        <Component {...mergedProps} />
+      </div>
     );
-  } as typeof Component;
-}
+  };
+
+  return withPureRenderTheme<AnyObject>(PurePanel);
+};
+
+export default genPurePanel;

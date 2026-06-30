@@ -1,34 +1,52 @@
-import { Col, ColorPicker, Row } from 'antd';
-import { FormattedMessage } from 'dumi';
 import React, { useMemo, useState } from 'react';
+import { Col, ColorPicker, Row } from 'antd';
+import type { Color } from 'antd/es/color-picker';
+import { FormattedMessage } from 'dumi';
+
+import useLocale from '../../../hooks/useLocale';
 import ColorPatterns from './ColorPatterns';
 
 const primaryMinSaturation = 70; // 主色推荐最小饱和度
 const primaryMinBrightness = 70; // 主色推荐最小亮度
 
+const locales = {
+  cn: {
+    saturation: (s: string) => `饱和度建议不低于${primaryMinSaturation}（现在${s}）`,
+    brightness: (b: string) => `亮度建议不低于${primaryMinBrightness}（现在${b}）`,
+  },
+  en: {
+    saturation: (s: string) =>
+      `Saturation is recommended not to be lower than ${primaryMinSaturation}（currently${s}）`,
+    brightness: (b: string) =>
+      `Brightness is recommended not to be lower than ${primaryMinBrightness}（currently${b}）`,
+  },
+};
+
 const ColorPaletteTool: React.FC = () => {
   const [primaryColor, setPrimaryColor] = useState<string>('#1890ff');
   const [backgroundColor, setBackgroundColor] = useState<string>('#141414');
-  const [primaryColorInstance, setPrimaryColorInstance] = useState(null);
+  const [primaryColorInstance, setPrimaryColorInstance] = useState<Color | null>(null);
+
+  const [locale] = useLocale(locales);
 
   const handleChangeColor = (color: Color, hex: string) => {
     setPrimaryColor(hex);
     setPrimaryColorInstance(color);
   };
 
-  const handleChangeBackgroundColor = (_, hex: string) => {
+  const handleChangeBackgroundColor = (_: Color, hex: string) => {
     setBackgroundColor(hex);
   };
 
   const colorValidation = useMemo<React.ReactNode>(() => {
     let text = '';
     if (primaryColorInstance) {
-      const { s, b } = primaryColorInstance.toHsb();
+      const { s, b } = primaryColorInstance.toHsb() || {};
       if (s * 100 < primaryMinSaturation) {
-        text += ` 饱和度建议不低于${primaryMinSaturation}（现在 ${(s * 100).toFixed(2)}）`;
+        text += locale.saturation((s * 100).toFixed(2));
       }
       if (b * 100 < primaryMinBrightness) {
-        text += ` 亮度建议不低于${primaryMinBrightness}（现在 ${(b * 100).toFixed(2)}）`;
+        text += locale.brightness((b * 100).toFixed(2));
       }
     }
     return (
@@ -36,12 +54,12 @@ const ColorPaletteTool: React.FC = () => {
         {text.trim()}
       </span>
     );
-  }, [primaryColorInstance]);
+  }, [locale, primaryColorInstance]);
 
   return (
     <div className="color-palette-horizontal color-palette-horizontal-dark">
       <div className="main-color">
-        {ColorPatterns({ color: primaryColor, dark: true, backgroundColor })}
+        <ColorPatterns color={primaryColor} backgroundColor={backgroundColor} dark />
       </div>
       <div className="color-palette-picker">
         <Row>

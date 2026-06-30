@@ -1,9 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
+import Pagination from '@rc-component/pagination/locale/kk_KZ';
 
-import Pagination from 'rc-pagination/lib/locale/kk_KZ';
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/kk_KZ';
 import DatePicker from '../date-picker/locale/kk_KZ';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/kk_KZ';
 
 const typeTemplate: string = '${label} ${type} типі емес';
@@ -16,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Таңдаңыз',
+    close: 'Жабу',
+    show: 'Көрсету',
+    hide: 'Жасыру',
   },
   Table: {
     filterTitle: 'Фильтр',
@@ -32,6 +34,11 @@ const localeValues: Locale = {
     triggerDesc: 'Төмендеуді сұрыптау үшін басыңыз',
     triggerAsc: 'Өсу ретімен сұрыптау үшін басыңыз',
     cancelSort: 'Сұрыптаудан бас тарту үшін басыңыз',
+  },
+  Tour: {
+    Next: 'Келесі',
+    Previous: 'Алдыңғы',
+    Finish: 'Аяқтау',
   },
   Modal: {
     okText: 'Жарайды',
@@ -72,9 +79,6 @@ const localeValues: Locale = {
     copy: 'Көшіру',
     copied: 'Көшірілді',
     expand: 'Жазу',
-  },
-  PageHeader: {
-    back: 'Артқа',
   },
   Form: {
     defaultValidateMessages: {

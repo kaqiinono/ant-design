@@ -1,17 +1,31 @@
-import { resetComponent } from '../../style';
-import { initZoomMotion } from '../../style/motion';
-import getArrowStyle, { MAX_VERTICAL_CONTENT_RADIUS } from '../../style/placementArrow';
-import type { FullToken, GenerateStyle, UseComponentStyleResult } from '../../theme/internal';
-import { genComponentStyleHook, genPresetColor, mergeToken } from '../../theme/internal';
+import { unit } from '@ant-design/cssinjs';
+import type { CSSObject } from '@ant-design/cssinjs';
 
-export interface ComponentToken {
+import { resetComponent } from '../../style';
+import { initFadeMotion, initZoomMotion } from '../../style/motion';
+import type { ArrowOffsetToken } from '../../style/placementArrow';
+import getArrowStyle, {
+  getArrowOffsetToken,
+  MAX_VERTICAL_CONTENT_RADIUS,
+} from '../../style/placementArrow';
+import type { ArrowToken } from '../../style/roundedArrow';
+import { getArrowToken } from '../../style/roundedArrow';
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genPresetColor, genStyleHooks, mergeToken } from '../../theme/internal';
+import { genCssVar } from '../../theme/util/genStyleUtils';
+
+export interface ComponentToken extends ArrowOffsetToken, ArrowToken {
+  /**
+   * @since 6.2.0
+   * @desc 文字提示最大宽度
+   * @descEN Max width of tooltip
+   */
+  maxWidth: number;
   /**
    * @desc 文字提示 z-index
    * @descEN z-index of tooltip
    */
   zIndexPopup: number;
-  /** @deprecated */
-  colorBgDefault: string;
 }
 
 interface TooltipToken extends FullToken<'Tooltip'> {
@@ -20,11 +34,13 @@ interface TooltipToken extends FullToken<'Tooltip'> {
   tooltipColor: string;
   tooltipBg: string;
   tooltipBorderRadius: number;
-  tooltipRadiusOuter: number;
 }
+
+const FALL_BACK_ORIGIN = '50%';
 
 const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
   const {
+    calc,
     componentCls, // ant-tooltip
     tooltipMaxWidth,
     tooltipColor,
@@ -32,11 +48,46 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
     tooltipBorderRadius,
     zIndexPopup,
     controlHeight,
-    boxShadowSecondary,
+    dropShadowPopover,
     paddingSM,
     paddingXS,
-    tooltipRadiusOuter,
+    arrowOffsetHorizontal,
+    sizePopupArrow,
+    antCls,
   } = token;
+
+  const [varName, varRef] = genCssVar(antCls, 'tooltip');
+
+  // arrowOffsetHorizontal + arrowWidth + borderRadius
+  const edgeAlignMinWidth = calc(tooltipBorderRadius)
+    .add(sizePopupArrow)
+    .add(arrowOffsetHorizontal)
+    .equal();
+
+  // borderRadius * 2 + arrowWidth
+  const centerAlignMinWidth = calc(tooltipBorderRadius).mul(2).add(sizePopupArrow).equal();
+
+  const sharedBodyStyle: CSSObject = {
+    minWidth: centerAlignMinWidth,
+    minHeight: controlHeight,
+    padding: `${unit(token.calc(paddingSM).div(2).equal())} ${unit(paddingXS)}`,
+    color: varRef('overlay-color', tooltipColor),
+    textAlign: 'start',
+    textDecoration: 'none',
+    wordWrap: 'break-word',
+    backgroundColor: tooltipBg,
+    borderRadius: tooltipBorderRadius,
+    boxSizing: 'border-box',
+  };
+
+  const sharedTransformOrigin: CSSObject = {
+    // When use `autoArrow`, origin will follow the arrow position
+    [varName('valid-offset-x')]: varRef('arrow-offset-x', 'var(--arrow-x)'),
+    transformOrigin: [
+      varRef('valid-offset-x', FALL_BACK_ORIGIN),
+      `var(--arrow-y, ${FALL_BACK_ORIGIN})`,
+    ].join(' '),
+  };
 
   return [
     {
@@ -48,26 +99,34 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
         width: 'max-content',
         maxWidth: tooltipMaxWidth,
         visibility: 'visible',
-        transformOrigin: `var(--arrow-x, 50%) var(--arrow-y, 50%)`,
+        filter: dropShadowPopover,
+
+        ...sharedTransformOrigin,
+
         '&-hidden': {
           display: 'none',
         },
 
-        '--antd-arrow-background-color': tooltipBg,
+        [varName('arrow-background-color')]: tooltipBg,
 
         // Wrapper for the tooltip content
-        [`${componentCls}-inner`]: {
-          minWidth: controlHeight,
-          minHeight: controlHeight,
-          padding: `${paddingSM / 2}px ${paddingXS}px`,
-          color: tooltipColor,
-          textAlign: 'start',
-          textDecoration: 'none',
-          wordWrap: 'break-word',
-          backgroundColor: tooltipBg,
-          borderRadius: tooltipBorderRadius,
-          boxShadow: boxShadowSecondary,
-          boxSizing: 'border-box',
+        [`${componentCls}-container`]: [sharedBodyStyle, initFadeMotion(token, true)],
+
+        [`&:has(~ ${componentCls}-unique-container)`]: {
+          [`${componentCls}-container`]: {
+            border: 'none',
+            background: 'transparent',
+          },
+        },
+
+        // Align placement should have another min width
+        [[
+          `&-placement-topLeft`,
+          `&-placement-topRight`,
+          `&-placement-bottomLeft`,
+          `&-placement-bottomRight`,
+        ].join(',')]: {
+          minWidth: edgeAlignMinWidth,
         },
 
         // Limit left and right placement radius
@@ -80,7 +139,7 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
           `&-placement-rightBottom`,
         ].join(',')]: {
           [`${componentCls}-inner`]: {
-            borderRadius: Math.min(tooltipBorderRadius, MAX_VERTICAL_CONTENT_RADIUS),
+            borderRadius: token.min(tooltipBorderRadius, MAX_VERTICAL_CONTENT_RADIUS),
           },
         },
 
@@ -91,11 +150,11 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
         // generator for preset color
         ...genPresetColor(token, (colorKey, { darkColor }) => ({
           [`&${componentCls}-${colorKey}`]: {
-            [`${componentCls}-inner`]: {
+            [`${componentCls}-container`]: {
               backgroundColor: darkColor,
             },
             [`${componentCls}-arrow`]: {
-              '--antd-arrow-background-color': darkColor,
+              [varName('arrow-background-color')]: darkColor,
             },
           },
         })),
@@ -108,16 +167,7 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
     },
 
     // Arrow Style
-    getArrowStyle<TooltipToken>(
-      mergeToken<TooltipToken>(token, {
-        borderRadiusOuter: tooltipRadiusOuter,
-      }),
-      {
-        colorBg: 'var(--antd-arrow-background-color)',
-        contentRadius: tooltipBorderRadius,
-        limitVerticalRadius: true,
-      },
-    ),
+    getArrowStyle<TooltipToken>(token, varRef('arrow-background-color'), { arrowShadow: false }),
 
     // Pure Render
     {
@@ -127,40 +177,66 @@ const genTooltipStyle: GenerateStyle<TooltipToken> = (token) => {
         margin: token.sizePopupArrow,
       },
     },
+
+    // Unique Body
+    {
+      [`${componentCls}-unique-container`]: {
+        ...sharedBodyStyle,
+        ...sharedTransformOrigin,
+        position: 'absolute',
+        zIndex: calc(zIndexPopup).sub(1).equal(),
+        filter: dropShadowPopover,
+
+        '&-hidden': {
+          display: 'none',
+        },
+
+        '&-visible': {
+          transition: `all ${token.motionDurationSlow}`,
+        },
+      },
+    },
   ];
 };
 
 // ============================== Export ==============================
-export default (prefixCls: string, injectStyle: boolean): UseComponentStyleResult => {
-  const useOriginHook = genComponentStyleHook(
+export const prepareComponentToken: GetDefaultToken<'Tooltip'> = (token) => ({
+  zIndexPopup: token.zIndexPopupBase + 70,
+  maxWidth: 250,
+  ...getArrowOffsetToken({
+    contentRadius: token.borderRadius,
+    limitVerticalRadius: true,
+  }),
+  ...getArrowToken(
+    mergeToken<TooltipToken>(token, {
+      borderRadiusOuter: Math.min(token.borderRadiusOuter, 4),
+    }),
+  ),
+});
+
+export default (prefixCls: string, rootCls: string, injectStyle = true) => {
+  const useStyle = genStyleHooks(
     'Tooltip',
     (token) => {
-      // Popover use Tooltip as internal component. We do not need to handle this.
-      if (injectStyle === false) {
-        return [];
-      }
-
-      const { borderRadius, colorTextLightSolid, colorBgDefault, borderRadiusOuter } = token;
+      const { borderRadius, colorTextLightSolid, colorBgSpotlight, maxWidth } = token;
 
       const TooltipToken = mergeToken<TooltipToken>(token, {
         // default variables
-        tooltipMaxWidth: 250,
+        tooltipMaxWidth: maxWidth,
         tooltipColor: colorTextLightSolid,
         tooltipBorderRadius: borderRadius,
-        tooltipBg: colorBgDefault,
-        tooltipRadiusOuter: borderRadiusOuter > 4 ? 4 : borderRadiusOuter,
+        tooltipBg: colorBgSpotlight,
       });
 
       return [genTooltipStyle(TooltipToken), initZoomMotion(token, 'zoom-big-fast')];
     },
-    ({ zIndexPopupBase, colorBgSpotlight }) => ({
-      zIndexPopup: zIndexPopupBase + 70,
-      colorBgDefault: colorBgSpotlight,
-    }),
+    prepareComponentToken,
     {
       resetStyle: false,
+      // Popover use Tooltip as internal component. We do not need to handle this.
+      injectStyle,
     },
   );
 
-  return useOriginHook(prefixCls);
+  return useStyle(prefixCls, rootCls);
 };

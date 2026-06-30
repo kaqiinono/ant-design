@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/en_GB';
+import Pagination from '@rc-component/pagination/locale/en_GB';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/en_GB';
 import DatePicker from '../date-picker/locale/en_GB';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/en_GB';
 
 const typeTemplate = '${label} is not a valid ${type}';
@@ -15,13 +15,17 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Please select',
+    close: 'Close',
+    sortable: 'sortable',
+    show: 'Show',
+    hide: 'Hide',
   },
   Table: {
     filterTitle: 'Filter menu',
     filterConfirm: 'OK',
     filterReset: 'Reset',
     filterEmptyText: 'No filters',
-    filterCheckall: 'Select all items',
+    filterCheckAll: 'Select all items',
     filterSearchPlaceholder: 'Search in filters',
     emptyText: 'No data',
     selectAll: 'Select current page',
@@ -34,6 +38,11 @@ const localeValues: Locale = {
     triggerDesc: 'Click to sort descending',
     triggerAsc: 'Click to sort ascending',
     cancelSort: 'Click to cancel sorting',
+  },
+  Tour: {
+    Next: 'Next',
+    Previous: 'Previous',
+    Finish: 'Finish',
   },
   Modal: {
     okText: 'OK',
@@ -64,7 +73,7 @@ const localeValues: Locale = {
     downloadFile: 'Download file',
   },
   Empty: {
-    description: 'No Data',
+    description: 'No data',
   },
   Icon: {
     icon: 'icon',
@@ -74,9 +83,6 @@ const localeValues: Locale = {
     copy: 'Copy',
     copied: 'Copied',
     expand: 'Expand',
-  },
-  PageHeader: {
-    back: 'Back',
   },
   Form: {
     optional: '(optional)',
@@ -128,8 +134,16 @@ const localeValues: Locale = {
       },
     },
   },
-  Image: {
-    preview: 'Preview',
+  QRCode: {
+    expired: 'QR code expired',
+    refresh: 'Refresh',
+    scanned: 'Scanned',
+  },
+  ColorPicker: {
+    presetEmpty: 'Empty',
+    transparent: 'Transparent',
+    singleColor: 'Single',
+    gradientColor: 'Gradient',
   },
 };
 

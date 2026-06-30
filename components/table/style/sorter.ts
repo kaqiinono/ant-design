@@ -1,16 +1,18 @@
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import type { GenerateStyle } from '../../theme/internal';
 import type { TableToken } from './index';
 
 const genSorterStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
-  const { componentCls, marginXXS, fontSizeIcon, tableHeaderIconColor, tableHeaderIconColorHover } =
-    token;
+  const { componentCls, marginXXS, fontSizeIcon, headerIconColor, headerIconHoverColor } = token;
   return {
     [`${componentCls}-wrapper`]: {
       [`${componentCls}-thead th${componentCls}-column-has-sorters`]: {
         outline: 'none',
         cursor: 'pointer',
-        transition: `all ${token.motionDurationSlow}`,
+        // why left 0s? Avoid column header move with transition when left is changed
+        // https://github.com/ant-design/ant-design/issues/50588
+        transition: `all ${token.motionDurationSlow}, left 0s`,
 
         '&:hover': {
           background: token.tableHeaderSortHoverBg,
@@ -49,6 +51,7 @@ const genSorterStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
         position: 'relative',
         zIndex: 1,
         flex: 1,
+        minWidth: 0,
       },
 
       [`${componentCls}-column-sorters`]: {
@@ -66,9 +69,15 @@ const genSorterStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
         },
       },
 
+      [`${componentCls}-column-sorters-tooltip-target-sorter`]: {
+        '&::after': {
+          content: 'none',
+        },
+      },
+
       [`${componentCls}-column-sorter`]: {
         marginInlineStart: marginXXS,
-        color: tableHeaderIconColor,
+        color: headerIconColor,
         fontSize: 0,
         transition: `color ${token.motionDurationSlow}`,
 
@@ -92,7 +101,7 @@ const genSorterStyle: GenerateStyle<TableToken, CSSObject> = (token) => {
       },
 
       [`${componentCls}-column-sorters:hover ${componentCls}-column-sorter`]: {
-        color: tableHeaderIconColorHover,
+        color: headerIconHoverColor,
       },
     },
   };

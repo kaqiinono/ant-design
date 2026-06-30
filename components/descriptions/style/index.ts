@@ -1,7 +1,9 @@
+import { unit } from '@ant-design/cssinjs';
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import { resetComponent, textEllipsis } from '../../style';
-import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook, mergeToken } from '../../theme/internal';
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks, mergeToken } from '../../theme/internal';
 
 /** Component only token. Which will handle additional calculation of alias token */
 export interface ComponentToken {
@@ -11,6 +13,16 @@ export interface ComponentToken {
    * @descEN Background color of label
    */
   labelBg: string;
+  /**
+   * @desc 标签文字颜色
+   * @descEN Text color of label
+   */
+  labelColor: string;
+  /**
+   * @desc 标题文字颜色
+   * @descEN Text color of title
+   */
+  titleColor: string;
   /**
    * @desc 标题下间距
    * @descEN Bottom margin of title
@@ -22,6 +34,11 @@ export interface ComponentToken {
    */
   itemPaddingBottom: number;
   /**
+   * @desc 子项结束间距
+   * @descEN End padding of item
+   */
+  itemPaddingEnd: number;
+  /**
    * @desc 冒号右间距
    * @descEN Right margin of colon
    */
@@ -32,6 +49,11 @@ export interface ComponentToken {
    */
   colonMarginLeft: number;
   /**
+   * @desc 内容区域文字颜色
+   * @descEN Text color of content
+   */
+  contentColor: string;
+  /**
    * @desc 额外区域文字颜色
    * @descEN Text color of extra area
    */
@@ -40,56 +62,68 @@ export interface ComponentToken {
 
 interface DescriptionsToken extends FullToken<'Descriptions'> {}
 
-const genBorderedStyle = (token: DescriptionsToken): CSSObject => {
+const genBorderedStyle: GenerateStyle<DescriptionsToken, CSSObject> = (token) => {
   const { componentCls, labelBg } = token;
   return {
     [`&${componentCls}-bordered`]: {
-      [`${componentCls}-view`]: {
-        border: `${token.lineWidth}px ${token.lineType} ${token.colorSplit}`,
+      [`> ${componentCls}-view`]: {
+        border: `${unit(token.lineWidth)} ${token.lineType} ${token.colorSplit}`,
         '> table': {
           tableLayout: 'auto',
-          borderCollapse: 'collapse',
+        },
+        [`${componentCls}-row`]: {
+          borderBottom: `${unit(token.lineWidth)} ${token.lineType} ${token.colorSplit}`,
+          '&:first-child': {
+            '> th:first-child, > td:first-child': {
+              borderStartStartRadius: token.borderRadiusLG,
+            },
+          },
+          '&:last-child': {
+            borderBottom: 'none',
+            '> th:first-child, > td:first-child': {
+              borderEndStartRadius: token.borderRadiusLG,
+            },
+          },
+          [`> ${componentCls}-item-label, > ${componentCls}-item-content`]: {
+            padding: `${unit(token.padding)} ${unit(token.paddingLG)}`,
+            borderInlineEnd: `${unit(token.lineWidth)} ${token.lineType} ${token.colorSplit}`,
+            '&:last-child': {
+              borderInlineEnd: 'none',
+            },
+          },
+          [`> ${componentCls}-item-label`]: {
+            color: token.colorTextSecondary,
+            backgroundColor: labelBg,
+            '&::after': {
+              display: 'none',
+            },
+          },
         },
       },
-      [`${componentCls}-item-label, ${componentCls}-item-content`]: {
-        padding: `${token.padding}px ${token.paddingLG}px`,
-        borderInlineEnd: `${token.lineWidth}px ${token.lineType} ${token.colorSplit}`,
-        '&:last-child': {
-          borderInlineEnd: 'none',
-        },
-      },
-      [`${componentCls}-item-label`]: {
-        color: token.colorTextSecondary,
-        backgroundColor: labelBg,
-        '&::after': {
-          display: 'none',
-        },
-      },
-      [`${componentCls}-row`]: {
-        borderBottom: `${token.lineWidth}px ${token.lineType} ${token.colorSplit}`,
-        '&:last-child': {
-          borderBottom: 'none',
-        },
-      },
-      [`&${componentCls}-middle`]: {
-        [`${componentCls}-item-label, ${componentCls}-item-content`]: {
-          padding: `${token.paddingSM}px ${token.paddingLG}px`,
+      [`&${componentCls}-medium`]: {
+        [`${componentCls}-row`]: {
+          [`> ${componentCls}-item-label, > ${componentCls}-item-content`]: {
+            padding: `${unit(token.paddingSM)} ${unit(token.paddingLG)}`,
+          },
         },
       },
       [`&${componentCls}-small`]: {
-        [`${componentCls}-item-label, ${componentCls}-item-content`]: {
-          padding: `${token.paddingXS}px ${token.padding}px`,
+        [`${componentCls}-row`]: {
+          [`> ${componentCls}-item-label, > ${componentCls}-item-content`]: {
+            padding: `${unit(token.paddingXS)} ${unit(token.padding)}`,
+          },
         },
       },
     },
   };
 };
 
-const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
+const genDescriptionStyles: GenerateStyle<DescriptionsToken, CSSObject> = (token) => {
   const {
     componentCls,
     extraColor,
     itemPaddingBottom,
+    itemPaddingEnd,
     colonMarginRight,
     colonMarginLeft,
     titleMarginBottom,
@@ -98,7 +132,7 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
     [componentCls]: {
       ...resetComponent(token),
       ...genBorderedStyle(token),
-      [`&-rtl`]: {
+      '&-rtl': {
         direction: 'rtl',
       },
       [`${componentCls}-header`]: {
@@ -109,7 +143,7 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
       [`${componentCls}-title`]: {
         ...textEllipsis,
         flex: 'auto',
-        color: token.colorText,
+        color: token.titleColor,
         fontWeight: token.fontWeightStrong,
         fontSize: token.fontSizeLG,
         lineHeight: token.lineHeightLG,
@@ -120,33 +154,47 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
         fontSize: token.fontSize,
       },
       [`${componentCls}-view`]: {
-        width: '100%',
+        // Use `min-width: 100%` together with `width: 0` instead of
+        // `width: 100%` so the view still fills its container in normal layout,
+        // but won't contribute an extreme intrinsic width when nested inside a
+        // `max-content` sized ancestor (e.g. Table with
+        // `scroll={{ x: 'max-content' }}`). See #54268.
+        width: 0,
+        minWidth: '100%',
         borderRadius: token.borderRadiusLG,
         table: {
           width: '100%',
           tableLayout: 'fixed',
+          borderCollapse: 'collapse',
         },
       },
       [`${componentCls}-row`]: {
         '> th, > td': {
           paddingBottom: itemPaddingBottom,
+          paddingInlineEnd: itemPaddingEnd,
+        },
+        '> th:last-child, > td:last-child': {
+          paddingInlineEnd: 0,
         },
         '&:last-child': {
           borderBottom: 'none',
+          '> th, > td': {
+            paddingBottom: 0,
+          },
         },
       },
       [`${componentCls}-item-label`]: {
-        color: token.colorTextTertiary,
+        color: token.labelColor,
         fontWeight: 'normal',
         fontSize: token.fontSize,
         lineHeight: token.lineHeight,
-        textAlign: `start`,
+        textAlign: 'start',
 
         '&::after': {
           content: '":"',
           position: 'relative',
           top: -0.5, // magic for position
-          marginInline: `${colonMarginLeft}px ${colonMarginRight}px`,
+          marginInline: `${unit(colonMarginLeft)} ${unit(colonMarginRight)}`,
         },
 
         [`&${componentCls}-item-no-colon::after`]: {
@@ -162,7 +210,7 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
       [`${componentCls}-item-content`]: {
         display: 'table-cell',
         flex: 1,
-        color: token.colorText,
+        color: token.contentColor,
         fontSize: token.fontSize,
         lineHeight: token.lineHeight,
         wordBreak: 'break-word',
@@ -180,10 +228,11 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
           [`${componentCls}-item-content`]: {
             display: 'inline-flex',
             alignItems: 'baseline',
+            minWidth: '1em',
           },
         },
       },
-      '&-middle': {
+      '&-medium': {
         [`${componentCls}-row`]: {
           '> th, > td': {
             paddingBottom: token.paddingSM,
@@ -200,19 +249,26 @@ const genDescriptionStyles: GenerateStyle<DescriptionsToken> = (token) => {
     },
   };
 };
+
+export const prepareComponentToken: GetDefaultToken<'Descriptions'> = (token) => ({
+  labelBg: token.colorFillAlter,
+  labelColor: token.colorTextTertiary,
+  titleColor: token.colorText,
+  titleMarginBottom: token.fontSizeSM * token.lineHeightSM,
+  itemPaddingBottom: token.padding,
+  itemPaddingEnd: token.padding,
+  colonMarginRight: token.marginXS,
+  colonMarginLeft: token.marginXXS / 2,
+  contentColor: token.colorText,
+  extraColor: token.colorText,
+});
+
 // ============================== Export ==============================
-export default genComponentStyleHook(
+export default genStyleHooks(
   'Descriptions',
   (token) => {
     const descriptionToken = mergeToken<DescriptionsToken>(token, {});
-    return [genDescriptionStyles(descriptionToken)];
+    return genDescriptionStyles(descriptionToken);
   },
-  (token) => ({
-    labelBg: token.colorFillAlter,
-    titleMarginBottom: token.fontSizeSM * token.lineHeightSM,
-    itemPaddingBottom: token.padding,
-    colonMarginRight: token.marginXS,
-    colonMarginLeft: token.marginXXS / 2,
-    extraColor: token.colorText,
-  }),
+  prepareComponentToken,
 );

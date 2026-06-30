@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/bn_BD';
+import Pagination from '@rc-component/pagination/locale/bn_BD';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/bn_BD';
 import DatePicker from '../date-picker/locale/bn_BD';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/bn_BD';
 
 const typeTemplate = '${label} টি সঠিক ${type} নয়।';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'অনুগ্রহ করে নির্বাচন করুন',
+    close: 'বন্ধ',
+    show: 'দেখান',
+    hide: 'লুকান',
   },
   Table: {
     filterTitle: 'ফিল্টার মেনু',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'অবতরণকে সাজানোর জন্য ক্লিক করুন',
     triggerAsc: 'আরোহী বাছাই করতে ক্লিক করুন',
     cancelSort: 'বাছাই বাতিল করতে ক্লিক করুন',
+  },
+  Tour: {
+    Next: 'পরবর্তী',
+    Previous: 'পূর্ববর্তী',
+    Finish: 'সমাপ্ত',
   },
   Modal: {
     okText: 'ঠিক',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'অনুলিপি',
     copied: 'অনুলিপি হয়েছে',
     expand: 'বিস্তৃত করা',
-  },
-  PageHeader: {
-    back: 'পেছনে',
   },
   Form: {
     optional: '(ঐচ্ছিক)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} এই ${pattern} প্যাটার্নের সাথে মেলে না',
       },
     },
-  },
-  Image: {
-    preview: 'পূর্বরূপ',
   },
 };
 

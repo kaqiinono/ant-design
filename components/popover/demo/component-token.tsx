@@ -1,5 +1,5 @@
-import { ConfigProvider, Popover } from 'antd';
 import React from 'react';
+import { ConfigProvider, Popover } from 'antd';
 
 const { _InternalPanelDoNotUseOrYouWillBeFired: InternalPopover } = Popover;
 
@@ -15,7 +15,7 @@ const App: React.FC = () => (
     theme={{
       components: {
         Popover: {
-          minWidth: 40,
+          titleMinWidth: 40,
         },
       },
     }}

@@ -1,18 +1,41 @@
-import classNames from 'classnames';
-import toArray from 'rc-util/lib/Children/toArray';
 import * as React from 'react';
-import useFlexGapSupport from '../_util/hooks/useFlexGapSupport';
-import { ConfigContext } from '../config-provider';
-import type { SizeType } from '../config-provider/SizeContext';
-import Compact from './Compact';
-import Item from './Item';
+import { toArray } from '@rc-component/util';
+import { clsx } from 'clsx';
 
+import { isPresetSize, isValidGapNumber } from '../_util/gapSize';
+import { useOrientation } from '../_util/hooks';
+import type { Orientation } from '../_util/hooks';
+import { useMergeSemantic } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
+import { isReactRenderable } from '../_util/is';
+import { devUseWarning } from '../_util/warning';
+import { useComponentConfig } from '../config-provider/context';
+import type { SizeType } from '../config-provider/SizeContext';
+import Addon from './Addon';
+import Compact from './Compact';
 import { SpaceContextProvider } from './context';
+import type { SpaceContextType } from './context';
+import Item from './Item';
 import useStyle from './style';
 
 export { SpaceContext } from './context';
 
 export type SpaceSize = SizeType | number;
+
+export type SpaceSemanticType = {
+  classNames?: {
+    root?: string;
+    item?: string;
+    separator?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    item?: React.CSSProperties;
+    separator?: React.CSSProperties;
+  };
+};
+
+export type SpaceSemanticAllType = GenerateSemantic<SpaceSemanticType, SpaceProps>;
 
 export interface SpaceProps extends React.HTMLAttributes<HTMLDivElement> {
   prefixCls?: string;
@@ -20,109 +43,144 @@ export interface SpaceProps extends React.HTMLAttributes<HTMLDivElement> {
   rootClassName?: string;
   style?: React.CSSProperties;
   size?: SpaceSize | [SpaceSize, SpaceSize];
-  direction?: 'horizontal' | 'vertical';
+  /** @deprecated please use `orientation` instead */
+  direction?: Orientation;
+  vertical?: boolean;
+  orientation?: Orientation;
   // No `stretch` since many components do not support that.
   align?: 'start' | 'end' | 'center' | 'baseline';
+  /** @deprecated please use `separator` instead */
   split?: React.ReactNode;
+  separator?: React.ReactNode;
   wrap?: boolean;
-  classNames?: { item: string };
-  styles?: { item: React.CSSProperties };
+  classNames?: SpaceSemanticAllType['classNamesAndFn'];
+  styles?: SpaceSemanticAllType['stylesAndFn'];
 }
 
-const spaceSize = {
-  small: 8,
-  middle: 16,
-  large: 24,
-};
-
-function getNumberSize(size: SpaceSize) {
-  return typeof size === 'string' ? spaceSize[size] : size || 0;
-}
-
-const Space = React.forwardRef<HTMLDivElement, SpaceProps>((props, ref) => {
-  const { getPrefixCls, space, direction: directionConfig } = React.useContext(ConfigContext);
+const InternalSpace = React.forwardRef<HTMLDivElement, SpaceProps>((props, ref) => {
+  const {
+    getPrefixCls,
+    direction: directionConfig,
+    size: contextSize,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('space');
 
   const {
-    size = space?.size || 'small',
+    size = contextSize ?? 'small',
     align,
     className,
     rootClassName,
     children,
-    direction = 'horizontal',
+    direction,
+    orientation,
     prefixCls: customizePrefixCls,
     split,
+    separator,
     style,
+    vertical,
     wrap = false,
-    classNames: customClassNames,
+    classNames,
     styles,
-    ...otherProps
+    ...restProps
   } = props;
 
-  const supportFlexGap = useFlexGapSupport();
+  const [horizontalSize, verticalSize] = Array.isArray(size) ? size : ([size, size] as const);
 
-  const [horizontalSize, verticalSize] = React.useMemo(
-    () =>
-      ((Array.isArray(size) ? size : [size, size]) as [SpaceSize, SpaceSize]).map((item) =>
-        getNumberSize(item),
-      ),
-    [size],
-  );
+  const isPresetVerticalSize = isPresetSize(verticalSize);
+
+  const isPresetHorizontalSize = isPresetSize(horizontalSize);
+
+  const isValidVerticalSize = isValidGapNumber(verticalSize);
+
+  const isValidHorizontalSize = isValidGapNumber(horizontalSize);
 
   const childNodes = toArray(children, { keepEmpty: true });
 
-  const mergedAlign = align === undefined && direction === 'horizontal' ? 'center' : align;
-  const prefixCls = getPrefixCls('space', customizePrefixCls);
-  const [wrapSSR, hashId] = useStyle(prefixCls);
+  const [mergedOrientation, mergedVertical] = useOrientation(orientation, vertical, direction);
 
-  const cn = classNames(
+  const mergedAlign = align === undefined && !mergedVertical ? 'center' : align;
+
+  const mergedSeparator = separator ?? split;
+
+  const prefixCls = getPrefixCls('space', customizePrefixCls);
+
+  const [hashId, cssVarCls] = useStyle(prefixCls);
+
+  // =========== Merged Props for Semantic ==========
+  const mergedProps: SpaceProps = {
+    ...props,
+    size,
+    orientation: mergedOrientation,
+    align: mergedAlign,
+  };
+
+  const [mergedClassNames, mergedStyles] = useMergeSemantic(
+    [contextClassNames, classNames],
+    [contextStyles, styles],
+    {
+      props: mergedProps,
+    },
+  );
+
+  const rootClassNames = clsx(
     prefixCls,
-    space?.className,
+    contextClassName,
     hashId,
-    `${prefixCls}-${direction}`,
+    `${prefixCls}-${mergedOrientation}`,
     {
       [`${prefixCls}-rtl`]: directionConfig === 'rtl',
       [`${prefixCls}-align-${mergedAlign}`]: mergedAlign,
+      [`${prefixCls}-gap-row-${verticalSize}`]: isPresetVerticalSize,
+      [`${prefixCls}-gap-col-${horizontalSize}`]: isPresetHorizontalSize,
     },
     className,
     rootClassName,
+    cssVarCls,
+    mergedClassNames.root,
   );
 
-  const itemClassName = classNames(
-    `${prefixCls}-item`,
-    customClassNames?.item ?? space?.classNames?.item,
-  );
-
-  const marginDirection = directionConfig === 'rtl' ? 'marginLeft' : 'marginRight';
+  const itemClassName = clsx(`${prefixCls}-item`, mergedClassNames.item);
 
   // Calculate latest one
-  let latestIndex = 0;
-  const nodes = childNodes.map((child, i) => {
-    if (child !== null && child !== undefined) {
-      latestIndex = i;
-    }
-
-    const key = (child && child.key) || `${itemClassName}-${i}`;
-
+  const renderedItems = childNodes.map<React.ReactNode>((child, i) => {
+    const key = child?.key || `${itemClassName}-${i}`;
     return (
       <Item
+        prefix={prefixCls}
+        classNames={mergedClassNames}
+        styles={mergedStyles}
         className={itemClassName}
         key={key}
-        direction={direction}
         index={i}
-        marginDirection={marginDirection}
-        split={split}
-        wrap={wrap}
-        style={styles?.item ?? space?.styles?.item}
+        separator={mergedSeparator}
+        style={mergedStyles.item}
       >
         {child}
       </Item>
     );
   });
 
-  const spaceContext = React.useMemo(
-    () => ({ horizontalSize, verticalSize, latestIndex, supportFlexGap }),
-    [horizontalSize, verticalSize, latestIndex, supportFlexGap],
-  );
+  // ======================== Warning ==========================
+  if (process.env.NODE_ENV !== 'production') {
+    const warning = devUseWarning('Space');
+    [
+      ['direction', 'orientation'],
+      ['split', 'separator'],
+    ].forEach(([deprecatedName, newName]) => {
+      warning.deprecated(!(deprecatedName in props), deprecatedName, newName);
+    });
+  }
+
+  const memoizedSpaceContext = React.useMemo<SpaceContextType>(() => {
+    const calcLatestIndex = childNodes.reduce<number>(
+      (latest, child, i) => (isReactRenderable(child) ? i : latest),
+      0,
+    );
+    return { latestIndex: calcLatestIndex };
+  }, [childNodes]);
 
   // =========================== Render ===========================
   if (childNodes.length === 0) {
@@ -133,46 +191,40 @@ const Space = React.forwardRef<HTMLDivElement, SpaceProps>((props, ref) => {
 
   if (wrap) {
     gapStyle.flexWrap = 'wrap';
-
-    // Patch for gap not support
-    if (!supportFlexGap) {
-      gapStyle.marginBottom = -verticalSize;
-    }
   }
 
-  if (supportFlexGap) {
+  if (!isPresetHorizontalSize && isValidHorizontalSize) {
     gapStyle.columnGap = horizontalSize;
+  }
+
+  if (!isPresetVerticalSize && isValidVerticalSize) {
     gapStyle.rowGap = verticalSize;
   }
 
-  return wrapSSR(
+  return (
     <div
       ref={ref}
-      className={cn}
-      style={{
-        ...gapStyle,
-        ...space?.style,
-        ...style,
-      }}
-      {...otherProps}
+      className={rootClassNames}
+      style={{ ...gapStyle, ...mergedStyles.root, ...contextStyle, ...style }}
+      {...restProps}
     >
-      <SpaceContextProvider value={spaceContext}>{nodes}</SpaceContextProvider>
-    </div>,
+      <SpaceContextProvider value={memoizedSpaceContext}>{renderedItems}</SpaceContextProvider>
+    </div>
   );
 });
+
+type CompoundedComponent = typeof InternalSpace & {
+  Compact: typeof Compact;
+  Addon: typeof Addon;
+};
+
+const Space = InternalSpace as CompoundedComponent;
+
+Space.Compact = Compact;
+Space.Addon = Addon;
 
 if (process.env.NODE_ENV !== 'production') {
   Space.displayName = 'Space';
 }
 
-type CompoundedComponent = React.ForwardRefExoticComponent<
-  SpaceProps & React.RefAttributes<HTMLDivElement>
-> & {
-  Compact: typeof Compact;
-};
-
-const CompoundedSpace = Space as CompoundedComponent;
-
-CompoundedSpace.Compact = Compact;
-
-export default CompoundedSpace;
+export default Space;

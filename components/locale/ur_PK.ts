@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/ur_PK';
+import Pagination from '@rc-component/pagination/locale/ur_PK';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ur_PK';
 import DatePicker from '../date-picker/locale/ur_PK';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ur_PK';
 
 const typeTemplate = '${label} درست نہیں ہے ${type}';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'منتخب کریں',
+    close: 'بند کریں',
+    show: 'دکھائیں',
+    hide: 'چھپائیں',
   },
   Table: {
     filterTitle: 'فلٹر مینو',
@@ -32,6 +35,11 @@ const localeValues: Locale = {
     triggerDesc: 'نزولی کو ترتیب دینے کیلئے کلک کریں',
     triggerAsc: 'چڑھنے کو ترتیب دینے کیلئے کلک کریں',
     cancelSort: 'ترتیب کو منسوخ کرنے کیلئے دبائیں',
+  },
+  Tour: {
+    Next: 'اگلا',
+    Previous: 'پچھلا',
+    Finish: 'ختم کریں',
   },
   Modal: {
     okText: 'ٹھیک ہے',
@@ -72,9 +80,6 @@ const localeValues: Locale = {
     copy: 'کاپی',
     copied: 'کاپی ہوگیا',
     expand: 'پھیلائیں',
-  },
-  PageHeader: {
-    back: 'پیچھے',
   },
   Form: {
     optional: '(اختیاری)',
@@ -125,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} پیٹرن سے ملتا نہیں ہے ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'پیش نظارہ',
   },
 };
 

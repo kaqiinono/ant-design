@@ -1,37 +1,42 @@
 import React from 'react';
-import { Avatar, Segmented, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Flex, Segmented } from 'antd';
 
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Flex gap="small" align="flex-start" vertical>
     <Segmented
       options={[
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel" />
+              <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=8" alt="User 1" />
               <div>User 1</div>
             </div>
           ),
           value: 'user1',
+          tooltip: { title: 'hello user1', color: 'gold' },
         },
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
+              <Avatar style={{ backgroundColor: '#f56a00' }} alt="User 2">
+                K
+              </Avatar>
               <div>User 2</div>
             </div>
           ),
           value: 'user2',
+          tooltip: { title: 'hello user2', color: 'pink' },
         },
         {
           label: (
             <div style={{ padding: 4 }}>
-              <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
+              <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} alt="User 3" />
               <div>User 3</div>
             </div>
           ),
           value: 'user3',
+          tooltip: { title: 'hello user3', color: 'geekblue' },
         },
       ]}
     />
@@ -75,7 +80,7 @@ const App: React.FC = () => (
         },
       ]}
     />
-  </Space>
+  </Flex>
 );
 
 export default App;

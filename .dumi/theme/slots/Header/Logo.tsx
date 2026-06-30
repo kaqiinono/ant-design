@@ -1,13 +1,13 @@
-import { css } from '@emotion/react';
-import { Link, useLocation } from 'dumi';
 import * as React from 'react';
-import useSiteToken from '../../../hooks/useSiteToken';
+import { createStyles } from 'antd-style';
+import { useLocation } from 'dumi';
+
+import Link from '../../common/Link';
 import * as utils from '../../utils';
 
-const useStyle = () => {
-  const { token } = useSiteToken();
-
-  const { headerHeight, colorTextHeading, fontFamily, mobileMaxWidth } = token;
+const useStyle = createStyles(({ cssVar, token, css }) => {
+  const { headerHeight, mobileMaxWidth } = token;
+  const { colorTextHeading } = cssVar;
 
   return {
     logo: css`
@@ -17,22 +17,24 @@ const useStyle = () => {
       color: ${colorTextHeading};
       font-weight: bold;
       font-size: 18px;
-      font-family: AlibabaPuHuiTi, ${fontFamily}, sans-serif;
+      font-family: Avenir, ${cssVar.fontFamily}, sans-serif;
       line-height: ${headerHeight}px;
       letter-spacing: -0.18px;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
+      column-gap: ${cssVar.marginSM};
 
       &:hover {
         color: ${colorTextHeading};
       }
 
       img {
+        width: 32px;
         height: 32px;
+        display: inline-block;
         vertical-align: middle;
-        margin-inline-end: 12px;
       }
 
       @media only screen and (max-width: ${mobileMaxWidth}px) {
@@ -44,21 +46,23 @@ const useStyle = () => {
       line-height: 32px;
     `,
   };
-};
+});
 
 export interface LogoProps {
   isZhCN: boolean;
   location: any;
 }
 
+const logoSrc = 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg';
+
 const Logo: React.FC<LogoProps> = ({ isZhCN }) => {
   const { search } = useLocation();
-  const { logo, title } = useStyle();
+  const { styles } = useStyle();
   return (
     <h1>
-      <Link to={utils.getLocalizedPathname('/', isZhCN, search)} css={logo}>
-        <img src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" alt="logo" />
-        <span css={title}>Ant Design</span>
+      <Link to={utils.getLocalizedPathname('/', isZhCN, search)} className={styles.logo}>
+        <img src={logoSrc} draggable={false} alt="logo" />
+        <span className={styles.title}>Ant Design</span>
       </Link>
     </h1>
   );

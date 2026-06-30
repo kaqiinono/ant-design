@@ -1,11 +1,11 @@
+import React from 'react';
 import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { Avatar, List, Space } from 'antd';
-import React from 'react';
 
 const data = Array.from({ length: 23 }).map((_, i) => ({
   href: 'https://ant.design',
   title: `ant design part ${i}`,
-  avatar: `https://xsgames.co/randomusers/avatar.php?g=pixel&key=${i}`,
+  avatar: `https://api.dicebear.com/10.x/lorelei/svg?seed=${i}`,
   description:
     'Ant Design, a design language for background applications, is refined by Ant UED Team.',
   content:
@@ -45,6 +45,7 @@ const App: React.FC = () => (
         ]}
         extra={
           <img
+            draggable={false}
             width={272}
             alt="logo"
             src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"

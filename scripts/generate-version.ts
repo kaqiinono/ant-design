@@ -1,8 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import localPackage from '../package.json';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const { version } = localPackage;
+import { version } from '../package.json';
 
 fs.writeFileSync(
   path.join(__dirname, '..', 'components', 'version', 'version.ts'),

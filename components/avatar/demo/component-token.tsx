@@ -1,6 +1,6 @@
+import React from 'react';
 import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, ConfigProvider, Space, Tooltip } from 'antd';
-import React from 'react';
 
 const App: React.FC = () => (
   <ConfigProvider
@@ -11,9 +11,13 @@ const App: React.FC = () => (
           containerSizeLG: 30,
           containerSizeSM: 16,
 
-          textFontSize: 18,
-          textFontSizeLG: 28,
-          textFontSizeSM: 12,
+          textFontSize: 14,
+          textFontSizeLG: 14,
+          textFontSizeSM: 14,
+
+          iconFontSize: 18,
+          iconFontSizeLG: 28,
+          iconFontSizeSM: 12,
 
           borderRadius: 10,
           groupOverlapping: -10,
@@ -28,8 +32,13 @@ const App: React.FC = () => (
       </Avatar>
     </Space>
     <Space>
-      <Avatar.Group maxCount={2} maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>
-        <Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=2" />
+      <Avatar.Group
+        max={{
+          count: 2,
+          style: { color: '#f56a00', backgroundColor: '#fde3cf' },
+        }}
+      >
+        <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=2" />
         <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
         <Tooltip title="Ant User" placement="top">
           <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />

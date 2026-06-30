@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/my_MM';
+import Pagination from '@rc-component/pagination/locale/my_MM';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/my_MM';
 import DatePicker from '../date-picker/locale/my_MM';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/my_MM';
 
 const typeTemplate = '${label} သည် တရားဝင် ${type} မဟုတ်ပါ';
@@ -16,13 +16,16 @@ const localeValues: Locale = {
   // locales for all components
   global: {
     placeholder: 'ကျေးဇူးပြု၍ ရွေးချယ်ပါ။',
+    close: 'ပိတ်ပါ',
+    show: 'ပြပါ',
+    hide: 'ဖျောက်ပါ',
   },
   Table: {
     filterTitle: 'စစ်ထုတ်ခြင်း မီနူ',
     filterConfirm: 'အိုကေ',
     filterReset: 'ပြန်လည်သတ်မှတ်ပါ။',
     filterEmptyText: 'စစ်ထုတ်မှုများမရှိပါ။',
-    filterCheckall: 'ပစ္စည်းအားလုံးကို ရွေးပါ။',
+    filterCheckAll: 'ပစ္စည်းအားလုံးကို ရွေးပါ။',
     filterSearchPlaceholder: 'စစ်ထုတ်မှုများတွင် ရှာဖွေပါ။',
     selectAll: 'လက်ရှိစာမျက်နှာကို ရွေးပါ။',
     selectInvert: 'လက်ရှိစာမျက်နှာကို ပြောင်းလိုက်ပါ။',
@@ -78,9 +81,6 @@ const localeValues: Locale = {
     copied: 'ကူးယူသည်။',
     expand: 'ချဲ့ထွင်ပါ။',
   },
-  PageHeader: {
-    back: 'ကျော',
-  },
   Form: {
     optional: '(ချန်လှပ်ထားနိုင်သည်)',
     defaultValidateMessages: {
@@ -130,9 +130,6 @@ const localeValues: Locale = {
         mismatch: '${label} သည် ပုံစံ ${pattern} နှင့် မကိုက်ညီပါ',
       },
     },
-  },
-  Image: {
-    preview: 'စမ်းကြည့်ပါ။',
   },
   QRCode: {
     expired: 'QR ကုဒ် သက်တမ်းကုန်သွားပါပြီ။',

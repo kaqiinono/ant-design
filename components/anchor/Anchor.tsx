@@ -1,18 +1,21 @@
-import classNames from 'classnames';
-import useEvent from 'rc-util/lib/hooks/useEvent';
 import * as React from 'react';
+import { useEvent } from '@rc-component/util';
+import { clsx } from 'clsx';
 import scrollIntoView from 'scroll-into-view-if-needed';
 
 import getScroll from '../_util/getScroll';
+import { useMergeSemantic, useSemanticRootStyle } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
+import { isFunction, isNumber, isPlainObject } from '../_util/is';
 import scrollTo from '../_util/scrollTo';
-import warning from '../_util/warning';
+import { devUseWarning } from '../_util/warning';
 import Affix from '../affix';
-import type { ConfigConsumerProps } from '../config-provider';
-import { ConfigContext } from '../config-provider';
+import type { AffixProps } from '../affix';
+import { ConfigContext, useComponentConfig } from '../config-provider/context';
+import useCSSVarCls from '../config-provider/hooks/useCSSVarCls';
 import type { AnchorLinkBaseProps } from './AnchorLink';
 import AnchorLink from './AnchorLink';
 import AnchorContext from './context';
-
 import useStyle from './style';
 
 export interface AnchorLinkItemProps extends AnchorLinkBaseProps {
@@ -35,8 +38,7 @@ function getOffsetTop(element: HTMLElement, container: AnchorContainer): number 
 
   if (rect.width || rect.height) {
     if (container === window) {
-      container = element.ownerDocument!.documentElement!;
-      return rect.top - container.clientTop;
+      return rect.top - element.ownerDocument.documentElement!.clientTop;
     }
     return rect.top - (container as HTMLElement).getBoundingClientRect().top;
   }
@@ -44,25 +46,44 @@ function getOffsetTop(element: HTMLElement, container: AnchorContainer): number 
   return rect.top;
 }
 
-const sharpMatcherRegex = /#([\S ]+)$/;
+const sharpMatcherRegex = /#([^\t\r\n\f\v]+)$/;
 
 interface Section {
   link: string;
   top: number;
 }
 
+export type AnchorSemanticType = {
+  classNames?: {
+    root?: string;
+    item?: string;
+    itemTitle?: string;
+    indicator?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    item?: React.CSSProperties;
+    itemTitle?: React.CSSProperties;
+    indicator?: React.CSSProperties;
+  };
+};
+
+export type AnchorSemanticAllType = GenerateSemantic<AnchorSemanticType, AnchorProps>;
+
 export interface AnchorProps {
   prefixCls?: string;
   className?: string;
   rootClassName?: string;
   style?: React.CSSProperties;
+  classNames?: AnchorSemanticAllType['classNamesAndFn'];
+  styles?: AnchorSemanticAllType['stylesAndFn'];
   /**
    * @deprecated Please use `items` instead.
    */
   children?: React.ReactNode;
   offsetTop?: number;
   bounds?: number;
-  affix?: boolean;
+  affix?: boolean | Omit<AffixProps, 'offsetTop' | 'target' | 'children'>;
   showInkInFixed?: boolean;
   getContainer?: () => AnchorContainer;
   /** Return customize highlight anchor */
@@ -80,11 +101,6 @@ export interface AnchorProps {
   replace?: boolean;
 }
 
-interface InternalAnchorProps extends AnchorProps {
-  anchorPrefixCls: string;
-  rootClassName: string;
-}
-
 export interface AnchorState {
   activeLink: null | string;
 }
@@ -99,21 +115,23 @@ export interface AnchorDefaultProps extends AnchorProps {
 export type AnchorDirection = 'vertical' | 'horizontal';
 
 export interface AntAnchor {
-  registerLink: (link: string) => void;
+  registerLink: (link: string, targetOffset?: number) => void;
   unregisterLink: (link: string) => void;
   activeLink: string | null;
-  scrollTo: (link: string) => void;
+  scrollTo: (link: string, targetOffset?: number) => void;
   onClick?: (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     link: { title: React.ReactNode; href: string },
   ) => void;
   direction: AnchorDirection;
+  classNames?: AnchorSemanticAllType['classNames'];
+  styles?: AnchorSemanticAllType['styles'];
 }
 
-const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
+const Anchor: React.FC<AnchorProps> = (props) => {
   const {
     rootClassName,
-    anchorPrefixCls: prefixCls,
+    prefixCls: customPrefixCls,
     className,
     style,
     offsetTop,
@@ -129,17 +147,19 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
     getContainer,
     getCurrentAnchor,
     replace,
+    classNames,
+    styles,
   } = props;
 
   // =================== Warning =====================
   if (process.env.NODE_ENV !== 'production') {
-    warning(!children, 'Anchor', '`Anchor children` is deprecated. Please use `items` instead.');
-  }
+    const warning = devUseWarning('Anchor');
 
-  if (process.env.NODE_ENV !== 'production') {
+    warning.deprecated(!children, 'Anchor children', 'items');
+
     warning(
       !(anchorDirection === 'horizontal' && items?.some((n) => 'children' in n)),
-      'Anchor',
+      'usage',
       '`Anchor items#children` is not supported when `Anchor` direction is horizontal.',
     );
   }
@@ -149,49 +169,73 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
   const activeLinkRef = React.useRef<string | null>(activeLink);
 
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const spanLinkNode = React.useRef<HTMLSpanElement>(null);
-  const animating = React.useRef<boolean>(false);
+  const spanLinkNodeRef = React.useRef<HTMLSpanElement>(null);
+  const animatingRef = React.useRef<boolean>(false);
+  const scrollRequestIdRef = React.useRef<(() => void) | null>(null);
+  const linkTargetOffsetRef = React.useRef<Record<string, number>>({});
 
-  const { direction, getTargetContainer, anchor } =
-    React.useContext<ConfigConsumerProps>(ConfigContext);
+  const {
+    direction,
+    getPrefixCls,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('anchor');
+
+  const { getTargetContainer } = React.useContext(ConfigContext);
+
+  const prefixCls = getPrefixCls('anchor', customPrefixCls);
+
+  const rootCls = useCSSVarCls(prefixCls);
+  const [hashId, cssVarCls] = useStyle(prefixCls, rootCls);
 
   const getCurrentContainer = getContainer ?? getTargetContainer ?? getDefaultContainer;
 
   const dependencyListItem: React.DependencyList[number] = JSON.stringify(links);
 
-  const registerLink = useEvent<AntAnchor['registerLink']>((link) => {
-    if (!links.includes(link)) {
-      setLinks((prev) => [...prev, link]);
+  const registerLink: AntAnchor['registerLink'] = (link, newTargetOffset) => {
+    setLinks((prev) => {
+      if (!prev.includes(link)) {
+        return [...prev, link];
+      }
+      return prev;
+    });
+    // Store link-level targetOffset for scroll detection
+    if (newTargetOffset !== undefined) {
+      linkTargetOffsetRef.current[link] = newTargetOffset;
     }
-  });
+  };
 
-  const unregisterLink = useEvent<AntAnchor['unregisterLink']>((link) => {
-    if (links.includes(link)) {
-      setLinks((prev) => prev.filter((i) => i !== link));
-    }
-  });
+  const unregisterLink: AntAnchor['unregisterLink'] = (link) => {
+    setLinks((prev) => prev.filter((i) => i !== link));
+    // Clean up targetOffset when unregistering
+    delete linkTargetOffsetRef.current[link];
+  };
 
   const updateInk = () => {
     const linkNode = wrapperRef.current?.querySelector<HTMLElement>(
       `.${prefixCls}-link-title-active`,
     );
-    if (linkNode && spanLinkNode.current) {
-      const { style: inkStyle } = spanLinkNode.current;
+    if (linkNode && spanLinkNodeRef.current) {
+      const { style: inkStyle } = spanLinkNodeRef.current;
       const horizontalAnchor = anchorDirection === 'horizontal';
       inkStyle.top = horizontalAnchor ? '' : `${linkNode.offsetTop + linkNode.clientHeight / 2}px`;
       inkStyle.height = horizontalAnchor ? '' : `${linkNode.clientHeight}px`;
       inkStyle.left = horizontalAnchor ? `${linkNode.offsetLeft}px` : '';
       inkStyle.width = horizontalAnchor ? `${linkNode.clientWidth}px` : '';
       if (horizontalAnchor) {
-        scrollIntoView(linkNode, {
-          scrollMode: 'if-needed',
-          block: 'nearest',
-        });
+        scrollIntoView(linkNode, { scrollMode: 'if-needed', block: 'nearest' });
       }
     }
   };
 
-  const getInternalCurrentAnchor = (_links: string[], _offsetTop = 0, _bounds = 5): string => {
+  const getInternalCurrentAnchor = (
+    _links: string[],
+    _offsetTop: number,
+    _bounds = 5,
+    _linkTargetOffset?: Record<string, number>,
+  ): string => {
     const linkSections: Section[] = [];
     const container = getCurrentContainer();
     _links.forEach((link) => {
@@ -201,8 +245,10 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
       }
       const target = document.getElementById(sharpLinkMatch[1]);
       if (target) {
+        // Use link-level targetOffset if provided, otherwise use global offsetTop
+        const linkOffsetTop = _linkTargetOffset?.[link] ?? _offsetTop;
         const top = getOffsetTop(target, container);
-        if (top < _offsetTop + _bounds) {
+        if (top <= linkOffsetTop + _bounds) {
           linkSections.push({ link, top });
         }
       }
@@ -216,12 +262,14 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
   };
 
   const setCurrentActiveLink = useEvent((link: string) => {
+    // FIXME: Seems a bug since this compare is not equals
+    // `activeLinkRef` is parsed value which will always trigger `onChange` event.
     if (activeLinkRef.current === link) {
       return;
     }
 
     // https://github.com/ant-design/ant-design/issues/30584
-    const newLink = typeof getCurrentAnchor === 'function' ? getCurrentAnchor(link) : link;
+    const newLink = isFunction(getCurrentAnchor) ? getCurrentAnchor(link) : link;
     setActiveLink(newLink);
     activeLinkRef.current = newLink;
 
@@ -231,22 +279,23 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
   });
 
   const handleScroll = React.useCallback(() => {
-    if (animating.current) {
+    if (animatingRef.current) {
       return;
     }
-    if (typeof getCurrentAnchor === 'function') {
-      return;
-    }
+
     const currentActiveLink = getInternalCurrentAnchor(
       links,
-      targetOffset !== undefined ? targetOffset : offsetTop || 0,
+      isNumber(targetOffset) ? targetOffset : offsetTop || 0,
       bounds,
+      linkTargetOffsetRef.current,
     );
-    setCurrentActiveLink(currentActiveLink);
-  }, [dependencyListItem, targetOffset, offsetTop]);
 
-  const handleScrollTo = React.useCallback<(link: string) => void>(
-    (link) => {
+    setCurrentActiveLink(currentActiveLink);
+  }, [links, targetOffset, offsetTop, bounds]);
+
+  const handleScrollTo = React.useCallback<(link: string, targetOffsetParams?: number) => void>(
+    (link, targetOffsetParams) => {
+      const previousActiveLink = activeLinkRef.current;
       setCurrentActiveLink(link);
       const sharpLinkMatch = sharpMatcherRegex.exec(link);
       if (!sharpLinkMatch) {
@@ -257,23 +306,51 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
         return;
       }
 
+      if (animatingRef.current) {
+        if (previousActiveLink === link) {
+          return;
+        }
+        scrollRequestIdRef.current?.();
+      }
+
       const container = getCurrentContainer();
-      const scrollTop = getScroll(container, true);
+      const scrollTop = getScroll(container);
       const eleOffsetTop = getOffsetTop(targetElement, container);
       let y = scrollTop + eleOffsetTop;
-      y -= targetOffset !== undefined ? targetOffset : offsetTop || 0;
-      animating.current = true;
-      scrollTo(y, {
+      const finalTargetOffset = targetOffsetParams ?? targetOffset ?? offsetTop ?? 0;
+      y -= finalTargetOffset;
+      animatingRef.current = true;
+      scrollRequestIdRef.current = scrollTo(y, {
         getContainer: getCurrentContainer,
         callback() {
-          animating.current = false;
+          animatingRef.current = false;
         },
       });
     },
     [targetOffset, offsetTop],
   );
 
-  const wrapperClass = classNames(
+  // =========== Merged Props for Semantic ==========
+  const mergedProps: AnchorProps = {
+    ...props,
+    direction: anchorDirection,
+  };
+
+  const contextStyleRoot = useSemanticRootStyle(contextStyle);
+  const styleRoot = useSemanticRootStyle(style);
+
+  const [mergedClassNames, mergedStyles] = useMergeSemantic<
+    AnchorSemanticAllType['classNames'],
+    AnchorSemanticAllType['styles'],
+    AnchorProps
+  >([contextClassNames, classNames], [contextStyles, contextStyleRoot, styles, styleRoot], {
+    props: mergedProps,
+  });
+
+  const wrapperClass = clsx(
+    hashId,
+    cssVarCls,
+    rootCls,
     rootClassName,
     `${prefixCls}-wrapper`,
     {
@@ -281,21 +358,21 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
     className,
-    anchor?.className,
+    contextClassName,
+    mergedClassNames.root,
   );
 
-  const anchorClass = classNames(prefixCls, {
+  const anchorClass = clsx(prefixCls, {
     [`${prefixCls}-fixed`]: !affix && !showInkInFixed,
   });
 
-  const inkClass = classNames(`${prefixCls}-ink`, {
+  const inkClass = clsx(`${prefixCls}-ink`, mergedClassNames.indicator, {
     [`${prefixCls}-ink-visible`]: activeLink,
   });
 
   const wrapperStyle: React.CSSProperties = {
     maxHeight: offsetTop ? `calc(100vh - ${offsetTop}px)` : '100vh',
-    ...anchor?.style,
-    ...style,
+    ...mergedStyles.root,
   };
 
   const createNestedLink = (options?: AnchorLinkItemProps[]) =>
@@ -310,7 +387,7 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
   const anchorContent = (
     <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
       <div className={anchorClass}>
-        <span className={inkClass} ref={spanLinkNode} />
+        <span className={inkClass} ref={spanLinkNodeRef} style={mergedStyles.indicator} />
         {'items' in props ? createNestedLink(items) : children}
       </div>
     </div>
@@ -326,7 +403,7 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
   }, [dependencyListItem]);
 
   React.useEffect(() => {
-    if (typeof getCurrentAnchor === 'function') {
+    if (isFunction(getCurrentAnchor)) {
       setCurrentActiveLink(getCurrentAnchor(activeLinkRef.current || ''));
     }
   }, [getCurrentAnchor]);
@@ -343,36 +420,24 @@ const AnchorContent: React.FC<InternalAnchorProps> = (props) => {
       activeLink,
       onClick,
       direction: anchorDirection,
+      classNames: mergedClassNames,
+      styles: mergedStyles,
     }),
-    [activeLink, onClick, handleScrollTo, anchorDirection],
+    [activeLink, onClick, handleScrollTo, anchorDirection, mergedStyles, mergedClassNames],
   );
+
+  const affixProps = isPlainObject(affix) ? affix : undefined;
 
   return (
     <AnchorContext.Provider value={memoizedContextValue}>
       {affix ? (
-        <Affix offsetTop={offsetTop} target={getCurrentContainer}>
+        <Affix offsetTop={offsetTop} target={getCurrentContainer} {...affixProps}>
           {anchorContent}
         </Affix>
       ) : (
         anchorContent
       )}
     </AnchorContext.Provider>
-  );
-};
-
-const Anchor: React.FC<AnchorProps> = (props) => {
-  const { prefixCls: customizePrefixCls, rootClassName } = props;
-  const { getPrefixCls } = React.useContext<ConfigConsumerProps>(ConfigContext);
-  const anchorPrefixCls = getPrefixCls('anchor', customizePrefixCls);
-
-  const [wrapSSR, hashId] = useStyle(anchorPrefixCls);
-
-  return wrapSSR(
-    <AnchorContent
-      {...props}
-      rootClassName={classNames(hashId, rootClassName)}
-      anchorPrefixCls={anchorPrefixCls}
-    />,
   );
 };
 

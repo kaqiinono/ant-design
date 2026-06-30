@@ -1,5 +1,7 @@
 ---
-order: 3
+group:
+  title: Basic Usage
+order: 4
 title: Usage with Umi
 ---
 
@@ -54,10 +56,10 @@ Before starting the project, let's install some more dependencies that will be u
 
 ```bash
 $ pnpm i @umijs/plugins -D
-$ pnpm i antd axios @ant-design/pro-layout -S
+$ pnpm i antd axios @ant-design/pro-components -S
 ```
 
-`@umijs/plugins` is the official plugin set of Umi, containing a large number of plugins such as valtio, react-query, styled-components, locale, access, qiankun, etc. `antd` needs no introduction. `axios` is the request library; `@ant-design/pro-layout` is the component used to generate the layouts.
+`@umijs/plugins` is the official plugin set of Umi, containing a large number of plugins such as valtio, react-query, styled-components, locale, access, qiankun, etc. `antd` needs no introduction. `axios` is the request library; `@ant-design/pro-components` is the component used to generate the layouts.
 
 When finished, execute the following command to start the project.
 
@@ -129,14 +131,20 @@ As your application grows, you'll need to share UI elements across multiple page
 Create a new `src/components/ProductList.tsx` file with the following code.
 
 ```tsx
-import { Button, Popconfirm, Table } from 'antd';
 import React from 'react';
+import { Button, Popconfirm, Table } from 'antd';
+import type { TableProps } from 'antd';
 
-const ProductList: React.FC<{ products: { name: string }[]; onDelete: (id: string) => void }> = ({
+interface DataType {
+  id: string;
+  name: string;
+}
+
+const ProductList: React.FC<{ products: DataType[]; onDelete: (id: string) => void }> = ({
   onDelete,
   products,
 }) => {
-  const columns = [
+  const columns: TableProps<DataType>['columns'] = [
     {
       title: 'Name',
       dataIndex: 'name',
@@ -162,7 +170,7 @@ export default ProductList;
 
 Assuming we have agreed on an API interface with the backend developers, we can now use Mock data to locally mock up the data that the API should return, so that front-end and back-end development can proceed simultaneously without the front-end work being blocked because the back-end API is still being developed. Umi provides an out-of-the-box [Mock function](https://umijs.org/docs/guides/mock) that allows you to set up Mock data in a convenient and easy way.
 
-Create a `mock` directory and add a new `products.ts` file to this directory with the following code.
+Create a new `mock/products.ts` file in the root directory with the following code.
 
 ```ts
 import { defineMock } from 'umi';
@@ -219,11 +227,12 @@ export default defineConfig({
 Edit `src/pages/products.tsx` with the following code.
 
 ```tsx
-import ProductList from '@/components/ProductList';
-import axios from 'axios';
 import React from 'react';
+import axios from 'axios';
 import { useMutation, useQuery, useQueryClient } from 'umi';
+
 import styles from './products.less';
+import ProductList from '@/components/ProductList';
 
 export default function Page() {
   const queryClient = useQueryClient();
@@ -240,7 +249,9 @@ export default function Page() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
-  if (productsQuery.isLoading) return null;
+  if (productsQuery.isLoading) {
+    return null;
+  }
   return (
     <div>
       <h1 className={styles.title}>Page products</h1>
@@ -288,7 +299,7 @@ export default defineConfig({
 Edit `src/layouts/index.tsx` with the following code.
 
 ```tsx
-import { ProLayout } from '@ant-design/pro-layout';
+import { ProLayout } from '@ant-design/pro-components';
 import { Link, Outlet, useAppData, useLocation } from 'umi';
 
 export default function Layout() {

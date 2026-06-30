@@ -1,7 +1,10 @@
+import type { CSSObject } from '@ant-design/cssinjs';
+import { unit } from '@ant-design/cssinjs';
+
 import type { UploadToken } from '.';
 import type { GenerateStyle } from '../../theme/internal';
 
-const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
+const genDraggerStyle: GenerateStyle<UploadToken, CSSObject> = (token) => {
   const { componentCls, iconCls } = token;
 
   return {
@@ -12,13 +15,13 @@ const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
         height: '100%',
         textAlign: 'center',
         background: token.colorFillAlter,
-        border: `${token.lineWidth}px dashed ${token.colorBorder}`,
+        border: `${unit(token.lineWidth)} dashed ${token.colorBorder}`,
         borderRadius: token.borderRadiusLG,
         cursor: 'pointer',
         transition: `border-color ${token.motionDurationSlow}`,
 
         [componentCls]: {
-          padding: `${token.padding}px 0`,
+          padding: token.padding,
         },
 
         [`${componentCls}-btn`]: {
@@ -26,6 +29,11 @@ const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
           width: '100%',
           height: '100%',
           outline: 'none',
+          borderRadius: token.borderRadiusLG,
+
+          '&:focus-visible': {
+            outline: `${unit(token.lineWidthFocus)} solid ${token.colorPrimaryBorder}`,
+          },
         },
 
         [`${componentCls}-drag-container`]: {
@@ -33,7 +41,10 @@ const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
           verticalAlign: 'middle',
         },
 
-        [`&:not(${componentCls}-disabled):hover`]: {
+        [`
+          &:not(${componentCls}-disabled):hover,
+          &-hover:not(${componentCls}-disabled)
+        `]: {
           borderColor: token.colorPrimaryHover,
         },
 
@@ -47,7 +58,7 @@ const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
         },
 
         [`p${componentCls}-text`]: {
-          margin: `0 0 ${token.marginXXS}px`,
+          margin: `0 0 ${unit(token.marginXXS)}`,
           color: token.colorTextHeading,
           fontSize: token.fontSizeLG,
         },
@@ -59,8 +70,6 @@ const genDraggerStyle: GenerateStyle<UploadToken> = (token) => {
 
         // ===================== Disabled =====================
         [`&${componentCls}-disabled`]: {
-          cursor: 'not-allowed',
-
           [`p${componentCls}-drag-icon ${iconCls},
             p${componentCls}-text,
             p${componentCls}-hint

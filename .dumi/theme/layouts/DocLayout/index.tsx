@@ -1,19 +1,22 @@
-import ConfigProvider from 'antd/es/config-provider';
-import zhCN from 'antd/es/locale/zh_CN';
-import classNames from 'classnames';
+import { clsx } from 'clsx';
 import dayjs from 'dayjs';
+
 import 'dayjs/locale/zh-cn';
-import { Helmet, useOutlet, useSiteData } from 'dumi';
-import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import { ConfigProvider, theme } from 'antd';
+import zhCN from 'antd/es/locale/zh_CN';
+import { Helmet, useOutlet, useSearchParams, useSiteData } from 'dumi';
+
 import useLocale from '../../../hooks/useLocale';
 import useLocation from '../../../hooks/useLocation';
 import GlobalStyles from '../../common/GlobalStyles';
-import Footer from '../../slots/Footer';
 import Header from '../../slots/Header';
 import SiteContext from '../../slots/SiteContext';
-import '../../static/style';
+import IndexLayout from '../IndexLayout';
 import ResourceLayout from '../ResourceLayout';
 import SidebarLayout from '../SidebarLayout';
+import VersionUpgrade from '../../common/VersionUpgrade';
 
 const locales = {
   cn: {
@@ -32,9 +35,12 @@ const DocLayout: React.FC = () => {
   const location = useLocation();
   const { pathname, search, hash } = location;
   const [locale, lang] = useLocale(locales);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const { direction } = useContext(SiteContext);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null!);
+  const { direction } = React.use(SiteContext);
   const { loading } = useSiteData();
+  const { token } = theme.useToken();
+  const [searchParams] = useSearchParams();
+  const hideLayout = searchParams.get('layout') === 'false';
 
   useLayoutEffect(() => {
     if (lang === 'cn') {
@@ -42,69 +48,59 @@ const DocLayout: React.FC = () => {
     } else {
       dayjs.locale('en');
     }
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     const nprogressHiddenStyle = document.getElementById('nprogress-style');
-    if (nprogressHiddenStyle) {
-      timerRef.current = setTimeout(() => {
-        nprogressHiddenStyle.parentNode?.removeChild(nprogressHiddenStyle);
-      }, 0);
-    }
+    timerRef.current = setTimeout(() => {
+      nprogressHiddenStyle?.remove();
+    }, 0);
+    return () => clearTimeout(timerRef.current);
   }, []);
 
   // handle hash change or visit page hash from Link component, and jump after async chunk loaded
   useEffect(() => {
     const id = hash.replace('#', '');
-
-    if (id) document.getElementById(decodeURIComponent(id))?.scrollIntoView();
+    if (id) {
+      document.getElementById(decodeURIComponent(id))?.scrollIntoView();
+    }
   }, [loading, hash]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof (window as any).ga !== 'undefined') {
       (window as any).ga('send', 'pageview', pathname + search);
     }
-    if (typeof (window as any)._hmt !== 'undefined') {
-      (window as any)._hmt.push(['_trackPageview', pathname + search]);
-    }
-  }, [location]);
+  }, [pathname, search]);
 
-  const content = useMemo(() => {
-    if (
-      ['', '/'].some((path) => path === pathname) ||
-      ['/index'].some((path) => pathname.startsWith(path))
-    ) {
+  const content = React.useMemo<React.ReactNode>(() => {
+    if (['', '/'].includes(pathname) || ['/index'].some((path) => pathname.startsWith(path))) {
       return (
-        <>
+        <IndexLayout title={locale.title} desc={locale.description}>
           {outlet}
-          <Footer />
-        </>
+        </IndexLayout>
       );
     }
     if (pathname.startsWith('/docs/resource')) {
       return <ResourceLayout>{outlet}</ResourceLayout>;
     }
-    if (pathname.startsWith('/theme-editor')) {
+    if (pathname.startsWith('/theme-editor') || pathname.startsWith('/theme-market')) {
       return outlet;
     }
     return <SidebarLayout>{outlet}</SidebarLayout>;
-  }, [pathname, outlet]);
+  }, [pathname, outlet, locale.title, locale.description]);
 
   return (
     <>
       <Helmet encodeSpecialCharacters={false}>
         <html
-          lang={lang}
+          lang={lang === 'cn' ? 'zh-CN' : lang}
           data-direction={direction}
-          className={classNames({ rtl: direction === 'rtl' })}
+          className={clsx({ rtl: direction === 'rtl' })}
         />
-        <title>{locale?.title}</title>
         <link
           sizes="144x144"
           href="https://gw.alipayobjects.com/zos/antfincdn/UmVnt3t4T0/antd.png"
         />
-        <meta name="description" content={locale.description} />
-        <meta property="og:title" content={locale?.title} />
         <meta property="og:description" content={locale.description} />
         <meta property="og:type" content="website" />
         <meta
@@ -112,9 +108,14 @@ const DocLayout: React.FC = () => {
           content="https://gw.alipayobjects.com/zos/rmsportal/rlpTLlbMzTNYuZGGCVYM.png"
         />
       </Helmet>
-      <ConfigProvider direction={direction} locale={lang === 'cn' ? zhCN : undefined}>
+      <ConfigProvider
+        direction={direction}
+        locale={lang === 'cn' ? zhCN : undefined}
+        theme={{ token: { fontFamily: `AlibabaSans, ${token.fontFamily}` } }}
+      >
         <GlobalStyles />
-        <Header />
+        {!hideLayout && <Header />}
+        <VersionUpgrade />
         {content}
       </ConfigProvider>
     </>

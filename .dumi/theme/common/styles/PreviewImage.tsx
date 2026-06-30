@@ -1,16 +1,16 @@
-import { css, Global } from '@emotion/react';
 import React from 'react';
-import useSiteToken from '../../../hooks/useSiteToken';
+import { css, Global } from '@emotion/react';
+import { useTheme } from 'antd-style';
 
-export default () => {
-  const { token } = useSiteToken();
+const PreviewImage: React.FC = () => {
+  const token = useTheme();
 
   return (
     <Global
       styles={css`
         .preview-image-boxes {
           display: flex;
-          float: right;
+          float: inline-end;
           clear: both;
           width: 496px;
           margin: 0 0 70px 64px;
@@ -24,7 +24,7 @@ export default () => {
           }
 
           .ant-row-rtl & {
-            float: left;
+            float: inline-start;
             margin: 0 64px 70px 0;
           }
         }
@@ -34,16 +34,16 @@ export default () => {
         }
 
         .preview-image-box {
-          float: left;
+          float: inline-start;
           width: 100%;
         }
 
         .preview-image-box + .preview-image-box {
-          margin-left: 24px;
+          margin-inline-start: ${token.marginLG}px;
 
           .ant-row-rtl & {
-            margin-right: 24px;
-            margin-left: 0;
+            margin-inline-end: ${token.marginLG}px;
+            margin-inline-start: 0;
           }
         }
 
@@ -51,7 +51,7 @@ export default () => {
           position: relative;
           display: inline-block;
           width: 100%;
-          padding: 16px;
+          padding: ${token.padding}px;
           text-align: center;
           background: #f2f4f5;
           box-sizing: border-box;
@@ -70,14 +70,14 @@ export default () => {
           + svg {
             position: absolute;
             top: 0;
-            left: 0;
+            inset-inline-start: 0;
           }
         }
 
         .preview-image-wrapper.good::after {
           position: absolute;
           bottom: 0;
-          left: 0;
+          inset-inline-start: 0;
           display: block;
           width: 100%;
           height: 3px;
@@ -88,7 +88,7 @@ export default () => {
         .preview-image-wrapper.bad::after {
           position: absolute;
           bottom: 0;
-          left: 0;
+          inset-inline-start: 0;
           display: block;
           width: 100%;
           height: 3px;
@@ -97,15 +97,15 @@ export default () => {
         }
 
         .preview-image-title {
-          margin-top: 20px;
+          margin-top: ${token.marginMD}px;
           color: ${token.colorText};
-          font-size: 12px;
+          font-size: ${token.fontSizeSM}px;
         }
 
         .preview-image-description {
           margin-top: 2px;
           color: ${token.colorTextSecondary};
-          font-size: 12px;
+          font-size: ${token.fontSizeSM}px;
           line-height: 1.5;
         }
 
@@ -118,11 +118,11 @@ export default () => {
         .preview-image-box img {
           box-sizing: border-box;
           max-width: 100%;
-          padding: 12px;
+          padding: ${token.paddingSM}px;
           background: ${token.colorBgContainer};
           border-radius: ${token.borderRadius}px;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all ${token.motionDurationSlow};
 
           &.no-padding {
             padding: 0;
@@ -132,8 +132,12 @@ export default () => {
 
         .preview-image-boxes.preview-image-boxes-with-carousel img {
           padding: 0;
-          box-shadow: 0 1px 0 0 #ddd, 0 3px 0 0 ${token.colorBgContainer}, 0 4px 0 0 #ddd,
-            0 6px 0 0 ${token.colorBgContainer}, 0 7px 0 0 #ddd;
+          box-shadow:
+            0 1px 0 0 #ddd,
+            0 3px 0 0 ${token.colorBgContainer},
+            0 4px 0 0 #ddd,
+            0 6px 0 0 ${token.colorBgContainer},
+            0 7px 0 0 #ddd;
         }
 
         .preview-image-box img:hover {
@@ -142,7 +146,7 @@ export default () => {
 
         .transition-video-player,
         .motion-video-min {
-          float: right;
+          float: inline-end;
           width: 600px;
           padding: 0 0 70px 20px;
 
@@ -151,7 +155,7 @@ export default () => {
           }
 
           .ant-row-rtl & {
-            float: left;
+            float: inline-start;
           }
         }
 
@@ -162,7 +166,7 @@ export default () => {
         .motion-principle-wrapper {
           width: 100%;
           max-width: 900px;
-          margin: 48px 0 24px;
+          margin: ${token.marginXXL}px 0 ${token.marginLG}px;
         }
 
         .principle-wrapper {
@@ -173,24 +177,24 @@ export default () => {
             box-sizing: border-box;
             width: 100%;
             min-height: 180px;
-            margin-right: 12.5%;
-            margin-bottom: 24px;
-            padding: 24px;
+            margin-inline-end: 12.5%;
+            margin-bottom: ${token.marginLG}px;
+            padding: ${token.paddingLG}px;
             font-size: 24px;
             text-align: center;
             border: 1px solid #e8e8e8;
-            border-radius: 4px;
+            border-radius: ${token.borderRadiusSM}px;
 
             &:last-child {
-              margin-right: 0;
+              margin-inline-end: 0;
             }
 
             h4 {
-              margin: 16px 0 8px;
+              margin: ${token.margin}px 0 ${token.marginXS}px;
             }
 
             p {
-              font-size: 12px;
+              font-size: ${token.fontSizeSM}px;
               line-height: 24px;
             }
           }
@@ -199,3 +203,5 @@ export default () => {
     />
   );
 };
+
+export default PreviewImage;

@@ -1,15 +1,17 @@
+import React from 'react';
 import VerticalAlignTopOutlined from '@ant-design/icons/VerticalAlignTopOutlined';
-import classNames from 'classnames';
-import CSSMotion from 'rc-motion';
-import omit from 'rc-util/lib/omit';
-import * as React from 'react';
-import type { ConfigConsumerProps } from '../config-provider';
-import { ConfigContext } from '../config-provider';
+import CSSMotion from '@rc-component/motion';
+import { omit } from '@rc-component/util';
+import { clsx } from 'clsx';
+
 import getScroll from '../_util/getScroll';
 import { cloneElement } from '../_util/reactNode';
 import scrollTo from '../_util/scrollTo';
 import throttleByAnimationFrame from '../_util/throttleByAnimationFrame';
-import warning from '../_util/warning';
+import { devUseWarning } from '../_util/warning';
+import type { ConfigConsumerProps } from '../config-provider';
+import { ConfigContext } from '../config-provider';
+import useCSSVarCls from '../config-provider/hooks/useCSSVarCls';
 import useStyle from './style';
 
 export interface BackTopProps {
@@ -17,14 +19,16 @@ export interface BackTopProps {
   onClick?: React.MouseEventHandler<HTMLElement>;
   target?: () => HTMLElement | Window | Document;
   prefixCls?: string;
-  children?: React.ReactNode;
   className?: string;
   rootClassName?: string;
   style?: React.CSSProperties;
   duration?: number;
 }
 
-const BackTop: React.FC<BackTopProps> = (props) => {
+/**
+ * @deprecated Please use `FloatButton.BackTop` instead.
+ */
+const BackTop: React.FC<React.PropsWithChildren<BackTopProps>> = (props) => {
   const {
     prefixCls: customizePrefixCls,
     className,
@@ -33,23 +37,25 @@ const BackTop: React.FC<BackTopProps> = (props) => {
     target,
     onClick,
     duration = 450,
+    children,
   } = props;
+
   const [visible, setVisible] = React.useState<boolean>(visibilityHeight === 0);
 
   const ref = React.useRef<HTMLDivElement>(null);
 
-  const getDefaultTarget = (): HTMLElement | Document | Window =>
-    ref.current && ref.current.ownerDocument ? ref.current.ownerDocument : window;
+  const getDefaultTarget = () => ref.current?.ownerDocument || window;
 
   const handleScroll = throttleByAnimationFrame(
     (e: React.UIEvent<HTMLElement, UIEvent> | { target: any }) => {
-      const scrollTop = getScroll(e.target, true);
+      const scrollTop = getScroll(e.target);
       setVisible(scrollTop >= visibilityHeight);
     },
   );
 
   if (process.env.NODE_ENV !== 'production') {
-    warning(false, 'BackTop', '`BackTop` is deprecated, please use `FloatButton.BackTop` instead.');
+    const warning = devUseWarning('BackTop');
+    warning.deprecated(false, 'BackTop', 'FloatButton.BackTop');
   }
 
   React.useEffect(() => {
@@ -71,11 +77,16 @@ const BackTop: React.FC<BackTopProps> = (props) => {
   const { getPrefixCls, direction } = React.useContext<ConfigConsumerProps>(ConfigContext);
 
   const prefixCls = getPrefixCls('back-top', customizePrefixCls);
-  const rootPrefixCls = getPrefixCls();
-  const [wrapSSR, hashId] = useStyle(prefixCls);
 
-  const classString = classNames(
+  const rootPrefixCls = getPrefixCls();
+
+  const rootCls = useCSSVarCls(prefixCls);
+
+  const [hashId, cssVarCls] = useStyle(prefixCls, rootCls);
+
+  const classString = clsx(
     hashId,
+    cssVarCls,
     prefixCls,
     {
       [`${prefixCls}-rtl`]: direction === 'rtl',
@@ -102,21 +113,21 @@ const BackTop: React.FC<BackTopProps> = (props) => {
     </div>
   );
 
-  return wrapSSR(
+  return (
     <div {...divProps} className={classString} onClick={scrollToTop} ref={ref}>
       <CSSMotion visible={visible} motionName={`${rootPrefixCls}-fade`}>
         {({ className: motionClassName }) =>
-          cloneElement(props.children || defaultElement, ({ className: cloneCls }) => ({
-            className: classNames(motionClassName, cloneCls),
+          cloneElement(children || defaultElement, ({ className: cloneCls }) => ({
+            className: clsx(motionClassName, cloneCls),
           }))
         }
       </CSSMotion>
-    </div>,
+    </div>
   );
 };
 
 if (process.env.NODE_ENV !== 'production') {
-  BackTop.displayName = 'BackTop';
+  BackTop.displayName = 'Deprecated.BackTop';
 }
 
-export default React.memo(BackTop);
+export default BackTop;

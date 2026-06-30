@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/pl_PL';
+import Pagination from '@rc-component/pagination/locale/pl_PL';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/pl_PL';
 import DatePicker from '../date-picker/locale/pl_PL';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/pl_PL';
 
 const typeTemplate = '${label} nie posiada poprawnej wartości dla typu ${type}';
@@ -15,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Wybierz',
+    close: 'Zamknij',
+    show: 'Pokaż',
+    hide: 'Ukryj',
   },
   Table: {
     filterTitle: 'Menu filtra',
     filterConfirm: 'OK',
     filterReset: 'Usuń filtry',
     filterEmptyText: 'Brak filtrów',
-    filterCheckall: 'Wybierz wszystkie elementy',
+    filterCheckAll: 'Wybierz wszystkie elementy',
     filterSearchPlaceholder: 'Szukaj w filtrach',
     emptyText: 'Brak danych',
     selectAll: 'Zaznacz bieżącą stronę',
@@ -34,6 +37,11 @@ const localeValues: Locale = {
     triggerDesc: 'Sortuj malejąco',
     triggerAsc: 'Sortuj rosnąco',
     cancelSort: 'Usuń sortowanie',
+  },
+  Tour: {
+    Next: 'Dalej',
+    Previous: 'Wróć',
+    Finish: 'Zakończ',
   },
   Modal: {
     okText: 'OK',
@@ -74,9 +82,6 @@ const localeValues: Locale = {
     copy: 'Kopiuj',
     copied: 'Skopiowany',
     expand: 'Rozwiń',
-  },
-  PageHeader: {
-    back: 'Wstecz',
   },
   Form: {
     optional: '(opcjonalne)',
@@ -127,9 +132,6 @@ const localeValues: Locale = {
         mismatch: '${label} nie posiada wartości zgodnej ze wzorem ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Podgląd',
   },
 };
 

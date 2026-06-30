@@ -1,12 +1,15 @@
+import type { CSSProperties } from 'react';
+import { unit } from '@ant-design/cssinjs';
 import type { CSSObject } from '@ant-design/cssinjs';
+
 import { resetComponent } from '../../style';
-import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook, mergeToken } from '../../theme/internal';
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks, mergeToken } from '../../theme/internal';
 
 export interface ComponentToken {
   /**
-   * @desc 头像背景色
-   * @descEN Background color of Avatar
+   * @desc 头像尺寸
+   * @descEN Size of Avatar
    */
   containerSize: number;
   /**
@@ -35,6 +38,21 @@ export interface ComponentToken {
    */
   textFontSizeSM: number;
   /**
+   * @desc 头像图标大小
+   * @descEN Font size of Avatar icon
+   */
+  iconFontSize: number;
+  /**
+   * @desc 大号头像图标大小
+   * @descEN Font size of large Avatar icon
+   */
+  iconFontSizeLG: number | string;
+  /**
+   * @desc 小号头像图标大小
+   * @descEN Font size of small Avatar icon
+   */
+  iconFontSizeSM: number;
+  /**
    * @desc 头像组间距
    * @descEN Spacing between avatars in a group
    */
@@ -51,13 +69,17 @@ export interface ComponentToken {
   groupBorderColor: string;
 }
 
+/**
+ * @desc Avatar 组件的 Token
+ * @descEN Token for Avatar component
+ */
 type AvatarToken = FullToken<'Avatar'> & {
   avatarBgColor: string;
   avatarBg: string;
   avatarColor: string;
 };
 
-const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
+const genBaseStyle: GenerateStyle<AvatarToken, CSSObject> = (token) => {
   const {
     antCls,
     componentCls,
@@ -70,6 +92,9 @@ const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
     textFontSize,
     textFontSizeLG,
     textFontSizeSM,
+    iconFontSize,
+    iconFontSizeLG,
+    iconFontSizeSM,
     borderRadius,
     borderRadiusLG,
     borderRadiusSM,
@@ -78,27 +103,23 @@ const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
   } = token;
 
   // Avatar size style
-  const avatarSizeStyle = (size: number, fontSize: number, radius: number): CSSObject => ({
+  const avatarSizeStyle = (
+    size: number,
+    fontSize: number,
+    iconFontSize: CSSProperties['fontSize'],
+    radius: number,
+  ): CSSObject => ({
     width: size,
     height: size,
-    lineHeight: `${size - lineWidth * 2}px`,
     borderRadius: '50%',
+    fontSize,
 
     [`&${componentCls}-square`]: {
       borderRadius: radius,
     },
 
-    [`${componentCls}-string`]: {
-      position: 'absolute',
-      left: {
-        _skip_check_: true,
-        value: '50%',
-      },
-      transformOrigin: '0 center',
-    },
-
     [`&${componentCls}-icon`]: {
-      fontSize,
+      fontSize: iconFontSize,
       [`> ${iconCls}`]: {
         margin: 0,
       },
@@ -109,16 +130,18 @@ const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
     [componentCls]: {
       ...resetComponent(token),
       position: 'relative',
-      display: 'inline-block',
+      display: 'inline-flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       overflow: 'hidden',
       color: avatarColor,
       whiteSpace: 'nowrap',
       textAlign: 'center',
       verticalAlign: 'middle',
       background: avatarBg,
-      border: `${lineWidth}px ${lineType} transparent`,
+      border: `${unit(lineWidth)} ${lineType} transparent`,
 
-      [`&-image`]: {
+      '&-image': {
         background: 'transparent',
       },
 
@@ -126,14 +149,14 @@ const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
         display: 'block',
       },
 
-      ...avatarSizeStyle(containerSize, textFontSize, borderRadius),
+      ...avatarSizeStyle(containerSize, textFontSize, iconFontSize, borderRadius),
 
-      [`&-lg`]: {
-        ...avatarSizeStyle(containerSizeLG, textFontSizeLG, borderRadiusLG),
+      '&-lg': {
+        ...avatarSizeStyle(containerSizeLG, textFontSizeLG, iconFontSizeLG, borderRadiusLG),
       },
 
-      [`&-sm`]: {
-        ...avatarSizeStyle(containerSizeSM, textFontSizeSM, borderRadiusSM),
+      '&-sm': {
+        ...avatarSizeStyle(containerSizeSM, textFontSizeSM, iconFontSizeSM, borderRadiusSM),
       },
 
       '> img': {
@@ -146,18 +169,18 @@ const genBaseStyle: GenerateStyle<AvatarToken> = (token) => {
   };
 };
 
-const genGroupStyle: GenerateStyle<AvatarToken> = (token) => {
+const genGroupStyle: GenerateStyle<AvatarToken, CSSObject> = (token) => {
   const { componentCls, groupBorderColor, groupOverlapping, groupSpace } = token;
 
   return {
     [`${componentCls}-group`]: {
       display: 'inline-flex',
 
-      [`${componentCls}`]: {
+      [componentCls]: {
         borderColor: groupBorderColor,
       },
 
-      [`> *:not(:first-child)`]: {
+      '> *:not(:first-child)': {
         marginInlineStart: groupOverlapping,
       },
     },
@@ -169,7 +192,37 @@ const genGroupStyle: GenerateStyle<AvatarToken> = (token) => {
   };
 };
 
-export default genComponentStyleHook(
+export const prepareComponentToken: GetDefaultToken<'Avatar'> = (token) => {
+  const {
+    controlHeight,
+    controlHeightLG,
+    controlHeightSM,
+    fontSize,
+    fontSizeLG,
+    fontSizeXL,
+    fontSizeHeading3,
+    marginXS,
+    marginXXS,
+    colorBorderBg,
+  } = token;
+
+  return {
+    containerSize: controlHeight,
+    containerSizeLG: controlHeightLG,
+    containerSizeSM: controlHeightSM,
+    textFontSize: fontSize,
+    textFontSizeLG: fontSize,
+    textFontSizeSM: fontSize,
+    iconFontSize: Math.round((fontSizeLG + fontSizeXL) / 2),
+    iconFontSizeLG: fontSizeHeading3,
+    iconFontSizeSM: fontSize,
+    groupSpace: marginXXS,
+    groupOverlapping: -marginXS,
+    groupBorderColor: colorBorderBg,
+  };
+};
+
+export default genStyleHooks(
   'Avatar',
   (token) => {
     const { colorTextLightSolid, colorTextPlaceholder } = token;
@@ -179,33 +232,5 @@ export default genComponentStyleHook(
     });
     return [genBaseStyle(avatarToken), genGroupStyle(avatarToken)];
   },
-  (token) => {
-    const {
-      controlHeight,
-      controlHeightLG,
-      controlHeightSM,
-
-      fontSize,
-      fontSizeLG,
-      fontSizeXL,
-      fontSizeHeading3,
-
-      marginXS,
-      marginXXS,
-      colorBorderBg,
-    } = token;
-    return {
-      containerSize: controlHeight,
-      containerSizeLG: controlHeightLG,
-      containerSizeSM: controlHeightSM,
-
-      textFontSize: Math.round((fontSizeLG + fontSizeXL) / 2),
-      textFontSizeLG: fontSizeHeading3,
-      textFontSizeSM: fontSize,
-
-      groupSpace: marginXXS,
-      groupOverlapping: -marginXS,
-      groupBorderColor: colorBorderBg,
-    };
-  },
+  prepareComponentToken,
 );

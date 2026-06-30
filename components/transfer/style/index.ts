@@ -1,60 +1,61 @@
+import { unit } from '@ant-design/cssinjs';
 import type { CSSObject } from '@ant-design/cssinjs';
-import { resetComponent, resetIcon, textEllipsis } from '../../style';
-import type { FullToken, GenerateStyle } from '../../theme/internal';
-import { genComponentStyleHook, mergeToken } from '../../theme/internal';
+
+import { operationUnit, resetComponent, resetIcon, textEllipsis } from '../../style';
+import type { FullToken, GenerateStyle, GetDefaultToken } from '../../theme/internal';
+import { genStyleHooks, mergeToken } from '../../theme/internal';
 
 export interface ComponentToken {
   /**
    * @desc 列表宽度
    * @descEN Width of list
    */
-  listWidth: number;
+  listWidth: number | string;
   /**
    * @desc 大号列表宽度
    * @descEN Width of large list
    */
-  listWidthLG: number;
+  listWidthLG: number | string;
   /**
    * @desc 列表高度
    * @descEN Height of list
    */
-  listHeight: number;
+  listHeight: number | string;
   /**
    * @desc 列表项高度
    * @descEN Height of list item
    */
-  itemHeight: number;
+  itemHeight: number | string;
   /**
    * @desc 列表项纵向内边距
    * @descEN Vertical padding of list item
    */
-  itemPaddingBlock: number;
+  itemPaddingBlock: number | string;
   /**
    * @desc 顶部高度
    * @descEN Height of header
    */
-  headerHeight: number;
+  headerHeight: number | string;
 }
 
 interface TransferToken extends FullToken<'Transfer'> {
   transferHeaderVerticalPadding: number;
 }
 
-const genTransferCustomizeStyle: GenerateStyle<TransferToken> = (
-  token: TransferToken,
-): CSSObject => {
-  const { antCls, componentCls, listHeight, controlHeightLG, marginXXS, margin } = token;
+const genTransferCustomizeStyle: GenerateStyle<TransferToken, CSSObject> = (token) => {
+  const { antCls, componentCls, listHeight, controlHeightLG } = token;
 
   const tableCls = `${antCls}-table`;
   const inputCls = `${antCls}-input`;
 
   return {
     [`${componentCls}-customize-list`]: {
-      [`${componentCls}-list`]: {
+      [`${componentCls}-section`]: {
         flex: '1 1 50%',
         width: 'auto',
         height: 'auto',
         minHeight: listHeight,
+        minWidth: 0,
       },
 
       // =================== Hook Components ===================
@@ -70,7 +71,8 @@ const genTransferCustomizeStyle: GenerateStyle<TransferToken> = (
         },
 
         [`${tableCls}-pagination${tableCls}-pagination`]: {
-          margin: `${margin}px 0 ${marginXXS}px`,
+          margin: 0,
+          padding: token.paddingXS,
         },
       },
 
@@ -84,17 +86,17 @@ const genTransferCustomizeStyle: GenerateStyle<TransferToken> = (
 const genTransferStatusColor = (token: TransferToken, color: string): CSSObject => {
   const { componentCls, colorBorder } = token;
   return {
-    [`${componentCls}-list`]: {
+    [`${componentCls}-section`]: {
       borderColor: color,
 
-      '&-search:not([disabled])': {
+      [`${componentCls}-list-search:not([disabled])`]: {
         borderColor: colorBorder,
       },
     },
   };
 };
 
-const genTransferStatusStyle: GenerateStyle<TransferToken> = (token: TransferToken): CSSObject => {
+const genTransferStatusStyle: GenerateStyle<TransferToken, CSSObject> = (token) => {
   const { componentCls } = token;
   return {
     [`${componentCls}-status-error`]: {
@@ -106,7 +108,7 @@ const genTransferStatusStyle: GenerateStyle<TransferToken> = (token: TransferTok
   };
 };
 
-const genTransferListStyle: GenerateStyle<TransferToken> = (token: TransferToken): CSSObject => {
+const genTransferListStyle: GenerateStyle<TransferToken, CSSObject> = (token) => {
   const {
     componentCls,
     colorBorder,
@@ -118,6 +120,7 @@ const genTransferListStyle: GenerateStyle<TransferToken> = (token: TransferToken
     itemPaddingBlock,
     controlItemBgActive,
     colorTextDisabled,
+    colorTextSecondary,
     listHeight,
     listWidth,
     listWidthLG,
@@ -134,13 +137,14 @@ const genTransferListStyle: GenerateStyle<TransferToken> = (token: TransferToken
     colorText,
     controlItemBgActiveHover,
   } = token;
+  const contentBorderRadius = unit(token.calc(borderRadiusLG).sub(lineWidth).equal());
 
   return {
     display: 'flex',
     flexDirection: 'column',
     width: listWidth,
     height: listHeight,
-    border: `${lineWidth}px ${lineType} ${colorBorder}`,
+    border: `${unit(lineWidth)} ${lineType} ${colorBorder}`,
     borderRadius: token.borderRadiusLG,
 
     '&-with-pagination': {
@@ -148,177 +152,179 @@ const genTransferListStyle: GenerateStyle<TransferToken> = (token: TransferToken
       height: 'auto',
     },
 
-    '&-search': {
-      [`${iconCls}-search`]: {
-        color: colorTextDisabled,
-      },
-    },
-
-    '&-header': {
-      display: 'flex',
-      flex: 'none',
-      alignItems: 'center',
-      height: headerHeight,
-      // border-top is on the transfer dom. We should minus 1px for this
-      padding: `${
-        transferHeaderVerticalPadding - lineWidth
-      }px ${paddingSM}px ${transferHeaderVerticalPadding}px`,
-      color: colorText,
-      background: colorBgContainer,
-      borderBottom: `${lineWidth}px ${lineType} ${colorSplit}`,
-      borderRadius: `${borderRadiusLG}px ${borderRadiusLG}px 0 0`,
-
-      '> *:not(:last-child)': {
-        marginInlineEnd: 4, // This is magic and fixed number, DO NOT use token since it may change.
-      },
-
-      '> *': {
-        flex: 'none',
-      },
-
-      '&-title': {
-        ...textEllipsis,
-        flex: 'auto',
-        textAlign: 'end',
-      },
-
-      '&-dropdown': {
-        ...resetIcon(),
-
-        fontSize: fontSizeIcon,
-        transform: 'translateY(10%)',
-        cursor: 'pointer',
-
-        '&[disabled]': {
-          cursor: 'not-allowed',
+    [`${componentCls}-list`]: {
+      '&-search': {
+        [`${iconCls}-search`]: {
+          color: colorTextDisabled,
         },
       },
-    },
 
-    '&-body': {
-      display: 'flex',
-      flex: 'auto',
-      flexDirection: 'column',
-      fontSize: token.fontSize,
-      // https://blog.csdn.net/qq449245884/article/details/107373672/
-      minHeight: 0,
-
-      '&-search-wrapper': {
-        position: 'relative',
-        flex: 'none',
-        padding: paddingSM,
-      },
-    },
-
-    '&-content': {
-      flex: 'auto',
-      margin: 0,
-      padding: 0,
-      overflow: 'auto',
-      listStyle: 'none',
-
-      '&-item': {
+      '&-header': {
         display: 'flex',
+        flex: 'none',
         alignItems: 'center',
-        minHeight: itemHeight,
-        padding: `${itemPaddingBlock}px ${paddingSM}px`,
-        transition: `all ${motionDurationSlow}`,
+        height: headerHeight,
+        // border-top is on the transfer dom. We should minus 1px for this
+        padding: `${unit(token.calc(transferHeaderVerticalPadding).sub(lineWidth).equal())} ${unit(
+          paddingSM,
+        )} ${unit(transferHeaderVerticalPadding)}`,
+        color: colorText,
+        background: colorBgContainer,
+        borderBottom: `${unit(lineWidth)} ${lineType} ${colorSplit}`,
+        borderRadius: `${unit(borderRadiusLG)} ${unit(borderRadiusLG)} 0 0`,
 
         '> *:not(:last-child)': {
-          marginInlineEnd: marginXS,
+          marginInlineEnd: 4, // This is magic and fixed number, DO NOT use token since it may change.
         },
 
         '> *': {
           flex: 'none',
         },
 
-        '&-text': {
+        '&-title': {
           ...textEllipsis,
-          flex: 'auto',
+          flex: '0 1 auto',
+          textAlign: 'end',
+          marginInlineStart: 'auto',
         },
 
-        '&-remove': {
-          position: 'relative',
-          color: colorBorder,
+        '&-dropdown': {
+          ...resetIcon(),
 
+          fontSize: fontSizeIcon,
+          transform: 'translateY(10%)',
           cursor: 'pointer',
+
+          '&[disabled]': {
+            cursor: 'not-allowed',
+          },
+        },
+      },
+
+      '&-body': {
+        display: 'flex',
+        flex: 'auto',
+        flexDirection: 'column',
+        fontSize: token.fontSize,
+        // https://blog.csdn.net/qq449245884/article/details/107373672/
+        minHeight: 0,
+
+        '&-search-wrapper': {
+          position: 'relative',
+          flex: 'none',
+          padding: paddingSM,
+        },
+      },
+
+      '&-content': {
+        flex: 'auto',
+        margin: 0,
+        padding: 0,
+        overflow: 'auto',
+        listStyle: 'none',
+        borderRadius: `0 0 ${contentBorderRadius} ${contentBorderRadius}`,
+
+        '&-item': {
+          display: 'flex',
+          alignItems: 'center',
+          minHeight: itemHeight,
+          padding: `${unit(itemPaddingBlock)} ${unit(paddingSM)}`,
           transition: `all ${motionDurationSlow}`,
 
-          '&:hover': {
-            color: token.colorLinkHover,
+          '> *:not(:last-child)': {
+            marginInlineEnd: marginXS,
           },
 
-          '&::after': {
-            position: 'absolute',
-            inset: `-${itemPaddingBlock}px -50%`,
-            content: '""',
+          '> *': {
+            flex: 'none',
+          },
+
+          '&-text': {
+            ...textEllipsis,
+            flex: 'auto',
+          },
+
+          '&-remove': {
+            ...operationUnit(token),
+            color: colorBorder,
+
+            '&:hover, &:focus': {
+              color: colorTextSecondary,
+            },
+
+            '&:disabled': {
+              color: colorTextDisabled,
+              cursor: 'not-allowed',
+            },
+          },
+
+          [`&:not(${componentCls}-list-content-item-disabled)`]: {
+            '&:hover': {
+              backgroundColor: controlItemBgHover,
+              cursor: 'pointer',
+            },
+
+            [`&${componentCls}-list-content-item-checked:hover`]: {
+              backgroundColor: controlItemBgActiveHover,
+            },
+          },
+
+          '&-checked': {
+            backgroundColor: controlItemBgActive,
+          },
+
+          '&-disabled': {
+            color: colorTextDisabled,
+            cursor: 'not-allowed',
           },
         },
 
-        [`&:not(${componentCls}-list-content-item-disabled)`]: {
-          '&:hover': {
-            backgroundColor: controlItemBgHover,
-            cursor: 'pointer',
+        // Do not change hover style when `oneWay` mode
+        [`&-show-remove ${componentCls}-list-content-item:not(${componentCls}-list-content-item-disabled):hover`]:
+          {
+            background: 'transparent',
+            cursor: 'default',
           },
+      },
 
-          [`&${componentCls}-list-content-item-checked:hover`]: {
-            backgroundColor: controlItemBgActiveHover,
-          },
-        },
+      '&-pagination': {
+        padding: token.paddingXS,
+        textAlign: 'end',
+        borderTop: `${unit(lineWidth)} ${lineType} ${colorSplit}`,
 
-        '&-checked': {
-          backgroundColor: controlItemBgActive,
-        },
-
-        '&-disabled': {
-          color: colorTextDisabled,
-          cursor: 'not-allowed',
+        [`${antCls}-pagination-options`]: {
+          paddingInlineEnd: token.paddingXS,
         },
       },
 
-      // Do not change hover style when `oneWay` mode
-      [`&-show-remove ${componentCls}-list-content-item:not(${componentCls}-list-content-item-disabled):hover`]:
-        {
-          background: 'transparent',
-          cursor: 'default',
-        },
-    },
-
-    '&-pagination': {
-      padding: `${token.paddingXS}px 0`,
-      textAlign: 'end',
-      borderTop: `${lineWidth}px ${lineType} ${colorSplit}`,
-
-      [`${antCls}-pagination-options`]: {
-        paddingInlineEnd: token.paddingXS,
+      '&-body-not-found': {
+        flex: 'none',
+        width: '100%',
+        margin: 'auto 0',
+        color: colorTextDisabled,
+        textAlign: 'center',
       },
-    },
 
-    '&-body-not-found': {
-      flex: 'none',
-      width: '100%',
-      margin: 'auto 0',
-      color: colorTextDisabled,
-      textAlign: 'center',
-    },
+      '&-footer': {
+        borderTop: `${unit(lineWidth)} ${lineType} ${colorSplit}`,
+      },
 
-    '&-footer': {
-      borderTop: `${lineWidth}px ${lineType} ${colorSplit}`,
+      // fix: https://github.com/ant-design/ant-design/issues/44489
+      '&-checkbox': {
+        lineHeight: 1,
+      },
     },
   };
 };
 
-const genTransferStyle: GenerateStyle<TransferToken> = (token: TransferToken): CSSObject => {
+const genTransferStyle: GenerateStyle<TransferToken, CSSObject> = (token) => {
   const {
     antCls,
     iconCls,
     componentCls,
-    headerHeight,
     marginXS,
     marginXXS,
     fontSizeIcon,
-    fontSize,
-    lineHeight,
     colorBgContainerDisabled,
   } = token;
 
@@ -331,42 +337,31 @@ const genTransferStyle: GenerateStyle<TransferToken> = (token: TransferToken): C
       alignItems: 'stretch',
 
       [`${componentCls}-disabled`]: {
-        [`${componentCls}-list`]: {
+        [`${componentCls}-section`]: {
           background: colorBgContainerDisabled,
         },
       },
 
-      [`${componentCls}-list`]: genTransferListStyle(token),
+      [`${componentCls}-section`]: genTransferListStyle(token),
 
-      [`${componentCls}-operation`]: {
+      [`${componentCls}-actions`]: {
         display: 'flex',
         flex: 'none',
         flexDirection: 'column',
         alignSelf: 'center',
-        margin: `0 ${marginXS}px`,
+        margin: `0 ${unit(marginXS)}`,
         verticalAlign: 'middle',
+        gap: marginXXS,
 
-        [`${antCls}-btn`]: {
-          display: 'block',
-
-          '&:first-child': {
-            marginBottom: marginXXS,
-          },
-
-          [iconCls]: {
-            fontSize: fontSizeIcon,
-          },
+        [`${antCls}-btn ${iconCls}`]: {
+          fontSize: fontSizeIcon,
         },
-      },
-
-      [`${antCls}-empty-image`]: {
-        maxHeight: headerHeight / 2 - Math.round(fontSize * lineHeight),
       },
     },
   };
 };
 
-const genTransferRTLStyle: GenerateStyle<TransferToken> = (token: TransferToken): CSSObject => {
+const genTransferRTLStyle: GenerateStyle<TransferToken, CSSObject> = (token) => {
   const { componentCls } = token;
   return {
     [`${componentCls}-rtl`]: {
@@ -375,15 +370,25 @@ const genTransferRTLStyle: GenerateStyle<TransferToken> = (token: TransferToken)
   };
 };
 
+export const prepareComponentToken: GetDefaultToken<'Transfer'> = (token) => {
+  const { fontSize, lineHeight, controlHeight, controlHeightLG, lineWidth } = token;
+  const fontHeight = Math.round(fontSize * lineHeight);
+  return {
+    listWidth: 180,
+    listHeight: 200,
+    listWidthLG: 250,
+    headerHeight: controlHeightLG,
+    itemHeight: controlHeight,
+    itemPaddingBlock: (controlHeight - fontHeight) / 2,
+    transferHeaderVerticalPadding: Math.ceil((controlHeightLG - lineWidth - fontHeight) / 2),
+  };
+};
+
 // ============================== Export ==============================
-export default genComponentStyleHook(
+export default genStyleHooks(
   'Transfer',
   (token) => {
-    const { fontSize, lineHeight, lineWidth, controlHeightLG } = token;
-    const fontHeight = Math.round(fontSize * lineHeight);
-    const transferToken = mergeToken<TransferToken>(token, {
-      transferHeaderVerticalPadding: Math.ceil((controlHeightLG - lineWidth - fontHeight) / 2),
-    });
+    const transferToken = mergeToken<TransferToken>(token);
 
     return [
       genTransferStyle(transferToken),
@@ -392,16 +397,5 @@ export default genComponentStyleHook(
       genTransferRTLStyle(transferToken),
     ];
   },
-  (token) => {
-    const { fontSize, lineHeight, controlHeight, controlHeightLG } = token;
-    const fontHeight = Math.round(fontSize * lineHeight);
-    return {
-      listWidth: 180,
-      listHeight: 200,
-      listWidthLG: 250,
-      headerHeight: controlHeightLG,
-      itemHeight: controlHeight,
-      itemPaddingBlock: (controlHeight - fontHeight) / 2,
-    };
-  },
+  prepareComponentToken,
 );

@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/ar_EG';
+import Pagination from '@rc-component/pagination/locale/ar_EG';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/ar_EG';
 import DatePicker from '../date-picker/locale/ar_EG';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/ar_EG';
 
 const typeTemplate = 'ليس ${label} من نوع ${type} صالحًا';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'يرجى التحديد',
+    close: 'إغلاق',
+    show: 'إظهار',
+    hide: 'إخفاء',
   },
   Table: {
     filterTitle: 'الفلاتر',
@@ -29,6 +32,11 @@ const localeValues: Locale = {
     triggerDesc: 'ترتيب تنازلي',
     triggerAsc: 'ترتيب تصاعدي',
     cancelSort: 'إلغاء الترتيب',
+  },
+  Tour: {
+    Next: 'التالي',
+    Previous: 'السابق',
+    Finish: 'إنهاء',
   },
   Modal: {
     okText: 'تأكيد',
@@ -63,9 +71,6 @@ const localeValues: Locale = {
     copy: 'نسخ',
     copied: 'نقل',
     expand: 'وسع',
-  },
-  PageHeader: {
-    back: 'عودة',
   },
   Form: {
     defaultValidateMessages: {
@@ -115,6 +120,17 @@ const localeValues: Locale = {
         mismatch: 'لا يتطابق ${label} مع ${pattern}',
       },
     },
+  },
+  QRCode: {
+    expired: 'انتهت صلاحية رمز الاستجابة السريعة',
+    refresh: 'انقر للتحديث',
+    scanned: 'تم المسح',
+  },
+  ColorPicker: {
+    presetEmpty: 'لا يوجد',
+    transparent: 'شفاف',
+    singleColor: 'لون واحد',
+    gradientColor: 'تدرج لوني',
   },
 };
 

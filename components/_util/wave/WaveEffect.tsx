@@ -1,8 +1,14 @@
-import classNames from 'classnames';
-import CSSMotion from 'rc-motion';
-import { render, unmount } from 'rc-util/lib/React/render';
-import raf from 'rc-util/lib/raf';
 import * as React from 'react';
+import CSSMotion from '@rc-component/motion';
+import { composeRef, raf, render, unmount } from '@rc-component/util';
+import { clsx } from 'clsx';
+
+import type { WaveProps } from '.';
+import { ConfigContext } from '../../config-provider';
+import { genCssVar } from '../../theme/util/genStyleUtils';
+import { isTransitionEvent } from '../is';
+import { TARGET_CLS } from './interface';
+import type { ShowWaveEffect } from './interface';
 import { getTargetWaveColor } from './util';
 
 function validateNum(value: number) {
@@ -12,13 +18,22 @@ function validateNum(value: number) {
 export interface WaveEffectProps {
   className: string;
   target: HTMLElement;
+  component?: string;
+  colorSource?: WaveProps['colorSource'];
 }
 
 const WaveEffect: React.FC<WaveEffectProps> = (props) => {
-  const { className, target } = props;
+  const { className, target, component, colorSource } = props;
   const divRef = React.useRef<HTMLDivElement>(null);
 
-  const [color, setWaveColor] = React.useState<string | null>(null);
+  const { getPrefixCls } = React.useContext(ConfigContext);
+
+  const rootPrefixCls = getPrefixCls();
+
+  const [varName] = genCssVar(rootPrefixCls, 'wave');
+
+  // ===================== Effect =====================
+  const [waveColor, setWaveColor] = React.useState<string | null>(null);
   const [borderRadius, setBorderRadius] = React.useState<number[]>([]);
   const [left, setLeft] = React.useState(0);
   const [top, setTop] = React.useState(0);
@@ -26,32 +41,30 @@ const WaveEffect: React.FC<WaveEffectProps> = (props) => {
   const [height, setHeight] = React.useState(0);
   const [enabled, setEnabled] = React.useState(false);
 
-  const waveStyle = {
+  const waveStyle: React.CSSProperties = {
     left,
     top,
     width,
     height,
     borderRadius: borderRadius.map((radius) => `${radius}px`).join(' '),
-  } as React.CSSProperties & {
-    [name: string]: number | string;
   };
 
-  if (color) {
-    waveStyle['--wave-color'] = color;
+  if (waveColor) {
+    waveStyle[varName('color')] = waveColor;
   }
 
   function syncPos() {
     const nodeStyle = getComputedStyle(target);
 
     // Get wave color from target
-    setWaveColor(getTargetWaveColor(target));
+    setWaveColor(getTargetWaveColor(target, colorSource));
 
     const isStatic = nodeStyle.position === 'static';
 
     // Rect
     const { borderLeftWidth, borderTopWidth } = nodeStyle;
-    setLeft(isStatic ? target.offsetLeft : validateNum(-parseFloat(borderLeftWidth)));
-    setTop(isStatic ? target.offsetTop : validateNum(-parseFloat(borderTopWidth)));
+    setLeft(isStatic ? target.offsetLeft : validateNum(-Number.parseFloat(borderLeftWidth)));
+    setTop(isStatic ? target.offsetTop : validateNum(-Number.parseFloat(borderTopWidth)));
     setWidth(target.offsetWidth);
     setHeight(target.offsetHeight);
 
@@ -69,7 +82,7 @@ const WaveEffect: React.FC<WaveEffectProps> = (props) => {
         borderTopRightRadius,
         borderBottomRightRadius,
         borderBottomLeftRadius,
-      ].map((radius) => validateNum(parseFloat(radius))),
+      ].map((radius) => validateNum(Number.parseFloat(radius))),
     );
   }
 
@@ -96,11 +109,14 @@ const WaveEffect: React.FC<WaveEffectProps> = (props) => {
         resizeObserver?.disconnect();
       };
     }
-  }, []);
+  }, [target]);
 
   if (!enabled) {
     return null;
   }
+
+  const isSmallComponent =
+    (component === 'Checkbox' || component === 'Radio') && target?.classList.contains(TARGET_CLS);
 
   return (
     <CSSMotion
@@ -109,7 +125,7 @@ const WaveEffect: React.FC<WaveEffectProps> = (props) => {
       motionName="wave-motion"
       motionDeadline={5000}
       onAppearEnd={(_, event) => {
-        if (event.deadline || (event as TransitionEvent).propertyName === 'opacity') {
+        if (event.deadline || (isTransitionEvent(event) && event.propertyName === 'opacity')) {
           const holder = divRef.current?.parentElement!;
           unmount(holder).then(() => {
             holder?.remove();
@@ -118,20 +134,33 @@ const WaveEffect: React.FC<WaveEffectProps> = (props) => {
         return false;
       }}
     >
-      {({ className: motionClassName }) => (
-        <div ref={divRef} className={classNames(className, motionClassName)} style={waveStyle} />
+      {({ className: motionClassName }, ref) => (
+        <div
+          ref={composeRef(divRef, ref)}
+          className={clsx(className, motionClassName, { 'wave-quick': isSmallComponent })}
+          style={waveStyle}
+        />
       )}
     </CSSMotion>
   );
 };
 
-export default function showWaveEffect(node: HTMLElement, className: string) {
+const showWaveEffect: ShowWaveEffect = (target, info) => {
+  const { component } = info;
+
+  // Skip for unchecked checkbox
+  if (component === 'Checkbox' && !target.querySelector<HTMLInputElement>('input')?.checked) {
+    return;
+  }
+
   // Create holder
   const holder = document.createElement('div');
   holder.style.position = 'absolute';
-  holder.style.left = `0px`;
-  holder.style.top = `0px`;
-  node?.insertBefore(holder, node?.firstChild);
+  holder.style.left = '0px';
+  holder.style.top = '0px';
+  target?.insertBefore(holder, target?.firstChild);
 
-  render(<WaveEffect target={node} className={className} />, holder);
-}
+  render(<WaveEffect {...info} target={target} />, holder);
+};
+
+export default showWaveEffect;

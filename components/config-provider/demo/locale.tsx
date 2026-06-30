@@ -1,42 +1,49 @@
+import React, { useState } from 'react';
 import { EllipsisOutlined } from '@ant-design/icons';
-import type { RadioChangeEvent, TourProps, UploadFile } from 'antd';
+import type {
+  ConfigProviderProps,
+  RadioChangeEvent,
+  TableProps,
+  TourProps,
+  UploadFile,
+} from 'antd';
 import {
-  Upload,
-  Tour,
-  Input,
-  Form,
-  QRCode,
   Button,
   Calendar,
   ConfigProvider,
   DatePicker,
+  Divider,
+  Form,
+  Image,
+  Input,
+  InputNumber,
   Modal,
   Pagination,
   Popconfirm,
+  QRCode,
   Radio,
   Select,
   Space,
   Table,
   theme,
   TimePicker,
+  Tour,
   Transfer,
-  Image,
-  InputNumber,
-  Divider,
+  Upload,
 } from 'antd';
-import type { Locale } from 'antd/es/locale';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
+
 import 'dayjs/locale/zh-cn';
-import React, { useState } from 'react';
+
+type Locale = ConfigProviderProps['locale'];
 
 dayjs.locale('en');
 
-const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const columns = [
+const columns: TableProps['columns'] = [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -118,16 +125,20 @@ const Page: React.FC = () => {
 
   return (
     <Space
-      direction="vertical"
+      vertical
       size={[0, 16]}
       style={{ width: '100%', paddingTop: 16, borderTop: `1px solid ${token.colorBorder}` }}
     >
       <Pagination defaultCurrent={1} total={50} showSizeChanger />
       <Space wrap>
-        <Select showSearch style={{ width: 200 }}>
-          <Option value="jack">jack</Option>
-          <Option value="lucy">lucy</Option>
-        </Select>
+        <Select
+          showSearch
+          style={{ width: 200 }}
+          options={[
+            { label: 'jack', value: 'jack' },
+            { label: 'lucy', value: 'lucy' },
+          ]}
+        />
         <DatePicker />
         <TimePicker />
         <RangePicker />
@@ -180,17 +191,31 @@ const Page: React.FC = () => {
         />
       </Space>
       <Upload listType="picture-card" fileList={fileList} />
-      <Divider orientation="left">Tour</Divider>
+      <Divider titlePlacement="start">Tour</Divider>
       <Button type="primary" onClick={() => setTourOpen(true)}>
         Begin Tour
       </Button>
       <Space>
-        <Button ref={(node) => node && tourRefs.current.splice(0, 0, node)}> Upload</Button>
-        <Button ref={(node) => node && tourRefs.current.splice(1, 0, node)} type="primary">
+        <Button
+          ref={(node) => {
+            node && tourRefs.current.splice(0, 0, node);
+          }}
+        >
+          {' '}
+          Upload
+        </Button>
+        <Button
+          ref={(node) => {
+            node && tourRefs.current.splice(1, 0, node);
+          }}
+          type="primary"
+        >
           Save
         </Button>
         <Button
-          ref={(node) => node && tourRefs.current.splice(2, 0, node)}
+          ref={(node) => {
+            node && tourRefs.current.splice(2, 0, node);
+          }}
           icon={<EllipsisOutlined />}
         />
       </Space>
@@ -200,11 +225,11 @@ const Page: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  const [locale, setLocal] = useState<Locale>(enUS);
+  const [locale, setLocale] = useState<Locale>(enUS);
 
   const changeLocale = (e: RadioChangeEvent) => {
     const localeValue = e.target.value;
-    setLocal(localeValue);
+    setLocale(localeValue);
     if (!localeValue) {
       dayjs.locale('en');
     } else {
@@ -215,7 +240,7 @@ const App: React.FC = () => {
   return (
     <>
       <div style={{ marginBottom: 16 }}>
-        <span style={{ marginRight: 16 }}>Change locale of components:</span>
+        <span style={{ marginInlineEnd: 16 }}>Change locale of components:</span>
         <Radio.Group value={locale} onChange={changeLocale}>
           <Radio.Button key="en" value={enUS}>
             English

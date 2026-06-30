@@ -1,6 +1,8 @@
 import React from 'react';
+
 import type { FormListFieldData, FormListOperation } from '..';
 import Form from '..';
+import { isNumber } from '../../_util/is';
 import { fireEvent, render, waitFakeTimer } from '../../../tests/utils';
 import Button from '../../button';
 import Input from '../../input';
@@ -22,7 +24,7 @@ describe('Form.List', () => {
   ) => {
     let element: HTMLElement;
 
-    if (typeof input === 'number') {
+    if (isNumber(input)) {
       element = document.querySelectorAll('input')[input];
     }
 
@@ -136,8 +138,7 @@ describe('Form.List', () => {
           {(fields, { add, remove }) => (
             <>
               {fields.map((field) => (
-                // key is in a field
-                // eslint-disable-next-line react/jsx-key
+                /* eslint-disable-next-line react/no-missing-key */
                 <Form.Item {...field}>
                   <Input />
                 </Form.Item>
@@ -204,7 +205,7 @@ describe('Form.List', () => {
     }
 
     await addItem();
-    expect(container.querySelector('.ant-form-item-explain div')?.innerHTML).toEqual('At least 2');
+    expect(container.querySelector('.ant-form-item-explain div')?.innerHTML).toBe('At least 2');
 
     await addItem();
     expect(container.getElementsByClassName('ant-form-item-explain div')).toHaveLength(0);
@@ -312,7 +313,7 @@ describe('Form.List', () => {
 
     render(
       <Form>
-        <Form.List name={null!!}>
+        <Form.List name={null!}>
           {(fields) =>
             fields.map((field) => (
               <Form.Item {...field} key={field.key}>

@@ -1,68 +1,107 @@
-import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
-import classNames from 'classnames';
-import type { InputRef, InputProps as RcInputProps } from 'rc-input';
-import RcInput from 'rc-input';
-import type { BaseInputProps } from 'rc-input/lib/interface';
-import { composeRef } from 'rc-util/lib/ref';
 import React, { forwardRef, useContext, useEffect, useRef } from 'react';
+import type { InputRef, InputProps as RcInputProps } from '@rc-component/input';
+import RcInput from '@rc-component/input';
+import { composeRef, triggerFocus } from '@rc-component/util';
+import type { InputFocusOptions } from '@rc-component/util';
+import { clsx } from 'clsx';
+
+import ContextIsolator from '../_util/ContextIsolator';
+import { useAllowClear } from '../_util/hooks';
+import { useMergeSemantic, useSemanticRootStyle } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
 import type { InputStatus } from '../_util/statusUtils';
 import { getMergedStatus, getStatusClassNames } from '../_util/statusUtils';
-import warning from '../_util/warning';
-import { ConfigContext } from '../config-provider';
+import { devUseWarning } from '../_util/warning';
+import type { Variant } from '../config-provider';
+import { useComponentConfig } from '../config-provider/context';
 import DisabledContext from '../config-provider/DisabledContext';
-import type { SizeType } from '../config-provider/SizeContext';
+import useCSSVarCls from '../config-provider/hooks/useCSSVarCls';
 import useSize from '../config-provider/hooks/useSize';
-import { FormItemInputContext, NoFormStyle } from '../form/context';
-import { NoCompactStyle, useCompactItemContext } from '../space/Compact';
+import type { SizeType } from '../config-provider/SizeContext';
+import { FormItemInputContext } from '../form/context';
+import useVariant from '../form/hooks/useVariants';
+import { useCompactItemContext } from '../space/Compact';
 import useRemovePasswordTimeout from './hooks/useRemovePasswordTimeout';
-import useStyle from './style';
+import useStyle, { useSharedStyle } from './style';
 import { hasPrefixSuffix } from './utils';
 
-export interface InputFocusOptions extends FocusOptions {
-  cursor?: 'start' | 'end' | 'all';
-}
-
+export type { InputFocusOptions };
 export type { InputRef };
+export { triggerFocus };
 
-export function triggerFocus(
-  element?: HTMLInputElement | HTMLTextAreaElement,
-  option?: InputFocusOptions,
-) {
-  if (!element) {
-    return;
-  }
+export type InputSemanticType = {
+  classNames?: {
+    root?: string;
+    prefix?: string;
+    suffix?: string;
+    clear?: string;
+    input?: string;
+    count?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    prefix?: React.CSSProperties;
+    suffix?: React.CSSProperties;
+    clear?: React.CSSProperties;
+    input?: React.CSSProperties;
+    count?: React.CSSProperties;
+  };
+};
 
-  element.focus(option);
-
-  // Selection content
-  const { cursor } = option || {};
-  if (cursor) {
-    const len = element.value.length;
-
-    switch (cursor) {
-      case 'start':
-        element.setSelectionRange(0, 0);
-        break;
-      case 'end':
-        element.setSelectionRange(len, len);
-        break;
-      default:
-        element.setSelectionRange(0, len);
-        break;
-    }
-  }
-}
+export type InputSemanticAllType = GenerateSemantic<InputSemanticType, InputProps>;
 
 export interface InputProps
   extends Omit<
     RcInputProps,
-    'wrapperClassName' | 'groupClassName' | 'inputClassName' | 'affixWrapperClassName' | 'classes'
+    | 'wrapperClassName'
+    | 'groupClassName'
+    | 'inputClassName'
+    | 'affixWrapperClassName'
+    | 'classes'
+    | 'classNames'
+    | 'styles'
   > {
   rootClassName?: string;
   size?: SizeType;
   disabled?: boolean;
   status?: InputStatus;
+  /**
+   * @deprecated Use `Space.Compact` instead.
+   *
+   * @example
+   * ```tsx
+   * import { Space, Input } from 'antd';
+   *
+   * <Space.Compact>
+   *   {addon}
+   *   <Input defaultValue="name" />
+   * </Space.Compact>
+   * ```
+   */
+  addonBefore?: React.ReactNode;
+  /**
+   * @deprecated Use `Space.Compact` instead.
+   *
+   * @example
+   * ```tsx
+   * import { Space, Input } from 'antd';
+   *
+   * <Space.Compact>
+   *   <Input defaultValue="name" />
+   *   {addon}
+   * </Space.Compact>
+   * ```
+   */
+  addonAfter?: React.ReactNode;
+  /** @deprecated Use `variant="borderless"` instead. */
   bordered?: boolean;
+  /**
+   * @since 5.13.0
+   * @default "outlined"
+   */
+  variant?: Variant;
+  classNames?: InputSemanticAllType['classNamesAndFn'];
+  styles?: InputSemanticAllType['stylesAndFn'];
   [key: `data-${string}`]: string | undefined;
 }
 
@@ -84,16 +123,40 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
     styles,
     rootClassName,
     onChange,
-    classNames: classes,
+    classNames,
+    variant: customVariant,
     ...rest
   } = props;
-  const { getPrefixCls, direction, input } = React.useContext(ConfigContext);
+
+  if (process.env.NODE_ENV !== 'production') {
+    const { deprecated } = devUseWarning('Input');
+    [
+      ['bordered', 'variant'],
+      ['addonAfter', 'Space.Compact'],
+      ['addonBefore', 'Space.Compact'],
+    ].forEach(([prop, newProp]) => {
+      deprecated(!(prop in props), prop, newProp);
+    });
+  }
+
+  const {
+    getPrefixCls,
+    direction,
+    allowClear: contextAllowClear,
+    autoComplete: contextAutoComplete,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+  } = useComponentConfig('input');
 
   const prefixCls = getPrefixCls('input', customizePrefixCls);
   const inputRef = useRef<InputRef>(null);
 
   // Style
-  const [wrapSSR, hashId] = useStyle(prefixCls);
+  const rootCls = useCSSVarCls(prefixCls);
+  const [hashId, cssVarCls] = useSharedStyle(prefixCls, rootClassName);
+  useStyle(prefixCls, rootCls);
 
   // ===================== Compact Item =====================
   const { compactSize, compactItemClassnames } = useCompactItemContext(prefixCls, direction);
@@ -105,23 +168,46 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
   const disabled = React.useContext(DisabledContext);
   const mergedDisabled = customDisabled ?? disabled;
 
+  // =========== Merged Props for Semantic ==========
+  const mergedProps: InputProps = {
+    ...props,
+    size: mergedSize,
+    disabled: mergedDisabled,
+  };
+
+  const contextStyleRoot = useSemanticRootStyle(contextStyle);
+  const styleRoot = useSemanticRootStyle(style);
+
+  const [mergedClassNames, mergedStyles] = useMergeSemantic<
+    InputSemanticAllType['classNames'],
+    InputSemanticAllType['styles'],
+    InputProps
+  >([contextClassNames, classNames], [contextStyles, contextStyleRoot, styles, styleRoot], {
+    props: mergedProps,
+  });
+
   // ===================== Status =====================
   const { status: contextStatus, hasFeedback, feedbackIcon } = useContext(FormItemInputContext);
   const mergedStatus = getMergedStatus(contextStatus, customStatus);
 
   // ===================== Focus warning =====================
   const inputHasPrefixSuffix = hasPrefixSuffix(props) || !!hasFeedback;
-  const prevHasPrefixSuffix = useRef<boolean>(inputHasPrefixSuffix);
-  useEffect(() => {
-    if (inputHasPrefixSuffix && !prevHasPrefixSuffix.current) {
-      warning(
-        document.activeElement === inputRef.current?.input,
-        'Input',
-        `When Input is focused, dynamic add or remove prefix / suffix will make it lose focus caused by dom structure change. Read more: https://ant.design/components/input/#FAQ`,
-      );
-    }
-    prevHasPrefixSuffix.current = inputHasPrefixSuffix;
-  }, [inputHasPrefixSuffix]);
+  const prevHasPrefixSuffixRef = useRef<boolean>(inputHasPrefixSuffix);
+
+  if (process.env.NODE_ENV !== 'production') {
+    const warning = devUseWarning('Input');
+
+    useEffect(() => {
+      if (inputHasPrefixSuffix && !prevHasPrefixSuffixRef.current) {
+        warning(
+          document.activeElement === inputRef.current?.input,
+          'usage',
+          `When Input is focused, dynamic add or remove prefix / suffix will make it lose focus caused by dom structure change. Read more: https://ant.design/components/input/#FAQ`,
+        );
+      }
+      prevHasPrefixSuffixRef.current = inputHasPrefixSuffix;
+    }, [inputHasPrefixSuffix]);
+  }
 
   // ===================== Remove Password value =====================
   const removePasswordTimeout = useRemovePasswordTimeout(inputRef, true);
@@ -148,93 +234,95 @@ const Input = forwardRef<InputRef, InputProps>((props, ref) => {
     </>
   );
 
-  // Allow clear
-  let mergedAllowClear: BaseInputProps['allowClear'];
-  if (typeof allowClear === 'object' && allowClear?.clearIcon) {
-    mergedAllowClear = allowClear;
-  } else if (allowClear) {
-    mergedAllowClear = { clearIcon: <CloseCircleFilled /> };
-  }
+  const mergedAllowClear = useAllowClear({ allowClear, contextAllowClear, componentName: 'Input' });
 
-  return wrapSSR(
+  const [variant, enableVariantCls] = useVariant('input', customVariant, bordered);
+
+  return (
     <RcInput
       ref={composeRef(ref, inputRef)}
       prefixCls={prefixCls}
-      autoComplete={input?.autoComplete}
+      autoComplete={contextAutoComplete}
       {...rest}
       disabled={mergedDisabled}
       onBlur={handleBlur}
       onFocus={handleFocus}
-      style={{ ...input?.style, ...style }}
-      styles={{ ...input?.styles, ...styles }}
+      style={mergedStyles.root}
+      styles={mergedStyles}
       suffix={suffixNode}
       allowClear={mergedAllowClear}
-      className={classNames(className, rootClassName, compactItemClassnames, input?.className)}
+      className={clsx(
+        className,
+        rootClassName,
+        cssVarCls,
+        rootCls,
+        compactItemClassnames,
+        contextClassName,
+        mergedClassNames.root,
+      )}
       onChange={handleChange}
-      addonAfter={
-        addonAfter && (
-          <NoCompactStyle>
-            <NoFormStyle override status>
-              {addonAfter}
-            </NoFormStyle>
-          </NoCompactStyle>
-        )
-      }
       addonBefore={
         addonBefore && (
-          <NoCompactStyle>
-            <NoFormStyle override status>
-              {addonBefore}
-            </NoFormStyle>
-          </NoCompactStyle>
+          <ContextIsolator form space>
+            {addonBefore}
+          </ContextIsolator>
+        )
+      }
+      addonAfter={
+        addonAfter && (
+          <ContextIsolator form space>
+            {addonAfter}
+          </ContextIsolator>
         )
       }
       classNames={{
-        ...classes,
-        ...input?.classNames,
-        input: classNames(
+        ...mergedClassNames,
+        input: clsx(
           {
             [`${prefixCls}-sm`]: mergedSize === 'small',
             [`${prefixCls}-lg`]: mergedSize === 'large',
             [`${prefixCls}-rtl`]: direction === 'rtl',
-            [`${prefixCls}-borderless`]: !bordered,
           },
-          !inputHasPrefixSuffix && getStatusClassNames(prefixCls, mergedStatus),
-          classes?.input,
-          input?.classNames?.input,
+          mergedClassNames.input,
           hashId,
         ),
-      }}
-      classes={{
-        affixWrapper: classNames(
+        variant: clsx(
+          {
+            [`${prefixCls}-${variant}`]: enableVariantCls,
+          },
+          getStatusClassNames(prefixCls, mergedStatus),
+        ),
+        affixWrapper: clsx(
           {
             [`${prefixCls}-affix-wrapper-sm`]: mergedSize === 'small',
             [`${prefixCls}-affix-wrapper-lg`]: mergedSize === 'large',
             [`${prefixCls}-affix-wrapper-rtl`]: direction === 'rtl',
-            [`${prefixCls}-affix-wrapper-borderless`]: !bordered,
           },
-          getStatusClassNames(`${prefixCls}-affix-wrapper`, mergedStatus, hasFeedback),
           hashId,
         ),
-        wrapper: classNames(
+        wrapper: clsx(
           {
             [`${prefixCls}-group-rtl`]: direction === 'rtl',
           },
           hashId,
         ),
-        group: classNames(
+        groupWrapper: clsx(
           {
             [`${prefixCls}-group-wrapper-sm`]: mergedSize === 'small',
             [`${prefixCls}-group-wrapper-lg`]: mergedSize === 'large',
             [`${prefixCls}-group-wrapper-rtl`]: direction === 'rtl',
-            [`${prefixCls}-group-wrapper-disabled`]: mergedDisabled,
+            [`${prefixCls}-group-wrapper-${variant}`]: enableVariantCls,
           },
           getStatusClassNames(`${prefixCls}-group-wrapper`, mergedStatus, hasFeedback),
           hashId,
         ),
       }}
-    />,
+    />
   );
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  Input.displayName = 'Input';
+}
 
 export default Input;

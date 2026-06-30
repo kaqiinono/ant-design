@@ -1,13 +1,15 @@
+import type { CSSObject } from '@ant-design/cssinjs';
+import { unit } from '@ant-design/cssinjs';
+
 import type { UploadToken } from '.';
 import { clearFix, textEllipsis } from '../../style';
 import type { GenerateStyle } from '../../theme/internal';
 
-const genListStyle: GenerateStyle<UploadToken> = (token) => {
-  const { componentCls, antCls, iconCls, fontSize, lineHeight } = token;
+const genListStyle: GenerateStyle<UploadToken, CSSObject> = (token) => {
+  const { componentCls, iconCls, fontSize, lineHeight, motionDurationSlow, calc } = token;
   const itemCls = `${componentCls}-list-item`;
   const actionsCls = `${itemCls}-actions`;
   const actionCls = `${itemCls}-action`;
-  const listItemHeightSM = Math.round(fontSize * lineHeight);
 
   return {
     [`${componentCls}-wrapper`]: {
@@ -17,12 +19,13 @@ const genListStyle: GenerateStyle<UploadToken> = (token) => {
 
         [itemCls]: {
           position: 'relative',
-          height: token.lineHeight * fontSize,
+          height: calc(token.lineHeight).mul(fontSize).equal(),
           marginTop: token.marginXS,
           fontSize,
           display: 'flex',
           alignItems: 'center',
-          transition: `background-color ${token.motionDurationSlow}`,
+          transition: `background-color ${motionDurationSlow}`,
+          borderRadius: token.borderRadiusSM,
 
           '&:hover': {
             backgroundColor: token.controlItemBgHover,
@@ -30,54 +33,48 @@ const genListStyle: GenerateStyle<UploadToken> = (token) => {
 
           [`${itemCls}-name`]: {
             ...textEllipsis,
-            padding: `0 ${token.paddingXS}px`,
+            padding: `0 ${unit(token.paddingXS)}`,
             lineHeight,
             flex: 'auto',
-            transition: `all ${token.motionDurationSlow}`,
+            transition: `all ${motionDurationSlow}`,
           },
 
           [actionsCls]: {
+            whiteSpace: 'nowrap',
+
             [actionCls]: {
               opacity: 0,
             },
 
-            [`${actionCls}${antCls}-btn-sm`]: {
-              height: listItemHeightSM,
-              border: 0,
-              lineHeight: 1,
-              // FIXME: should not override small button
-              '> span': {
-                transform: 'scale(1)',
+            '@media (hover: none), (pointer: coarse)': {
+              [actionCls]: {
+                opacity: 1,
               },
-            },
-
-            [`
-              ${actionCls}:focus,
-              &.picture ${actionCls}
-            `]: {
-              opacity: 1,
             },
 
             [iconCls]: {
               color: token.actionsColor,
-              transition: `all ${token.motionDurationSlow}`,
+              transition: `all ${motionDurationSlow}`,
             },
 
-            [`&:hover ${iconCls}`]: {
-              color: token.colorText,
+            [`
+              ${actionCls}:focus-visible,
+              &.picture ${actionCls}
+            `]: {
+              opacity: 1,
             },
           },
 
           [`${componentCls}-icon ${iconCls}`]: {
-            color: token.colorTextDescription,
+            color: token.colorIcon,
             fontSize,
           },
 
           [`${itemCls}-progress`]: {
             position: 'absolute',
-            bottom: -token.uploadProgressOffset,
+            bottom: token.calc(token.uploadProgressOffset).mul(-1).equal(),
             width: '100%',
-            paddingInlineStart: fontSize + token.paddingXS,
+            paddingInlineStart: calc(fontSize).add(token.paddingXS).equal(),
             fontSize,
             lineHeight: 0,
             pointerEvents: 'none',
@@ -90,7 +87,6 @@ const genListStyle: GenerateStyle<UploadToken> = (token) => {
 
         [`${itemCls}:hover ${actionCls}`]: {
           opacity: 1,
-          color: token.colorText,
         },
 
         [`${itemCls}-error`]: {
@@ -111,7 +107,9 @@ const genListStyle: GenerateStyle<UploadToken> = (token) => {
         },
 
         [`${componentCls}-list-item-container`]: {
-          transition: `opacity ${token.motionDurationSlow}, height ${token.motionDurationSlow}`,
+          transition: ['opacity', 'height']
+            .map((prop) => `${prop} ${motionDurationSlow}`)
+            .join(', '),
 
           // For smooth removing animation
           '&::before': {

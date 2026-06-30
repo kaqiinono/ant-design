@@ -1,6 +1,6 @@
+import React from 'react';
 import type { PaginationProps } from 'antd';
 import { ConfigProvider, Pagination } from 'antd';
-import React from 'react';
 
 const itemRender: PaginationProps['itemRender'] = (_, type, originalElement) => {
   if (type === 'prev') {
@@ -19,11 +19,13 @@ const App: React.FC = () => (
           itemSize: 20,
           itemSizeSM: 12,
           itemActiveBg: '#e7cc87',
+          itemActiveColor: '#eee',
+          itemActiveColorHover: '#fff',
           itemLinkBg: '#344324',
           itemActiveBgDisabled: '#9c1515',
           itemInputBg: '#9c1515',
           miniOptionsSizeChangerTop: 0,
-          itemBg: '#333',
+          itemBg: '#b5f5ec',
         },
       },
     }}

@@ -1,5 +1,5 @@
-import { Collapse, Space } from 'antd';
 import React from 'react';
+import { Collapse, Space } from 'antd';
 
 const text = `
   A dog is a type of domesticated animal.
@@ -8,14 +8,14 @@ const text = `
 `;
 
 const App: React.FC = () => (
-  <Space direction="vertical">
+  <Space vertical>
     <Collapse
       collapsible="header"
       defaultActiveKey={['1']}
       items={[
         {
           key: '1',
-          label: 'This panel can only be collapsed by clicking text',
+          label: 'This panel can be collapsed by clicking text or icon',
           children: <p>{text}</p>,
         },
       ]}

@@ -1,7 +1,8 @@
 ---
-order: 12
+group:
+  title: Other
+order: 1
 title: Contributing
-toc: false
 ---
 
 The following is a set of guidelines for contributing to Ant Design. Please spend several minutes reading these guidelines before you create an issue or pull request.
@@ -20,7 +21,7 @@ According to our [release schedule](/changelog#release-schedule), we maintain tw
 
 ## Bugs
 
-We are using [GitHub Issues](https://github.com/ant-design/ant-design/issues) for bug tracking. The best way to get your bug fixed is by using our [issue helper](http://new-issue.ant.design) and provide reproduction steps with this [template](https://u.ant.design/codesandbox-repro).
+We are using [GitHub Issues](https://github.com/ant-design/ant-design/issues) for bug tracking. The best way to get your bug fixed is by using our [issue helper](http://new-issue.ant.design) and provide reproduction steps with this [template](https://u.ant.design/reproduce).
 
 Before you report a bug, please make sure you've searched existing issues, and read our [FAQ](/docs/react/faq).
 
@@ -53,7 +54,7 @@ The core team is monitoring for pull requests. We will review your pull request 
 3. If you've fixed a bug or added code that should be tested, add tests!
 4. Ensure the test suite passes (npm run test). Tip: `npm test -- --watch TestName` is helpful in development.
 5. Run `npm test -- -u` to update the [jest snapshots](https://jestjs.io/docs/snapshot-testing) and commit these changes as well (if there are any updates).
-6. Ensure the UI change passes `npm run test-image`，Run `npm run test-image -- -u` to update UI snapshots and commit these changes as well (if there are any updates), **UI test base on [Docker](https://docs.docker.com/get-docker/), need download the corresponding installation according to the platform**
+6. Ensure the UI change passes `npm run test:image`, Run `npm run test:image -- -u` to update UI snapshots and commit these changes as well (if there are any updates), **UI test base on [Docker](https://docs.docker.com/get-docker/), need download the corresponding installation according to the platform**
 7. Make sure your code lints (npm run lint). Tip: Lint runs automatically when you `git commit` (Use [Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)).
 8. Finally, please make sure that all GitHub CI checks pass, if they fail, you can click `detail` to enter the details to view the reason.
 
@@ -77,11 +78,11 @@ Runs Ant Design website locally.
 
 <InstallDependencies npm='$ npm start' yarn='$ yarn start'></InstallDependencies>
 
-### Checks the code style
+### Check the code style
 
 <InstallDependencies npm='$ npm run lint' yarn='$ yarn lint'></InstallDependencies>
 
-### Run test
+### Run tests
 
 runs the complete test suite. (Make sure the `NODE_ENV` environment variable is unset, or it may causing some problems.)
 

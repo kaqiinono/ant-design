@@ -1,9 +1,11 @@
-import fs from 'fs';
-import _ from 'lodash';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
+import sortBy from 'lodash/sortBy';
+import unionBy from 'lodash/unionBy';
 import simpleGit from 'simple-git';
 
 const cwd = process.cwd();
+
 const git = simpleGit(cwd);
 
 const excludes = [
@@ -14,23 +16,29 @@ const excludes = [
   'alipay.com',
   'taobao.com',
   'ant-design-bot',
+  'github-actions',
+  'copilot',
+  'renovate',
+  'renovate[bot]',
+  'dependabot',
+  'dependabot[bot]',
+  'gemini-code-assist[bot]',
 ];
 
 async function execute() {
-  let logs = (await git.log()).all;
-  logs = _.remove(logs, ({ author_email: email }) => {
-    for (let i = 0; i < excludes.length; i++) {
-      const item = excludes[i];
-      if (email.includes(item)) {
-        return false;
-      }
-    }
-    return true;
+  const logResult = await git.log();
+
+  const filtered = logResult.all.filter(({ author_name, author_email }) => {
+    const name = author_name.toLowerCase();
+    const email = author_email.toLowerCase();
+    return !excludes.some((item) => email.includes(item) || name.includes(item));
   });
-  logs = _.sortBy(_.unionBy(logs, 'author_email'), 'author_name');
+
+  const all = sortBy(unionBy(filtered, 'author_email'), 'author_name');
+
   fs.writeFileSync(
-    path.join(cwd, 'AUTHORS.txt'),
-    logs.map((item) => `${item.author_name} <${item.author_email}>`).join('\n'),
+    path.join(cwd, 'contributors.json'),
+    JSON.stringify(Array.from(new Set(all.map((authorItem) => authorItem.author_name))), null, 2),
   );
 }
 

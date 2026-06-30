@@ -2,13 +2,12 @@
 category: Components
 group: Navigation
 title: Breadcrumb
+description: Display the current location within a hierarchy. And allow going back to states higher up in the hierarchy.
 cover: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*I5a2Tpqs3y0AAAAAAAAAAAAADrJ8AQ/original
 coverDark: https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Tr90QKrE_LcAAAAAAAAAAAAADrJ8AQ/original
 demo:
   cols: 2
 ---
-
-A breadcrumb displays the current location within a hierarchy. It allows going back to states higher up in the hierarchy.
 
 ## When To Use
 
@@ -16,48 +15,38 @@ A breadcrumb displays the current location within a hierarchy. It allows going b
 - When you need to inform the user of where they are.
 - When the user may need to navigate back to a higher level.
 
-```jsx
-// works when >=5.3.0, recommended ✅
-return <Breadcrumb items={[{ title: 'sample' }]} />;
-
-// works when <5.3.0, deprecated when >=5.3.0 🙅🏻‍♀️
-return (
-  <Breadcrumb>
-    <Breadcrumb.Item>sample</Breadcrumb.Item>
-  </Breadcrumb>
-);
-
-// or
-
-return <Breadcrumb routes={[{ breadcrumbName: 'sample' }]} />;
-```
-
 ## Examples
 
 <!-- prettier-ignore -->
 <code src="./demo/basic.tsx">Basic Usage</code>
 <code src="./demo/withIcon.tsx">With an Icon</code>
-<code src="./demo/react-router.tsx" iframe="200">react-router V6</code>
+<code src="./demo/withParams.tsx">With Params</code>
 <code src="./demo/separator.tsx">Configuring the Separator</code>
 <code src="./demo/overlay.tsx">Bread crumbs with drop down menu</code>
 <code src="./demo/separator-component.tsx">Configuring the Separator Independently</code>
 <code src="./demo/debug-routes.tsx">Debug Routes</code>
+<code src="./demo/style-class.tsx" version="6.0.0">Custom semantic dom styling</code>
 <code src="./demo/component-token.tsx" debug>Component Token</code>
 
 ## API
 
+Common props ref：[Common props](/docs/react/common-props)
+
 ### Breadcrumb
 
-| Property | Description | Type | Default | Version |
-| --- | --- | --- | --- | --- |
-| itemRender | Custom item renderer | (route, params, routes, paths) => ReactNode | - |  |
-| params | Routing parameters | object | - |  |
-| items | The routing stack information of router | [items\[\]](#ItemType) | - | 5.3.0 |
-| separator | Custom separator | ReactNode | `/` |  |
+| Property | Description | Type | Default | Version | [Global Config](/components/config-provider#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| classNames | Customize class for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - | 6.0.0 | 6.0.0 |
+| dropdownIcon | Custom dropdown icon | ReactNode | `<DownOutlined />` | 6.2.0 | 6.2.0 |
+| items | The routing stack information of router (>=5.3.0 recommended, use `Breadcrumb.Item` children for older versions) | [ItemType\[\]](#itemtype) | - | 5.3.0 | × |
+| itemRender | Custom item renderer, work with react-router, see [example](#use-with-browserhistory) | (route, params, routes, paths) => ReactNode | - |  | × |
+| params | Routing parameters | object | - |  | × |
+| separator | Custom separator | ReactNode | `/` |  | 6.0.0 |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - | 6.0.0 | 6.0.0 |
 
 ### ItemType
 
-> type ItemType = [RouteItemType](#RouteItemType) | [SeparatorType](#SeparatorType)
+> type ItemType = Omit<[RouteItemType](#routeitemtype), 'title' | 'path'> | [SeparatorType](#separatortype)
 
 ### RouteItemType
 
@@ -69,7 +58,7 @@ return <Breadcrumb routes={[{ breadcrumbName: 'sample' }]} />;
 | path | Connected path. Each path will connect with prev one. Can not work with `href` | string | - |  |
 | menu | The menu props | [MenuProps](/components/menu/#api) | - | 4.24.0 |
 | onClick | Set the handler to handle click event | (e:MouseEvent) => void | - |  |
-| title | item name | ReactNode | - |  |
+| title | item name | ReactNode | - | 5.3.0 |
 
 ### SeparatorType
 
@@ -94,11 +83,11 @@ import { Link } from 'react-router';
 
 const items = [
   {
-    path: 'index',
+    path: '/index',
     title: 'home',
   },
   {
-    path: 'first',
+    path: '/first',
     title: 'first',
     children: [
       {
@@ -116,17 +105,27 @@ const items = [
     ],
   },
   {
-    path: 'second',
+    path: '/second',
     title: 'second',
   },
 ];
-function itemRender(route, params, items, paths) {
-  const last = items.indexOf(item) === items.length - 1;
-  return last ? <span>{item.title}</span> : <Link to={paths.join('/')}>{item.title}</Link>;
+
+function itemRender(currentRoute, params, items, paths) {
+  const isLast = currentRoute?.path === items[items.length - 1]?.path;
+
+  return isLast ? (
+    <span>{currentRoute.title}</span>
+  ) : (
+    <Link to={`/${paths.join('/')}`}>{currentRoute.title}</Link>
+  );
 }
 
 return <Breadcrumb itemRender={itemRender} items={items} />;
 ```
+
+## Semantic DOM
+
+<code src="./demo/_semantic.tsx" simplify="true"></code>
 
 ## Design Token
 

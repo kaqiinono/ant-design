@@ -1,19 +1,17 @@
-import React, { useContext } from 'react';
-import { DumiDemoGrid, FormattedMessage } from 'dumi';
-import { Tooltip } from 'antd';
-import { BugFilled, BugOutlined, CodeFilled, CodeOutlined } from '@ant-design/icons';
-import classNames from 'classnames';
-import DemoContext from '../../slots/DemoContext';
+import React, { Suspense } from 'react';
+import { BugOutlined, CodeOutlined } from '@ant-design/icons';
+import { css, Global } from '@emotion/react';
+import { Button, Tooltip } from 'antd';
+import { DumiDemo, DumiDemoGrid, FormattedMessage } from 'dumi';
+
 import useLayoutState from '../../../hooks/useLayoutState';
+import DemoContext from '../../slots/DemoContext';
+import DemoFallback from '../Previewer/DemoFallback';
 
 const DemoWrapper: typeof DumiDemoGrid = ({ items }) => {
-  const { showDebug, setShowDebug } = useContext(DemoContext);
+  const { showDebug, setShowDebug } = React.use(DemoContext);
 
   const [expandAll, setExpandAll] = useLayoutState(false);
-
-  const expandTriggerClass = classNames('code-box-expand-trigger', {
-    'code-box-expand-trigger-active': expandAll,
-  });
 
   const handleVisibleToggle = () => {
     setShowDebug?.(!showDebug);
@@ -25,12 +23,12 @@ const DemoWrapper: typeof DumiDemoGrid = ({ items }) => {
 
   const demos = React.useMemo(
     () =>
-      items.reduce((acc, item) => {
+      items.reduce<typeof items>((acc, item) => {
         const { previewerProps } = item;
         const { debug } = previewerProps;
-
-        if (debug && !showDebug) return acc;
-
+        if (debug && !showDebug) {
+          return acc;
+        }
         return acc.concat({
           ...item,
           previewerProps: {
@@ -45,38 +43,55 @@ const DemoWrapper: typeof DumiDemoGrid = ({ items }) => {
             originDebug: debug,
           },
         });
-      }, [] as typeof items),
-    [expandAll, showDebug],
+      }, []),
+    [expandAll, items, showDebug],
   );
 
   return (
     <div className="demo-wrapper">
+      <Global
+        styles={css`
+          :root {
+            --antd-site-api-deprecated-display: ${showDebug ? 'table-row' : 'none'};
+          }
+        `}
+      />
       <span className="all-code-box-controls">
         <Tooltip
           title={
             <FormattedMessage id={`app.component.examples.${expandAll ? 'collapse' : 'expand'}`} />
           }
         >
-          {expandAll ? (
-            <CodeFilled className={expandTriggerClass} onClick={handleExpandToggle} />
-          ) : (
-            <CodeOutlined className={expandTriggerClass} onClick={handleExpandToggle} />
-          )}
+          <Button
+            type="text"
+            size="small"
+            icon={<CodeOutlined />}
+            onClick={handleExpandToggle}
+            className={expandAll ? 'icon-enabled' : ''}
+          />
         </Tooltip>
         <Tooltip
           title={
             <FormattedMessage id={`app.component.examples.${showDebug ? 'hide' : 'visible'}`} />
           }
         >
-          {showDebug ? (
-            <BugFilled className={expandTriggerClass} onClick={handleVisibleToggle} />
-          ) : (
-            <BugOutlined className={expandTriggerClass} onClick={handleVisibleToggle} />
-          )}
+          <Button
+            type="text"
+            size="small"
+            icon={<BugOutlined />}
+            onClick={handleVisibleToggle}
+            className={showDebug ? 'icon-enabled' : ''}
+          />
         </Tooltip>
       </span>
-      {/* FIXME: find a new way instead of `key` to trigger re-render */}
-      <DumiDemoGrid items={demos} key={`${expandAll}${showDebug}`} />
+      <DumiDemoGrid
+        items={demos}
+        demoRender={(item) => (
+          <Suspense key={item.demo.id} fallback={<DemoFallback />}>
+            <DumiDemo {...item} />
+          </Suspense>
+        )}
+      />
     </div>
   );
 };

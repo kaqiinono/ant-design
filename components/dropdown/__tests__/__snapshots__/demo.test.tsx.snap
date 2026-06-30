@@ -1,111 +1,197 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`renders components/dropdown/demo/arrow.tsx correctly 1`] = `
-Array [
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
+<div
+  class="ant-space ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+>
+  <div
+    class="ant-space-item"
   >
-    <span>
-      bottomLeft
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottomLeft
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottom
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottomRight
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
   >
-    <span>
-      bottom
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      bottomRight
-    </span>
-  </button>,
-  <br />,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      topLeft
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      top
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      topRight
-    </span>
-  </button>,
-]
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            topLeft
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            top
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            topRight
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`renders components/dropdown/demo/arrow-center.tsx correctly 1`] = `
-Array [
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
+<div
+  class="ant-space ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+>
+  <div
+    class="ant-space-item"
   >
-    <span>
-      bottomLeft
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottomLeft
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottom
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            bottomRight
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
   >
-    <span>
-      bottom
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      bottomRight
-    </span>
-  </button>,
-  <br />,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      topLeft
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      top
-    </span>
-  </button>,
-  <button
-    class="ant-btn ant-btn-default ant-dropdown-trigger"
-    type="button"
-  >
-    <span>
-      topRight
-    </span>
-  </button>,
-]
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            topLeft
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            top
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            topRight
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`renders components/dropdown/demo/basic.tsx correctly 1`] = `
@@ -113,11 +199,10 @@ exports[`renders components/dropdown/demo/basic.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover me
     </div>
@@ -151,7 +236,7 @@ exports[`renders components/dropdown/demo/basic.tsx correctly 1`] = `
 exports[`renders components/dropdown/demo/context-menu.tsx correctly 1`] = `
 <div
   class="ant-dropdown-trigger"
-  style="color:rgba(0, 0, 0, 0.45);background:#f5f5f5;height:200px;text-align:center;line-height:200px"
+  style="color:rgba(0,0,0,0.45);background:#f5f5f5;height:200px;text-align:center;line-height:200px"
 >
   Right Click on here
 </div>
@@ -162,11 +247,10 @@ exports[`renders components/dropdown/demo/custom-dropdown.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover me
     </div>
@@ -199,18 +283,17 @@ exports[`renders components/dropdown/demo/custom-dropdown.tsx correctly 1`] = `
 
 exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
 <div
-  class="ant-space ant-space-horizontal ant-space-align-center"
-  style="flex-wrap:wrap;margin-bottom:-8px"
+  class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+  style="flex-wrap:wrap"
 >
   <div
     class="ant-space-item"
-    style="margin-right:8px;padding-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -218,7 +301,7 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -249,13 +332,12 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
   </div>
   <div
     class="ant-space-item"
-    style="margin-right:8px;padding-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -263,7 +345,7 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -294,13 +376,12 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
   </div>
   <div
     class="ant-space-item"
-    style="margin-right:8px;padding-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         disabled=""
         type="button"
       >
@@ -309,7 +390,7 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         disabled=""
         type="button"
       >
@@ -341,13 +422,12 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
   </div>
   <div
     class="ant-space-item"
-    style="margin-right:8px;padding-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -355,7 +435,7 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-loading ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-loading ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -386,56 +466,47 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
   </div>
   <div
     class="ant-space-item"
-    style="margin-right:8px;padding-bottom:8px"
   >
     <button
-      class="ant-btn ant-btn-default ant-dropdown-trigger"
+      class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-end ant-dropdown-trigger"
       type="button"
     >
-      <div
-        class="ant-space ant-space-horizontal ant-space-align-center"
+      <span
+        class="ant-btn-icon"
       >
-        <div
-          class="ant-space-item"
-          style="margin-right:8px"
+        <span
+          aria-label="down"
+          class="anticon anticon-down"
+          role="img"
         >
-          Button
-        </div>
-        <div
-          class="ant-space-item"
-        >
-          <span
-            aria-label="down"
-            class="anticon anticon-down"
-            role="img"
+          <svg
+            aria-hidden="true"
+            data-icon="down"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="64 64 896 896"
+            width="1em"
           >
-            <svg
-              aria-hidden="true"
-              data-icon="down"
-              fill="currentColor"
-              focusable="false"
-              height="1em"
-              viewBox="64 64 896 896"
-              width="1em"
-            >
-              <path
-                d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
-              />
-            </svg>
-          </span>
-        </div>
-      </div>
+            <path
+              d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+            />
+          </svg>
+        </span>
+      </span>
+      <span>
+        Button
+      </span>
     </button>
   </div>
   <div
     class="ant-space-item"
-    style="padding-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-dangerous ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-dangerous ant-btn-color-dangerous ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -443,7 +514,7 @@ exports[`renders components/dropdown/demo/dropdown-button.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-dangerous ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-dangerous ant-btn-color-dangerous ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -480,11 +551,10 @@ exports[`renders components/dropdown/demo/event.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover me, Click menu item
     </div>
@@ -515,9 +585,48 @@ exports[`renders components/dropdown/demo/event.tsx correctly 1`] = `
 </a>
 `;
 
+exports[`renders components/dropdown/demo/extra.tsx correctly 1`] = `
+<a
+  class="ant-dropdown-trigger"
+>
+  <div
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+  >
+    <div
+      class="ant-space-item"
+    >
+      Hover me
+    </div>
+    <div
+      class="ant-space-item"
+    >
+      <span
+        aria-label="down"
+        class="anticon anticon-down"
+        role="img"
+      >
+        <svg
+          aria-hidden="true"
+          data-icon="down"
+          fill="currentColor"
+          focusable="false"
+          height="1em"
+          viewBox="64 64 896 896"
+          width="1em"
+        >
+          <path
+            d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+          />
+        </svg>
+      </span>
+    </div>
+  </div>
+</a>
+`;
+
 exports[`renders components/dropdown/demo/icon-debug.tsx correctly 1`] = `
 <div
-  class="ant-space ant-space-horizontal ant-space-align-center"
+  class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
 >
   <div
     class="ant-space-item"
@@ -526,7 +635,7 @@ exports[`renders components/dropdown/demo/icon-debug.tsx correctly 1`] = `
       class="ant-space-compact ant-space-compact-block ant-dropdown-button"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -534,7 +643,139 @@ exports[`renders components/dropdown/demo/icon-debug.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        type="button"
+      >
+        <span
+          class="ant-btn-icon"
+        >
+          <span
+            aria-label="down"
+            class="anticon anticon-down"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="down"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
+        type="button"
+      >
+        <span>
+          Submit
+        </span>
+      </button>
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        type="button"
+      >
+        <span
+          class="ant-btn-icon"
+        >
+          <span
+            aria-label="down"
+            class="anticon anticon-down"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="down"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space-compact"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-compact-item ant-btn-compact-first-item"
+        type="button"
+      >
+        <span>
+          Submit
+        </span>
+      </button>
+      <button
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        type="button"
+      >
+        <span
+          class="ant-btn-icon"
+        >
+          <span
+            aria-label="down"
+            class="anticon anticon-down"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="down"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space-compact"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
+        type="button"
+      >
+        <span>
+          Submit
+        </span>
+      </button>
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -571,11 +812,10 @@ exports[`renders components/dropdown/demo/item.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover me
     </div>
@@ -608,17 +848,16 @@ exports[`renders components/dropdown/demo/item.tsx correctly 1`] = `
 
 exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
 <div
-  class="ant-space ant-space-vertical"
+  class="ant-space ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
 >
   <div
     class="ant-space-item"
-    style="margin-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-primary ant-btn-loading ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-loading ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span
@@ -649,7 +888,7 @@ exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-primary ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -680,13 +919,12 @@ exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
   </div>
   <div
     class="ant-space-item"
-    style="margin-bottom:8px"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-primary ant-btn-sm ant-btn-loading ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-sm ant-btn-loading ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span
@@ -717,52 +955,7 @@ exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-primary ant-btn-sm ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
-        type="button"
-      >
-        <span
-          class="ant-btn-icon"
-        >
-          <span
-            aria-label="ellipsis"
-            class="anticon anticon-ellipsis"
-            role="img"
-          >
-            <svg
-              aria-hidden="true"
-              data-icon="ellipsis"
-              fill="currentColor"
-              focusable="false"
-              height="1em"
-              viewBox="64 64 896 896"
-              width="1em"
-            >
-              <path
-                d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
-              />
-            </svg>
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
-  <div
-    class="ant-space-item"
-    style="margin-bottom:8px"
-  >
-    <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
-    >
-      <button
-        class="ant-btn ant-btn-primary ant-btn-compact-item ant-btn-compact-first-item"
-        type="button"
-      >
-        <span>
-          Submit
-        </span>
-      </button>
-      <button
-        class="ant-btn ant-btn-primary ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-sm ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -795,10 +988,10 @@ exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
     class="ant-space-item"
   >
     <div
-      class="ant-space-compact ant-space-compact-block ant-dropdown-button"
+      class="ant-space-compact"
     >
       <button
-        class="ant-btn ant-btn-default ant-btn-compact-item ant-btn-compact-first-item"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-compact-item ant-btn-compact-first-item"
         type="button"
       >
         <span>
@@ -806,7 +999,51 @@ exports[`renders components/dropdown/demo/loading.tsx correctly 1`] = `
         </span>
       </button>
       <button
-        class="ant-btn ant-btn-default ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
+        type="button"
+      >
+        <span
+          class="ant-btn-icon"
+        >
+          <span
+            aria-label="ellipsis"
+            class="anticon anticon-ellipsis"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="ellipsis"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
+              />
+            </svg>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space-compact"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-compact-item ant-btn-compact-first-item"
+        type="button"
+      >
+        <span>
+          Submit
+        </span>
+      </button>
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-btn-icon-only ant-btn-compact-item ant-btn-compact-last-item ant-dropdown-trigger"
         type="button"
       >
         <span
@@ -843,11 +1080,10 @@ exports[`renders components/dropdown/demo/menu-full.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover to check menu style
     </div>
@@ -883,11 +1119,10 @@ exports[`renders components/dropdown/demo/overlay-open.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Hover me
     </div>
@@ -920,22 +1155,20 @@ exports[`renders components/dropdown/demo/overlay-open.tsx correctly 1`] = `
 
 exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
 <div
-  class="ant-space ant-space-vertical"
+  class="ant-space ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
 >
   <div
     class="ant-space-item"
-    style="margin-bottom:8px"
   >
     <div
-      class="ant-space ant-space-horizontal ant-space-align-center"
-      style="flex-wrap:wrap;margin-bottom:-8px"
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
     >
       <div
         class="ant-space-item"
-        style="margin-right:8px;padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
@@ -945,10 +1178,9 @@ exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
       </div>
       <div
         class="ant-space-item"
-        style="margin-right:8px;padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
@@ -958,10 +1190,9 @@ exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
       </div>
       <div
         class="ant-space-item"
-        style="padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
@@ -975,15 +1206,14 @@ exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
     class="ant-space-item"
   >
     <div
-      class="ant-space ant-space-horizontal ant-space-align-center"
-      style="flex-wrap:wrap;margin-bottom:-8px"
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
     >
       <div
         class="ant-space-item"
-        style="margin-right:8px;padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
@@ -993,10 +1223,9 @@ exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
       </div>
       <div
         class="ant-space-item"
-        style="margin-right:8px;padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
@@ -1006,14 +1235,103 @@ exports[`renders components/dropdown/demo/placement.tsx correctly 1`] = `
       </div>
       <div
         class="ant-space-item"
-        style="padding-bottom:8px"
       >
         <button
-          class="ant-btn ant-btn-default ant-dropdown-trigger"
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
           type="button"
         >
           <span>
             topRight
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            leftTop
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            left
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            leftBottom
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ant-space-item"
+  >
+    <div
+      class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+      style="flex-wrap:wrap"
+    >
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            rightTop
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            right
+          </span>
+        </button>
+      </div>
+      <div
+        class="ant-space-item"
+      >
+        <button
+          class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+          type="button"
+        >
+          <span>
+            rightBottom
           </span>
         </button>
       </div>
@@ -1034,14 +1352,13 @@ exports[`renders components/dropdown/demo/render-panel.tsx correctly 1`] = `
 
 exports[`renders components/dropdown/demo/selectable.tsx correctly 1`] = `
 <a
-  class="ant-typography ant-dropdown-trigger"
+  class="ant-typography ant-typography-link ant-dropdown-trigger css-var-test-id"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Selectable
     </div>
@@ -1072,16 +1389,123 @@ exports[`renders components/dropdown/demo/selectable.tsx correctly 1`] = `
 </a>
 `;
 
+exports[`renders components/dropdown/demo/selection.tsx correctly 1`] = `
+Array [
+  <span
+    aria-hidden="true"
+    class="ant-dropdown-trigger acss-1iewsaa"
+    style="left:-9999px;top:-9999px"
+  />,
+  <div
+    class="acss-18r2uqq"
+  >
+    Select any text in this paragraph to open a Dropdown menu near the selection. This is useful for actions such as masking sensitive words, marking entities, or searching the selected keyword. Example data: Alice, phone 13800138000, ID 110101199001011234.
+  </div>,
+]
+`;
+
+exports[`renders components/dropdown/demo/style-class.tsx correctly 1`] = `
+<div
+  class="ant-flex css-var-test-id ant-flex-wrap-wrap ant-flex-gap-medium"
+>
+  <div
+    class="ant-space ant-space-vertical ant-space-gap-row-large ant-space-gap-col-large css-var-test-id"
+  >
+    <div
+      class="ant-space-item"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-default ant-btn-color-default ant-btn-variant-outlined ant-dropdown-trigger"
+        type="button"
+      >
+        <div
+          class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+        >
+          <div
+            class="ant-space-item"
+          >
+            Object Style
+          </div>
+          <div
+            class="ant-space-item"
+          >
+            <span
+              aria-label="down"
+              class="anticon anticon-down"
+              role="img"
+            >
+              <svg
+                aria-hidden="true"
+                data-icon="down"
+                fill="currentColor"
+                focusable="false"
+                height="1em"
+                viewBox="64 64 896 896"
+                width="1em"
+              >
+                <path
+                  d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </button>
+    </div>
+    <div
+      class="ant-space-item"
+    >
+      <button
+        class="ant-btn css-var-test-id ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-dropdown-trigger"
+        type="button"
+      >
+        <div
+          class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
+        >
+          <div
+            class="ant-space-item"
+          >
+            Function Style
+          </div>
+          <div
+            class="ant-space-item"
+          >
+            <span
+              aria-label="down"
+              class="anticon anticon-down"
+              role="img"
+            >
+              <svg
+                aria-hidden="true"
+                data-icon="down"
+                fill="currentColor"
+                focusable="false"
+                height="1em"
+                viewBox="64 64 896 896"
+                width="1em"
+              >
+                <path
+                  d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`renders components/dropdown/demo/sub-menu.tsx correctly 1`] = `
 <a
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Cascading menu
     </div>
@@ -1117,11 +1541,10 @@ exports[`renders components/dropdown/demo/trigger.tsx correctly 1`] = `
   class="ant-dropdown-trigger"
 >
   <div
-    class="ant-space ant-space-horizontal ant-space-align-center"
+    class="ant-space ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small css-var-test-id"
   >
     <div
       class="ant-space-item"
-      style="margin-right:8px"
     >
       Click me
     </div>

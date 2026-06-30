@@ -1,19 +1,15 @@
-import raf from 'rc-util/lib/raf';
-
-type throttledFn = (...args: any[]) => void;
-
-type throttledCancelFn = { cancel: () => void };
+import { raf } from '@rc-component/util';
 
 function throttleByAnimationFrame<T extends any[]>(fn: (...args: T) => void) {
-  let requestId: number | null;
+  let requestId: number | null = null;
 
   const later = (args: T) => () => {
     requestId = null;
     fn(...args);
   };
 
-  const throttled: throttledFn & throttledCancelFn = (...args: T) => {
-    if (requestId == null) {
+  const throttled = (...args: T) => {
+    if (requestId === null) {
       requestId = raf(later(args));
     }
   };

@@ -1,37 +1,85 @@
+import * as React from 'react';
 import CheckCircleFilled from '@ant-design/icons/CheckCircleFilled';
 import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
 import ExclamationCircleFilled from '@ant-design/icons/ExclamationCircleFilled';
 import InfoCircleFilled from '@ant-design/icons/InfoCircleFilled';
-import classNames from 'classnames';
-import CSSMotion from 'rc-motion';
-import pickAttrs from 'rc-util/lib/pickAttrs';
-import type { ReactElement } from 'react';
-import * as React from 'react';
-import { replaceElement } from '../_util/reactNode';
-import warning from '../_util/warning';
-import { ConfigContext } from '../config-provider';
+import CSSMotion from '@rc-component/motion';
+import { composeRef, pickAttrs } from '@rc-component/util';
+import { clsx } from 'clsx';
 
-// CSSINJS
+import type { ClosableType } from '../_util/hooks';
+import { useMergeSemantic, useSemanticRootStyle } from '../_util/hooks/useMergeSemantic';
+import type { GenerateSemantic } from '../_util/hooks/useMergeSemantic/semanticType';
+import { isNonNullable, isPlainObject } from '../_util/is';
+import { devUseWarning } from '../_util/warning';
+import { useComponentConfig } from '../config-provider/context';
 import useStyle from './style';
+
+export interface AlertRef {
+  nativeElement: HTMLDivElement;
+}
+
+export type AlertVariant = 'outlined' | 'filled';
+
+export type AlertSemanticType = {
+  classNames?: {
+    root?: string;
+    icon?: string;
+    section?: string;
+    title?: string;
+    description?: string;
+    actions?: string;
+    close?: string;
+  };
+  styles?: {
+    root?: React.CSSProperties;
+    icon?: React.CSSProperties;
+    section?: React.CSSProperties;
+    title?: React.CSSProperties;
+    description?: React.CSSProperties;
+    actions?: React.CSSProperties;
+    close?: React.CSSProperties;
+  };
+};
+export type AlertSemanticAllType = GenerateSemantic<AlertSemanticType, AlertProps>;
 
 export interface AlertProps {
   /** Type of Alert styles, options:`success`, `info`, `warning`, `error` */
   type?: 'success' | 'info' | 'warning' | 'error';
-  /** Whether Alert can be closed */
-  closable?: boolean;
   /**
-   * @deprecated please use `closeIcon` instead.
+   * Variant of Alert style
+   * @since 6.4.0
+   */
+  variant?: AlertVariant;
+  /** Whether Alert can be closed */
+  closable?:
+    | boolean
+    | (Exclude<ClosableType, boolean> & {
+        /** Callback when close Alert */
+        onClose?: React.MouseEventHandler<HTMLButtonElement>;
+      });
+  /**
+   * @deprecated please use `closable.closeIcon` instead.
    * Close text to show
    */
   closeText?: React.ReactNode;
   /** Content of Alert */
+  title?: React.ReactNode;
+  /**
+   * @deprecated please use `title` instead.
+   */
   message?: React.ReactNode;
   /** Additional content of Alert */
   description?: React.ReactNode;
-  /** Callback when close Alert */
+  /**
+   * @deprecated please use `closable.onClose` instead.
+   */
   onClose?: React.MouseEventHandler<HTMLButtonElement>;
   /** Trigger when animation ending of Alert */
+  /**
+   * @deprecated please use `closable.afterClose` instead.
+   */
   afterClose?: () => void;
   /** Whether to show icon */
   showIcon?: boolean;
@@ -40,67 +88,85 @@ export interface AlertProps {
   style?: React.CSSProperties;
   prefixCls?: string;
   className?: string;
+  classNames?: AlertSemanticAllType['classNamesAndFn'];
+  styles?: AlertSemanticAllType['stylesAndFn'];
   rootClassName?: string;
   banner?: boolean;
   icon?: React.ReactNode;
-  /** Custom closeIcon */
-  closeIcon?: boolean | React.ReactNode;
+  /**
+   * @deprecated please use `closable.closeIcon` instead.
+   */
+  closeIcon?: React.ReactNode;
   action?: React.ReactNode;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
   onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
-}
 
-const iconMapFilled = {
-  success: CheckCircleFilled,
-  info: InfoCircleFilled,
-  error: CloseCircleFilled,
-  warning: ExclamationCircleFilled,
-};
+  id?: string;
+}
 
 interface IconNodeProps {
   type: AlertProps['type'];
   icon: AlertProps['icon'];
   prefixCls: AlertProps['prefixCls'];
   description: AlertProps['description'];
+  className?: string;
+  style?: React.CSSProperties;
+  successIcon?: React.ReactNode;
+  infoIcon?: React.ReactNode;
+  warningIcon?: React.ReactNode;
+  errorIcon?: React.ReactNode;
 }
 
 const IconNode: React.FC<IconNodeProps> = (props) => {
-  const { icon, prefixCls, type } = props;
-  const iconType = iconMapFilled[type!] || null;
-  if (icon) {
-    return replaceElement(icon, <span className={`${prefixCls}-icon`}>{icon}</span>, () => ({
-      className: classNames(`${prefixCls}-icon`, {
-        [(icon as ReactElement).props.className]: (icon as ReactElement).props.className,
-      }),
-    })) as ReactElement;
-  }
-  return React.createElement(iconType, { className: `${prefixCls}-icon` });
+  const { icon, type, className, style, successIcon, infoIcon, warningIcon, errorIcon } = props;
+  const iconMapFilled = {
+    success: successIcon ?? <CheckCircleFilled />,
+    info: infoIcon ?? <InfoCircleFilled />,
+    error: errorIcon ?? <CloseCircleFilled />,
+    warning: warningIcon ?? <ExclamationCircleFilled />,
+  };
+  return (
+    <span className={className} style={style}>
+      {icon ?? iconMapFilled[type!]}
+    </span>
+  );
 };
 
-interface CloseIconProps {
+type CloseIconProps = {
   isClosable: boolean;
   prefixCls: AlertProps['prefixCls'];
   closeIcon: AlertProps['closeIcon'];
   handleClose: AlertProps['onClose'];
-}
+  ariaProps: React.AriaAttributes;
+  className?: string;
+  style?: React.CSSProperties;
+};
 
-const CloseIcon: React.FC<CloseIconProps> = (props) => {
-  const { isClosable, prefixCls, closeIcon, handleClose } = props;
+const CloseIconNode: React.FC<CloseIconProps> = (props) => {
+  const { isClosable, prefixCls, closeIcon, handleClose, ariaProps, className, style } = props;
   const mergedCloseIcon =
     closeIcon === true || closeIcon === undefined ? <CloseOutlined /> : closeIcon;
   return isClosable ? (
-    <button type="button" onClick={handleClose} className={`${prefixCls}-close-icon`} tabIndex={0}>
+    <button
+      type="button"
+      onClick={handleClose}
+      className={clsx(`${prefixCls}-close-icon`, className)}
+      tabIndex={0}
+      style={style}
+      {...ariaProps}
+    >
       {mergedCloseIcon}
     </button>
   ) : null;
 };
 
-const Alert: React.FC<AlertProps> = (props) => {
+const Alert = React.forwardRef<AlertRef, AlertProps>((props, ref) => {
   const {
     description,
     prefixCls: customizePrefixCls,
     message,
+    title,
     banner,
     className,
     rootClassName,
@@ -114,21 +180,59 @@ const Alert: React.FC<AlertProps> = (props) => {
     closeText,
     closeIcon,
     action,
+    id,
+    styles,
+    classNames,
     ...otherProps
   } = props;
 
+  const mergedTitle = title ?? message;
+
   const [closed, setClosed] = React.useState(false);
+
   if (process.env.NODE_ENV !== 'production') {
-    warning(!closeText, 'Alert', '`closeText` is deprecated. Please use `closeIcon` instead.');
+    const warning = devUseWarning('Alert');
+    [
+      ['closeText', 'closable.closeIcon'],
+      ['message', 'title'],
+    ].forEach(([deprecatedName, newName]) => {
+      warning.deprecated(!(deprecatedName in props), deprecatedName, newName);
+    });
   }
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { getPrefixCls, direction, alert } = React.useContext(ConfigContext);
+
+  const internalRef = React.useRef<HTMLDivElement>(null);
+
+  React.useImperativeHandle(ref, () => ({
+    nativeElement: internalRef.current!,
+  }));
+
+  const {
+    getPrefixCls,
+    direction,
+    variant: contextVariant,
+    closable: contextClosable,
+    closeIcon: contextCloseIcon,
+    className: contextClassName,
+    style: contextStyle,
+    classNames: contextClassNames,
+    styles: contextStyles,
+    successIcon,
+    infoIcon,
+    warningIcon,
+    errorIcon,
+  } = useComponentConfig('alert');
+
   const prefixCls = getPrefixCls('alert', customizePrefixCls);
-  const [wrapSSR, hashId] = useStyle(prefixCls);
+
+  const [hashId, cssVarCls] = useStyle(prefixCls);
+
+  const { onClose: closableOnClose, afterClose: closableAfterClose } = isPlainObject(closable)
+    ? closable
+    : {};
 
   const handleClose = (e: React.MouseEvent<HTMLButtonElement>) => {
     setClosed(true);
-    props.onClose?.(e);
+    (closableOnClose ?? props.onClose)?.(e);
   };
 
   const type = React.useMemo<AlertProps['type']>(() => {
@@ -139,8 +243,13 @@ const Alert: React.FC<AlertProps> = (props) => {
     return banner ? 'warning' : 'info';
   }, [props.type, banner]);
 
+  const mergedVariant = props.variant ?? contextVariant ?? 'outlined';
+
   // closeable when closeText or closeIcon is assigned
-  const isClosable = React.useMemo(() => {
+  const isClosable = React.useMemo<boolean>(() => {
+    if (isPlainObject(closable) && closable.closeIcon) {
+      return true;
+    }
     if (closeText) {
       return true;
     }
@@ -148,44 +257,100 @@ const Alert: React.FC<AlertProps> = (props) => {
       return closable;
     }
     // should be true when closeIcon is 0 or ''
-    return closeIcon !== false && closeIcon !== null && closeIcon !== undefined;
-  }, [closeText, closeIcon, closable]);
+    if (closeIcon !== false && isNonNullable(closeIcon)) {
+      return true;
+    }
+
+    return !!contextClosable;
+  }, [closeText, closeIcon, closable, contextClosable]);
 
   // banner mode defaults to Icon
   const isShowIcon = banner && showIcon === undefined ? true : showIcon;
 
-  const alertCls = classNames(
+  // =========== Merged Props for Semantic ==========
+  const mergedProps: AlertProps = {
+    ...props,
+    prefixCls,
+    variant: mergedVariant,
+    type,
+    showIcon: isShowIcon,
+    closable: isClosable,
+  };
+
+  const contextStyleRoot = useSemanticRootStyle(contextStyle);
+  const styleRoot = useSemanticRootStyle(style);
+
+  const [mergedClassNames, mergedStyles] = useMergeSemantic<
+    AlertSemanticAllType['classNames'],
+    AlertSemanticAllType['styles'],
+    AlertProps
+  >([contextClassNames, classNames], [contextStyles, contextStyleRoot, styles, styleRoot], {
+    props: mergedProps,
+  });
+
+  const alertCls = clsx(
     prefixCls,
     `${prefixCls}-${type}`,
+    `${prefixCls}-${mergedVariant}`,
     {
       [`${prefixCls}-with-description`]: !!description,
       [`${prefixCls}-no-icon`]: !isShowIcon,
       [`${prefixCls}-banner`]: !!banner,
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
-    alert?.className,
+    contextClassName,
     className,
     rootClassName,
+    mergedClassNames.root,
+    cssVarCls,
     hashId,
   );
 
   const restProps = pickAttrs(otherProps, { aria: true, data: true });
 
-  return wrapSSR(
+  const mergedCloseIcon = React.useMemo(() => {
+    if (isPlainObject(closable) && closable.closeIcon) {
+      return closable.closeIcon;
+    }
+    if (closeText) {
+      return closeText;
+    }
+    if (closeIcon !== undefined) {
+      return closeIcon;
+    }
+    if (isPlainObject(contextClosable) && contextClosable.closeIcon) {
+      return contextClosable.closeIcon;
+    }
+    return contextCloseIcon;
+  }, [closeIcon, closable, contextClosable, closeText, contextCloseIcon]);
+
+  const mergedAriaProps = React.useMemo<React.AriaAttributes>(() => {
+    const merged = closable ?? contextClosable;
+    if (isPlainObject(merged)) {
+      return pickAttrs(merged, { data: true, aria: true });
+    }
+    return {};
+  }, [closable, contextClosable]);
+
+  return (
     <CSSMotion
       visible={!closed}
       motionName={`${prefixCls}-motion`}
       motionAppear={false}
       motionEnter={false}
       onLeaveStart={(node) => ({ maxHeight: node.offsetHeight })}
-      onLeaveEnd={afterClose}
+      onLeaveEnd={closableAfterClose ?? afterClose}
     >
-      {({ className: motionClassName, style: motionStyle }) => (
+      {({ className: motionClassName, style: motionStyle }, setRef) => (
         <div
-          ref={ref}
+          id={id}
+          ref={composeRef(internalRef, setRef)}
           data-show={!closed}
-          className={classNames(alertCls, motionClassName)}
-          style={{ ...alert?.style, ...style, ...motionStyle }}
+          className={clsx(alertCls, motionClassName)}
+          style={{
+            ...mergedStyles.root,
+            ...motionStyle,
+          }}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onClick={onClick}
@@ -194,28 +359,61 @@ const Alert: React.FC<AlertProps> = (props) => {
         >
           {isShowIcon ? (
             <IconNode
+              className={clsx(`${prefixCls}-icon`, mergedClassNames.icon)}
+              style={mergedStyles.icon}
               description={description}
               icon={props.icon}
               prefixCls={prefixCls}
               type={type}
+              successIcon={successIcon}
+              infoIcon={infoIcon}
+              warningIcon={warningIcon}
+              errorIcon={errorIcon}
             />
           ) : null}
-          <div className={`${prefixCls}-content`}>
-            {message ? <div className={`${prefixCls}-message`}>{message}</div> : null}
-            {description ? <div className={`${prefixCls}-description`}>{description}</div> : null}
+          <div
+            className={clsx(`${prefixCls}-section`, mergedClassNames.section)}
+            style={mergedStyles.section}
+          >
+            {mergedTitle ? (
+              <div
+                className={clsx(`${prefixCls}-title`, mergedClassNames.title)}
+                style={mergedStyles.title}
+              >
+                {mergedTitle}
+              </div>
+            ) : null}
+            {description ? (
+              <div
+                className={clsx(`${prefixCls}-description`, mergedClassNames.description)}
+                style={mergedStyles.description}
+              >
+                {description}
+              </div>
+            ) : null}
           </div>
-          {action ? <div className={`${prefixCls}-action`}>{action}</div> : null}
-          <CloseIcon
+          {action ? (
+            <div
+              className={clsx(`${prefixCls}-actions`, mergedClassNames.actions)}
+              style={mergedStyles.actions}
+            >
+              {action}
+            </div>
+          ) : null}
+          <CloseIconNode
+            className={mergedClassNames.close}
+            style={mergedStyles.close}
             isClosable={isClosable}
             prefixCls={prefixCls}
-            closeIcon={closeText || closeIcon}
+            closeIcon={mergedCloseIcon}
             handleClose={handleClose}
+            ariaProps={mergedAriaProps}
           />
         </div>
       )}
-    </CSSMotion>,
+    </CSSMotion>
   );
-};
+});
 
 if (process.env.NODE_ENV !== 'production') {
   Alert.displayName = 'Alert';

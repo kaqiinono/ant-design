@@ -1,18 +1,29 @@
-/* eslint-disable import/prefer-default-export */
 import type { CSSInterpolation, CSSObject } from '@ant-design/cssinjs';
-import type { DerivativeToken, FullToken } from '../theme/internal';
-import type { OverrideComponent } from '../theme/util/genComponentStyleHook';
 
-function compactItemVerticalBorder(token: DerivativeToken, parentCls: string): CSSObject {
+import type { AliasToken, CSSUtil, FullToken, OverrideComponent } from '../theme/internal';
+
+function compactItemVerticalBorder(
+  token: AliasToken & CSSUtil,
+  parentCls: string,
+  prefixCls: string,
+): CSSObject {
   return {
     // border collapse
     [`&-item:not(${parentCls}-last-item)`]: {
-      marginBottom: -token.lineWidth,
+      marginBottom: token.calc(token.lineWidth).mul(-1).equal(),
+    },
+
+    [`&-item:not(${prefixCls}-status-success)`]: {
+      zIndex: 2,
     },
 
     '&-item': {
-      '&:hover,&:focus,&:active': {
-        zIndex: 2,
+      '&:focus,&:active': {
+        zIndex: 3,
+      },
+
+      '&:hover': {
+        zIndex: 4,
       },
 
       '&[disabled]': {
@@ -51,7 +62,7 @@ export function genCompactItemVerticalStyle<T extends OverrideComponent>(
 
   return {
     [compactCls]: {
-      ...compactItemVerticalBorder(token, compactCls),
+      ...compactItemVerticalBorder(token, compactCls, token.componentCls),
       ...compactItemBorderVerticalRadius(token.componentCls, compactCls),
     },
   };

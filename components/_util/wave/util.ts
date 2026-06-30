@@ -1,35 +1,34 @@
-export function isNotGrey(color: string) {
-  // eslint-disable-next-line no-useless-escape
-  const match = (color || '').match(/rgba?\((\d*), (\d*), (\d*)(, [\d.]*)?\)/);
-  if (match && match[1] && match[2] && match[3]) {
-    return !(match[1] === match[2] && match[2] === match[3]);
-  }
-  return true;
-}
+import { isString } from '../is';
 
-export function isValidWaveColor(color: string) {
+export const isValidWaveColor = (
+  color: CSSStyleDeclaration[keyof CSSStyleDeclaration],
+): color is string => {
+  if (!color) {
+    return false;
+  }
   return (
-    color &&
+    isString(color) &&
     color !== '#fff' &&
     color !== '#ffffff' &&
     color !== 'rgb(255, 255, 255)' &&
     color !== 'rgba(255, 255, 255, 1)' &&
-    isNotGrey(color) &&
-    !/rgba\((?:\d*, ){3}0\)/.test(color) && // any transparent rgba color
-    color !== 'transparent'
+    !/rgba\((?:\d*, ){3}0\)/i.test(color) && // any transparent rgba color
+    !/^#(?:[0-9a-f]{3}0|[0-9a-f]{6}00)$/i.test(color) && // any transparent hex color
+    color !== 'transparent' &&
+    color !== 'canvastext'
   );
-}
+};
 
-export function getTargetWaveColor(node: HTMLElement) {
-  const { borderTopColor, borderColor, backgroundColor } = getComputedStyle(node);
-  if (isValidWaveColor(borderTopColor)) {
-    return borderTopColor;
+export function getTargetWaveColor(
+  node: HTMLElement,
+  colorSource: keyof CSSStyleDeclaration | null = null,
+): string | null {
+  const style = getComputedStyle(node);
+  const { borderTopColor, borderColor, backgroundColor } = style;
+
+  if (colorSource && isValidWaveColor(style[colorSource])) {
+    return style[colorSource];
   }
-  if (isValidWaveColor(borderColor)) {
-    return borderColor;
-  }
-  if (isValidWaveColor(backgroundColor)) {
-    return backgroundColor;
-  }
-  return null;
+
+  return [borderTopColor, borderColor, backgroundColor].find(isValidWaveColor) ?? null;
 }

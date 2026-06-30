@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Checkbox, ConfigProvider, Divider, Form, Input, Radio, Space } from 'antd';
-import type { SizeType } from 'antd/es/config-provider/SizeContext';
+import type { ConfigProviderProps } from 'antd';
+
+type SizeType = ConfigProviderProps['componentSize'];
 
 const ConfigDisplay = () => {
   const { componentDisabled, componentSize } = ConfigProvider.useConfig();
@@ -31,7 +33,7 @@ const App: React.FC = () => {
           }}
         >
           <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="middle">Middle</Radio.Button>
+          <Radio.Button value="medium">Medium</Radio.Button>
           <Radio.Button value="large">Large</Radio.Button>
         </Radio.Group>
         <Checkbox checked={disabled} onChange={(e) => setDisabled(e.target.checked)}>

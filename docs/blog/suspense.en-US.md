@@ -54,8 +54,6 @@ These code can run perfectly in React 17, and also run very well in React 18's S
 
 The StrictMode of React 18 is different from [React 17](https://17.reactjs.org/docs/strict-mode.html) in that it will be called multiple times in each phase to ensure that developers clean up the Effect:
 
-````tsx
-
 ```tsx
 const My = () => {
   console.log('render');
@@ -85,7 +83,7 @@ const My = () => {
 // - effect
 // - effect cleanup
 // - effect
-````
+```
 
 With above sample, we can know that `counter` in StrictMode will be accumulated, but the final value will be correct (that is, each component will only be counted once):
 
@@ -163,7 +161,7 @@ useMergedInsertionEffect(() => {
 With this modification, we found that React 17's CI was failed. After checking, we found that `useLayoutEffect` will have a timing problem:
 
 ```tsx
-// Some logic measure dom size
+// Some logic measure DOM size
 useLayoutEffect(() => {
   // This is not correct since style is not applied
   const { clientHeight } = nodeRef.current;
@@ -176,6 +174,85 @@ useLayoutEffect(() => {
 ```
 
 Measure logic in `useLayoutEffect` is executed before injecting style, resulting in incorrect size information. It can also be predicted that this will have an impact on developers. So we have to compromise, and in React 17 version, it will be downgraded to the original `useMemo` insertion.
+
+## New Problem under React 17
+
+With the above solution, `useInsertionEffect` perfectly solve the rendering problem. But in React 17 and below versions, we still insert styles in the render phase, but we will increase the reference count in the effect phase. But this brings a new problem, let's look at a piece of code ([CodeSandbox](https://codesandbox.io/s/aged-cdn-qjxmpz?file=/src/App.tsx:23-886)):
+
+```tsx
+import React from 'react';
+
+const A = () => {
+  React.useMemo(() => {
+    console.log('A render');
+  }, []);
+
+  React.useEffect(() => {
+    console.log('A mounted');
+    return () => {
+      console.log('A unmounted');
+    };
+  }, []);
+
+  return <div>A</div>;
+};
+
+const B = () => {
+  React.useMemo(() => {
+    console.log('B render');
+  }, []);
+
+  React.useEffect(() => {
+    console.log('B mounted');
+    return () => {
+      console.log('B unmounted');
+    };
+  }, []);
+
+  return <div>B</div>;
+};
+
+export default function App() {
+  const [show, setShow] = React.useState(true);
+
+  const toggle = () => {
+    setShow((prev) => !prev);
+  };
+
+  return (
+    <div>
+      <button onClick={toggle}>toggle</button>
+      <div>{show ? <A /> : <B />}</div>
+    </div>
+  );
+}
+```
+
+In this code (strict mode), clicking the button will switch the rendering of A and B. So what will the order of console be when switching from A to B? The answer is:
+
+```
+B render
+B render
+A unmounted
+B mounted
+B unmounted
+B mounted
+```
+
+We can see that the rendering of the new component is before the unmount callback of the old component. Remember the processing logic of `cssinjs` in React 17? Let's mark it:
+
+```
+B render      // Write to cache and insert style tag
+B render      // Write to cache and insert style tag
+A unmounted   // **Reference count--** (Reference count changed from 1 to 0, so the style was unloaded)
+B mounted     // Reference count++ (Reference count changed from 0 to 1, but the style was inserted before unloaded)
+B unmounted   // Reference count--
+B mounted     // Reference count++
+```
+
+We finally find out that due to reference count is not updated in time, the style was unloaded, which in not as expected.
+
+And the solution is simple: when the count changes from 0 to 1, style will be inserted again.
 
 ## Summary
 

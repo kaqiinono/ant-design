@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/et_EE';
+import Pagination from '@rc-component/pagination/locale/et_EE';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/et_EE';
 import DatePicker from '../date-picker/locale/et_EE';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/et_EE';
 
 const typeTemplate = '${label} ei ole kehtiv ${type}';
@@ -15,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Palun vali',
+    close: 'Sulge',
+    show: 'Näita',
+    hide: 'Peida',
   },
   Table: {
     filterTitle: 'Filtri menüü',
     filterConfirm: 'OK',
     filterReset: 'Nulli',
     filterEmptyText: 'Filtreid pole',
-    filterCheckall: 'Vali kõik',
+    filterCheckAll: 'Vali kõik',
     filterSearchPlaceholder: 'Otsi filtritest',
     emptyText: 'Andmed puuduvad',
     selectAll: 'Vali kõik',
@@ -34,6 +37,11 @@ const localeValues: Locale = {
     triggerDesc: 'Klõpsa kahanevalt sortimiseks',
     triggerAsc: 'Klõpsa kasvavalt sortimiseks',
     cancelSort: 'Klõpsa sortimise tühistamiseks',
+  },
+  Tour: {
+    Next: 'Järgmine',
+    Previous: 'Eelmine',
+    Finish: 'Lõpetada',
   },
   Modal: {
     okText: 'OK',
@@ -74,9 +82,6 @@ const localeValues: Locale = {
     copy: 'Kopeeri',
     copied: 'Kopeeritud',
     expand: 'Laienda',
-  },
-  PageHeader: {
-    back: 'Tagasi',
   },
   Form: {
     optional: '(valikuline)',
@@ -127,9 +132,6 @@ const localeValues: Locale = {
         mismatch: '${label} ei vasta mustrile ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Eelvaade',
   },
 };
 

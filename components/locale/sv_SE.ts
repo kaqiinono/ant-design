@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/sv_SE';
+import Pagination from '@rc-component/pagination/locale/sv_SE';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/sv_SE';
 import DatePicker from '../date-picker/locale/sv_SE';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/sv_SE';
 
 const typeTemplate = '${label} är inte en giltig ${type}';
@@ -15,13 +15,16 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Vänligen välj',
+    close: 'Stäng',
+    show: 'Visa',
+    hide: 'Dölj',
   },
   Table: {
     filterTitle: 'Filtermeny',
     filterConfirm: 'OK',
     filterReset: 'Återställ',
     filterEmptyText: 'Inga filter',
-    filterCheckall: 'Markera alla objekt',
+    filterCheckAll: 'Markera alla objekt',
     filterSearchPlaceholder: 'Sök i filter',
     emptyText: 'Ingen data',
     selectAll: 'Markera nuvarande sida',
@@ -80,9 +83,6 @@ const localeValues: Locale = {
     copied: 'Kopierad',
     expand: 'Expandera',
   },
-  PageHeader: {
-    back: 'Tillbaka',
-  },
   Form: {
     optional: '(valfritt)',
     defaultValidateMessages: {
@@ -132,9 +132,6 @@ const localeValues: Locale = {
         mismatch: '${label} stämmer inte överens med mönstret ${pattern}',
       },
     },
-  },
-  Image: {
-    preview: 'Förhandsgranska',
   },
   QRCode: {
     expired: 'QR-koden har upphört att gälla',

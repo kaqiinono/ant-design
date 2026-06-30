@@ -1,8 +1,8 @@
-/* eslint-disable no-template-curly-in-string */
-import Pagination from 'rc-pagination/lib/locale/de_DE';
+import Pagination from '@rc-component/pagination/locale/de_DE';
+
+import type { Locale } from '.';
 import Calendar from '../calendar/locale/de_DE';
 import DatePicker from '../date-picker/locale/de_DE';
-import type { Locale } from '.';
 import TimePicker from '../time-picker/locale/de_DE';
 
 const typeTemplate = '${label} ist nicht gültig. ${type} erwartet';
@@ -15,6 +15,9 @@ const localeValues: Locale = {
   Calendar,
   global: {
     placeholder: 'Bitte auswählen',
+    close: 'Schließen',
+    show: 'Anzeigen',
+    hide: 'Ausblenden',
   },
   Table: {
     filterTitle: 'Filter-Menü',
@@ -22,7 +25,7 @@ const localeValues: Locale = {
     filterReset: 'Zurücksetzen',
     filterEmptyText: 'Keine Filter',
     filterSearchPlaceholder: 'Suche in Filtern',
-    filterCheckall: 'Alle auswählen',
+    filterCheckAll: 'Alle auswählen',
     selectAll: 'Selektiere Alle',
     selectInvert: 'Selektion Invertieren',
     selectionAll: 'Wählen Sie alle Daten aus',
@@ -30,7 +33,7 @@ const localeValues: Locale = {
     emptyText: 'Keine Daten',
     expand: 'Zeile erweitern',
     collapse: 'Zeile reduzieren',
-    triggerDesc: 'Klicken zur absteigenden  Sortierung',
+    triggerDesc: 'Klicken zur absteigenden Sortierung',
     triggerAsc: 'Klicken zur aufsteigenden Sortierung',
     cancelSort: 'Klicken zum Abbrechen der Sortierung',
   },
@@ -57,6 +60,7 @@ const localeValues: Locale = {
     selectCurrent: 'Alle auf aktueller Seite auswählen',
     removeCurrent: 'Auswahl auf aktueller Seite aufheben',
     selectAll: 'Alle auswählen',
+    deselectAll: 'Alle abwählen',
     removeAll: 'Auswahl aufheben',
     selectInvert: 'Auswahl umkehren',
   },
@@ -75,9 +79,6 @@ const localeValues: Locale = {
     copy: 'Kopieren',
     copied: 'Kopiert',
     expand: 'Erweitern',
-  },
-  PageHeader: {
-    back: 'Zurück',
   },
   Form: {
     defaultValidateMessages: {
@@ -127,9 +128,6 @@ const localeValues: Locale = {
         mismatch: '${label} entspricht nicht dem ${pattern} Muster',
       },
     },
-  },
-  Image: {
-    preview: 'Vorschau',
   },
   QRCode: {
     expired: 'QR-Code abgelaufen',

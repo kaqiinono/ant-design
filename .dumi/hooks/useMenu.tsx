@@ -1,21 +1,110 @@
-import type { MenuProps } from 'antd';
-import { Tag, theme } from 'antd';
-import { useFullSidebarData, useSidebarData } from 'dumi';
 import React, { useMemo } from 'react';
+import type { MenuProps, TagProps } from 'antd';
+import { Flex, Tag, version } from 'antd';
+import { createStaticStyles } from 'antd-style';
+import { clsx } from 'clsx';
+import { useFullSidebarData, useSidebarData } from 'dumi';
+
 import Link from '../theme/common/Link';
+import useLocale from './useLocale';
 import useLocation from './useLocation';
+
+const locales = {
+  cn: {
+    deprecated: '废弃',
+    updated: '更新',
+    new: '新增',
+  },
+  en: {
+    deprecated: 'DEPRECATED',
+    updated: 'UPDATED',
+    new: 'NEW',
+  },
+};
+
+const getTagColor = (val?: string): TagProps['color'] => {
+  switch (val?.toUpperCase()) {
+    case 'UPDATED':
+      return 'processing';
+    case 'DEPRECATED':
+      return 'red';
+    default:
+      return 'success';
+  }
+};
+
+const styles = createStaticStyles(({ css, cssVar }) => ({
+  link: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  `,
+  tag: css`
+    margin-inline-end: 0;
+  `,
+  subtitle: css`
+    font-weight: normal;
+    font-size: ${cssVar.fontSizeSM};
+    opacity: 0.8;
+    margin-inline-start: ${cssVar.marginSM};
+  `,
+}));
+
+interface MenuItemLabelProps {
+  before?: React.ReactNode;
+  after?: React.ReactNode;
+  link: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  search?: string;
+  tag?: string;
+  className?: string;
+}
+
+const MenuItemLabelWithTag: React.FC<MenuItemLabelProps> = (props) => {
+  const { before, after, link, title, subtitle, search, tag, className } = props;
+
+  const [locale] = useLocale<string>(locales);
+
+  const getLocale = (name: string) => {
+    return locale[name.toLowerCase()] ?? name;
+  };
+
+  if (!before && !after) {
+    return (
+      <Link to={`${link}${search}`} className={clsx(className, { [styles.link]: tag })}>
+        <Flex justify="flex-start" align="center">
+          {title && <span>{title}</span>}
+          {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+        </Flex>
+        {tag && (
+          <Tag variant="filled" className={clsx(styles.tag)} color={getTagColor(tag)}>
+            {getLocale(tag.replace(/VERSION/i, version))}
+          </Tag>
+        )}
+      </Link>
+    );
+  }
+  return (
+    <Link to={`${link}${search}`} className={className}>
+      {before}
+      {title}
+      {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+      {after}
+    </Link>
+  );
+};
 
 export interface UseMenuOptions {
   before?: React.ReactNode;
   after?: React.ReactNode;
 }
 
-const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => {
+const useMenu = (options: UseMenuOptions = {}): readonly [MenuProps['items'], string] => {
   const fullData = useFullSidebarData();
   const { pathname, search } = useLocation();
   const sidebarData = useSidebarData();
   const { before, after } = options;
-  const { token } = theme.useToken();
 
   const menuItems = useMemo<MenuProps['items']>(() => {
     const sidebarItems = [...(sidebarData ?? [])];
@@ -32,7 +121,7 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
         key.startsWith('/changelog'),
       )?.[1];
       if (changelogData) {
-        sidebarItems.push(...changelogData);
+        sidebarItems.splice(1, 0, changelogData[0]);
       }
     }
     if (pathname.startsWith('/changelog')) {
@@ -40,7 +129,8 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
         key.startsWith('/docs/react'),
       )?.[1];
       if (reactDocData) {
-        sidebarItems.unshift(...reactDocData);
+        sidebarItems.unshift(reactDocData[0]);
+        sidebarItems.push(...reactDocData.slice(1));
       }
     }
 
@@ -52,7 +142,7 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
             const childrenGroup = group.children.reduce<
               Record<string, ReturnType<typeof useSidebarData>[number]['children']>
             >((childrenResult, child) => {
-              const type = (child.frontmatter as any).type ?? 'default';
+              const type = child.frontmatter?.type ?? 'default';
               if (!childrenResult[type]) {
                 childrenResult[type] = [];
               }
@@ -103,19 +193,15 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
               key: group?.title,
               children: group.children?.map((item) => ({
                 label: (
-                  <Link to={`${item.link}${search}`}>
-                    {before}
-                    <span key="english">{item?.title}</span>
-                    <span className="chinese" key="chinese">
-                      {(item.frontmatter as any).subtitle}
-                    </span>
-                    {(item.frontmatter as any).tag && (
-                      <Tag color="warning" style={{ marginInlineStart: token.marginXS }}>
-                        {(item.frontmatter as any).tag}
-                      </Tag>
-                    )}
-                    {after}
-                  </Link>
+                  <MenuItemLabelWithTag
+                    before={before}
+                    after={after}
+                    link={item.link}
+                    title={item?.title}
+                    subtitle={item.frontmatter?.subtitle}
+                    search={search}
+                    tag={item.frontmatter?.tag}
+                  />
                 ),
                 key: item.link.replace(/(-cn$)/g, ''),
               })),
@@ -125,17 +211,19 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
           const list = group.children || [];
           // 如果有 date 字段，我们就对其进行排序
           if (list.every((info) => info?.frontmatter?.date)) {
-            list.sort((a, b) => (a.frontmatter.date > b.frontmatter.date ? -1 : 1));
+            list.sort((a, b) => (a.frontmatter?.date > b.frontmatter?.date ? -1 : 1));
           }
-
           result.push(
             ...list.map((item) => ({
               label: (
-                <Link to={`${item.link}${search}`}>
-                  {before}
-                  {item?.title}
-                  {after}
-                </Link>
+                <MenuItemLabelWithTag
+                  before={before}
+                  after={after}
+                  link={item.link}
+                  title={item?.title}
+                  search={search}
+                  tag={item.frontmatter?.tag}
+                />
               ),
               key: item.link.replace(/(-cn$)/g, ''),
             })),
@@ -144,9 +232,9 @@ const useMenu = (options: UseMenuOptions = {}): [MenuProps['items'], string] => 
         return result;
       }, []) ?? []
     );
-  }, [sidebarData, fullData, pathname, search, options]);
+  }, [sidebarData, pathname, fullData, search, before, after]);
 
-  return [menuItems, pathname];
+  return [menuItems, pathname] as const;
 };
 
 export default useMenu;

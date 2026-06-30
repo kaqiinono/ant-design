@@ -1,17 +1,21 @@
 import React from 'react';
+
+import { isFunction, isString } from '../../_util/is';
 import type { SizeType } from '../SizeContext';
 import SizeContext from '../SizeContext';
 
-const useSize = <T>(customSize?: T | ((ctxSize: SizeType) => T)): T => {
+const useSize = <T extends string | undefined | number | object>(
+  customSize?: T | ((ctxSize: SizeType) => T),
+): T => {
   const size = React.useContext<SizeType>(SizeContext);
   const mergedSize = React.useMemo<T>(() => {
     if (!customSize) {
       return size as T;
     }
-    if (typeof customSize === 'string') {
+    if (isString(customSize)) {
       return customSize ?? size;
     }
-    if (customSize instanceof Function) {
+    if (isFunction(customSize)) {
       return customSize(size);
     }
     return size as T;

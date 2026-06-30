@@ -2,12 +2,12 @@ import fs from 'fs-extra';
 import type { DeclarationReflection } from 'typedoc';
 import { Application, TSConfigReader, TypeDocReader } from 'typedoc';
 
-type TokenMeta = {
+interface TokenMeta {
   seed: ReturnType<typeof getTokenList>;
   map: ReturnType<typeof getTokenList>;
   alias: ReturnType<typeof getTokenList>;
   components: Record<string, ReturnType<typeof getTokenList>>;
-};
+}
 
 function getTokenList(list?: DeclarationReflection[], source?: string) {
   return (list || [])
@@ -40,20 +40,30 @@ function getTokenList(list?: DeclarationReflection[], source?: string) {
     }));
 }
 
-const main = () => {
-  const app = new Application();
+function getPresetColorsTokenList(presetColors: string[]) {
+  return presetColors.map((item) => ({
+    source: 'seed',
+    token: item,
+    type: 'color',
+    desc: `预设${item}颜色`,
+    descEn: `Preset ${item} color`,
+    name: `预设${item}颜色`,
+    nameEn: `Preset ${item} color`,
+  }));
+}
 
-  // If you want TypeDoc to load tsconfig.json / typedoc.json files
-  app.options.addReader(new TSConfigReader());
-  app.options.addReader(new TypeDocReader());
+const main = async () => {
+  const app = await Application.bootstrap(
+    {
+      // typedoc options here
+      entryPoints: ['components/theme/interface/index.ts', 'components/*/style/index.{ts,tsx}'],
+      skipErrorChecking: true,
+      logLevel: 'Error',
+    },
+    [new TSConfigReader(), new TypeDocReader()],
+  );
 
-  app.bootstrap({
-    // typedoc options here
-    entryPoints: ['components/theme/interface/index.ts', 'components/*/style/index.{ts,tsx}'],
-    skipErrorChecking: true,
-  });
-
-  const project = app.convert();
+  const project = await app.convert();
 
   if (project) {
     // Project may not have converted correctly
@@ -65,12 +75,11 @@ const main = () => {
       components: {},
     };
 
-    // eslint-disable-next-line no-restricted-syntax
-    project?.children?.forEach((file) => {
+    project?.children?.forEach((file: any) => {
       // Global Token
       if (file.name === 'theme/interface') {
         let presetColors: string[] = [];
-        file.children?.forEach((type) => {
+        file.children?.forEach((type: any) => {
           if (type.name === 'SeedToken') {
             tokenMeta.seed = getTokenList(type.children, 'seed');
           } else if (type.name === 'MapToken') {
@@ -78,14 +87,15 @@ const main = () => {
           } else if (type.name === 'AliasToken') {
             tokenMeta.alias = getTokenList(type.children, 'alias');
           } else if (type.name === 'PresetColors') {
-            presetColors = (type?.type as any)?.target?.elements?.map((item: any) => item.value);
+            presetColors = type?.type?.target?.elements?.map((item: any) => item.value);
           }
         });
 
-        // Exclude preset colors
-        tokenMeta.seed = tokenMeta.seed.filter(
-          (item) => !presetColors.some((color) => item.token.startsWith(color)),
-        );
+        // Exclude preset colors e.g. 'blue' 'blue-1' 'blue-2' ...
+        tokenMeta.seed = tokenMeta.seed
+          .filter((item) => !presetColors.some((color) => item.token.startsWith(color)))
+          // Incorporate preset colors
+          .concat(getPresetColorsTokenList(presetColors));
         tokenMeta.map = tokenMeta.map.filter(
           (item) => !presetColors.some((color) => item.token.startsWith(color)),
         );
@@ -102,15 +112,15 @@ const main = () => {
       } else {
         const component = file.name
           .slice(0, file.name.indexOf('/'))
-          .replace(/(^(.)|-(.))/g, (match) => match.replace('-', '').toUpperCase());
-        const componentToken = file.children?.find((item) => item.name === `ComponentToken`);
+          .replace(/(^(.)|-(.))/g, (match: string) => match.replace('-', '').toUpperCase());
+        const componentToken = file.children?.find((item: any) => item?.name === 'ComponentToken');
         if (componentToken) {
           tokenMeta.components[component] = getTokenList(componentToken.children, component);
         }
       }
     });
 
-    const finalMeta = Object.entries(tokenMeta).reduce((acc, [key, value]) => {
+    const finalMeta = Object.entries(tokenMeta).reduce<any>((acc, [key, value]) => {
       if (key !== 'components') {
         (value as any[]).forEach((item) => {
           acc.global = acc.global || {};
@@ -127,10 +137,10 @@ const main = () => {
         acc.components = value;
       }
       return acc;
-    }, {} as any);
+    }, {});
 
     fs.writeJsonSync(output, finalMeta, 'utf8');
-    // eslint-disable-next-line no-console
+
     console.log(`✅  Token Meta has been written to ${output}`);
   }
 };

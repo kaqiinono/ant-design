@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { NoCompactStyle } from '../space/Compact';
+import { getNodeRef, supportNodeRef, useComposeRef } from '@rc-component/util';
+
+import ContextIsolator from '../_util/ContextIsolator';
 import type { MenuProps } from './menu';
 
 // Used for Dropdown only
@@ -10,6 +12,7 @@ export interface OverrideContextProps {
   selectable?: boolean;
   validator?: (menuProps: Pick<MenuProps, 'mode'>) => void;
   onClick?: () => void;
+  rootClassName?: string;
 }
 
 const OverrideContext = React.createContext<OverrideContextProps | null>(null);
@@ -30,13 +33,26 @@ export const OverrideProvider = React.forwardRef<
       // restProps.expandIcon, Not mark as deps since this is a ReactNode
       restProps.mode,
       restProps.selectable,
+      restProps.rootClassName,
       // restProps.validator, Not mark as deps since this is a function
     ],
   );
 
+  const canRef = supportNodeRef(children);
+  const mergedRef = useComposeRef(ref, canRef ? getNodeRef(children) : null);
+
   return (
     <OverrideContext.Provider value={context}>
-      <NoCompactStyle>{React.cloneElement(children as React.ReactElement, { ref })}</NoCompactStyle>
+      <ContextIsolator space>
+        {canRef
+          ? React.cloneElement(
+              children as React.ReactElement<{
+                ref?: React.Ref<HTMLElement>;
+              }>,
+              { ref: mergedRef },
+            )
+          : children}
+      </ContextIsolator>
     </OverrideContext.Provider>
   );
 });

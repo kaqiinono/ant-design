@@ -1,69 +1,83 @@
-import classNames from 'classnames';
-import { composeRef, supportRef } from 'rc-util/lib/ref';
-import isVisible from 'rc-util/lib/Dom/isVisible';
 import React, { useContext, useRef } from 'react';
+import { composeRef, getNodeRef, isVisible, supportRef } from '@rc-component/util';
+import { clsx } from 'clsx';
+
 import type { ConfigConsumerProps } from '../../config-provider';
 import { ConfigContext } from '../../config-provider';
 import { cloneElement } from '../reactNode';
+import type { WaveComponent } from './interface';
 import useStyle from './style';
 import useWave from './useWave';
 
 export interface WaveProps {
   disabled?: boolean;
   children?: React.ReactNode;
+  component?: WaveComponent;
+  colorSource?: 'color' | 'backgroundColor' | 'borderColor' | null;
 }
 
+const TRIGGER_TYPE_TO_EVENT_MAP = {
+  click: 'click',
+  mousedown: 'mousedown',
+  mouseup: 'mouseup',
+  pointerdown: 'pointerdown',
+  pointerup: 'pointerup',
+} as const;
+
 const Wave: React.FC<WaveProps> = (props) => {
-  const { children, disabled } = props;
-  const { getPrefixCls } = useContext<ConfigConsumerProps>(ConfigContext);
-  const containerRef = useRef<HTMLElement>(null);
+  const { children, disabled, component, colorSource } = props;
+  const { getPrefixCls, wave } = useContext<ConfigConsumerProps>(ConfigContext);
+
+  const containerRef = useRef<HTMLElement | null>(null);
 
   // ============================== Style ===============================
   const prefixCls = getPrefixCls('wave');
-  const [, hashId] = useStyle(prefixCls);
+  const hashId = useStyle(prefixCls);
 
   // =============================== Wave ===============================
-  const showWave = useWave(containerRef, classNames(prefixCls, hashId));
+  const showWave = useWave(containerRef, clsx(prefixCls, hashId), component, colorSource);
 
   // ============================== Effect ==============================
   React.useEffect(() => {
     const node = containerRef.current;
-    if (!node || node.nodeType !== 1 || disabled) {
+    if (!node || node.nodeType !== window.Node.ELEMENT_NODE || disabled) {
       return;
     }
 
-    // Click handler
-    const onClick = (e: MouseEvent) => {
+    const onClick = (e: Event) => {
       // Fix radio button click twice
       if (
-        (e.target as HTMLElement).tagName === 'INPUT' ||
         !isVisible(e.target as HTMLElement) ||
-        // No need wave
         !node.getAttribute ||
         node.getAttribute('disabled') ||
         (node as HTMLInputElement).disabled ||
-        node.className.includes('disabled') ||
+        (node.className.includes('disabled') && !node.className.includes('disabled:')) ||
+        node.getAttribute('aria-disabled') === 'true' ||
         node.className.includes('-leave')
       ) {
         return;
       }
-
-      showWave();
+      showWave(e as MouseEvent);
     };
 
-    // Bind events
-    node.addEventListener('click', onClick, true);
+    const triggerType = wave?.triggerType;
+    const eventName =
+      triggerType && triggerType in TRIGGER_TYPE_TO_EVENT_MAP
+        ? TRIGGER_TYPE_TO_EVENT_MAP[triggerType]
+        : 'click';
+
+    node.addEventListener(eventName, onClick, true);
     return () => {
-      node.removeEventListener('click', onClick, true);
+      node.removeEventListener(eventName, onClick, true);
     };
-  }, [disabled]);
+  }, [disabled, wave?.triggerType]);
 
   // ============================== Render ==============================
   if (!React.isValidElement(children)) {
-    return (children ?? null) as unknown as React.ReactElement;
+    return children ?? null;
   }
 
-  const ref = supportRef(children) ? composeRef((children as any).ref, containerRef) : containerRef;
+  const ref = supportRef(children) ? composeRef(getNodeRef(children), containerRef) : containerRef;
 
   return cloneElement(children, { ref });
 };

@@ -1,3 +1,4 @@
+import React from 'react';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import {
   Button,
@@ -15,9 +16,6 @@ import {
   Switch,
   Upload,
 } from 'antd';
-import React from 'react';
-
-const { Option } = Select;
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -58,10 +56,13 @@ const App: React.FC = () => (
       hasFeedback
       rules={[{ required: true, message: 'Please select your country!' }]}
     >
-      <Select placeholder="Please select a country">
-        <Option value="china">China</Option>
-        <Option value="usa">U.S.A</Option>
-      </Select>
+      <Select
+        placeholder="Please select a country"
+        options={[
+          { label: 'China', value: 'china' },
+          { label: 'U.S.A', value: 'usa' },
+        ]}
+      />
     </Form.Item>
 
     <Form.Item
@@ -69,18 +70,22 @@ const App: React.FC = () => (
       label="Select[multiple]"
       rules={[{ required: true, message: 'Please select your favourite colors!', type: 'array' }]}
     >
-      <Select mode="multiple" placeholder="Please select favourite colors">
-        <Option value="red">Red</Option>
-        <Option value="green">Green</Option>
-        <Option value="blue">Blue</Option>
-      </Select>
+      <Select
+        mode="multiple"
+        placeholder="Please select favourite colors"
+        options={[
+          { label: 'Red', value: 'red' },
+          { label: 'Green', value: 'green' },
+          { label: 'Blue', value: 'blue' },
+        ]}
+      />
     </Form.Item>
 
     <Form.Item label="InputNumber">
       <Form.Item name="input-number" noStyle>
         <InputNumber min={1} max={10} />
       </Form.Item>
-      <span className="ant-form-text" style={{ marginLeft: 8 }}>
+      <span className="ant-form-text" style={{ marginInlineStart: 8 }}>
         machines
       </span>
     </Form.Item>
@@ -193,7 +198,7 @@ const App: React.FC = () => (
       <ColorPicker />
     </Form.Item>
 
-    <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+    <Form.Item label={null}>
       <Space>
         <Button type="primary" htmlType="submit">
           Submit

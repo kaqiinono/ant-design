@@ -2,7 +2,7 @@ import React from 'react';
 import { App, Button, Space } from 'antd';
 
 // Sub page
-const MyPage = () => {
+const Page: React.FC = () => {
   const { message, modal, notification } = App.useApp();
 
   const showMessage = () => {
@@ -18,14 +18,14 @@ const MyPage = () => {
 
   const showNotification = () => {
     notification.info({
-      message: `Notification topLeft`,
+      title: 'Notification topLeft',
       description: 'Hello, Ant Design!!',
       placement: 'topLeft',
     });
   };
 
   return (
-    <Space>
+    <Space wrap>
       <Button type="primary" onClick={showMessage}>
         Open message
       </Button>
@@ -42,6 +42,6 @@ const MyPage = () => {
 // Entry component
 export default () => (
   <App>
-    <MyPage />
+    <Page />
   </App>
 );
